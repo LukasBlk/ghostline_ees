@@ -275,7 +275,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <rect width="1600" height="640" fill="url(#gWall)"/><rect width="1600" height="640" fill="url(#pGrid)"/>
   <path d="M220 40V600M440 40V600M660 40V600M880 40V600M1100 40V600M1320 40V600" stroke="#0f1e2e" stroke-width="4"/>
   <text x="80" y="110" class="wallsign">ŠKODA AUTO</text>
-  <text x="82" y="140" class="wallsub">TECHNOLOGICKÉ CENTRUM · SERVISNÍ HALA 03</text>
+  <text x="82" y="140" class="wallsub">TECHNOLOGICKÉ CENTRUM · EES DÍLNA</text>
   <rect y="596" width="1600" height="14" fill="url(#pHaz)" opacity=".35"/>
   <polygon points="0,610 1600,610 1600,900 0,900" fill="url(#gFloor)"/>
   <g stroke="#163049" stroke-opacity=".5"><path d="M800 610V900M600 610L280 900M1000 610L1320 900M400 610L-240 900M1200 610L1840 900"/><path d="M0 660H1600M0 735H1600M0 830H1600" stroke-opacity=".5"/></g>
@@ -733,30 +733,30 @@ const ITEMS = {
 };
 
 const STORY = [
-{ id: 'garage', el: 'sc-garage', ch: '01', title: 'SERVISNÍ HALA', sub: 'NEDĚLE 02:13 · TECHNOLOGICKÉ CENTRUM ŠKODA AUTO',
+{ id: 'garage', el: 'sc-garage', ch: '01', title: 'EES DÍLNA', sub: 'NEDĚLE 02:13 · TECHNOLOGICKÉ CENTRUM ŠKODA AUTO',
   intro: [
     ['n', 'Neděle, 02:13. Technologické centrum Škoda Auto. Hala je prázdná, jen zářivky tiše bzučí.'],
-    ['m', 'Tady Dagmar Párová, vedoucí produktové bezpečnosti. Díky, že jste dorazili tak rychle.'],
-    ['m', 'Testovací vůz ENYAQ se před hodinou sám nastartoval. Nikdo u něj nebyl a klíč je zamčený v trezoru.'],
+    ['m', 'Tady Dagmar Párová, CPSO. Díky, že jste dorazili tak rychle.'],
+    ['m', 'Testovací vůz ENYAQ se před hodinou sám nastartoval. Nikdo u něj nebyl a klíček je zamčený v trezoru.'],
     ['m', 'V 06:00 spouštíme ORU kampaň pro 412 000 vozů. Jestli se tu děje něco víc, musíme to vědět dřív.'],
     ['m', 'Rozhlédněte se. Na co kliknete, to prozkoumáte. Jsem s vámi ve spojení.'],
     ['s', 'Tip: tlačítko ◎ MÍSTA nahoře (nebo klávesa H) zvýrazní vše, co lze prozkoumat.']
   ],
   hs: {
     car:     { n: 'Testovací vůz ENYAQ', l: [
-      ['n', 'Elektrický sedan na zvedáku. Kola se pomalu otáčejí, přestože pohon má být odpojený.'],
+      ['n', 'Elektrické SUV na zvedáku. Kola se pomalu otáčejí, přestože pohon má být odpojený.'],
       ['n', 'Přední světlo bliká v pravidelném rytmu: tři krátké, tři dlouhé, tři krátké.'],
-      ['m', 'SOS v Morseově abecedě? Někdo si s námi hraje.'] ] },
+      ['m', 'Někdo si s námi hraje a posílá nám vzkaz, že by heslo?.'] ] },
     dongle:  { n: 'Neznámé zařízení pod vozem', item: 'dongle', take: true, l: [
       ['n', 'Z diagnostického portu OBD-II visí na kabelu malá černá krabička bez loga. Bliká na ní červená dioda.'],
       ['n', 'Uvnitř je SIM karta a anténa. Zařízení je online.'],
-      ['m', 'To není naše. OBD port vede přímo na CAN sběrnici — kdo tohle připojil, může vozu posílat příkazy odkudkoli přes mobilní síť.'],
-      ['n', 'Dongle opatrně odpojujete a ukládáte jako důkaz.'] ] },
+      ['m', 'To není naše. OBD port vede přímo na diagnostický CAN — kdo tohle připojil, může vozu posílat příkazy odkudkoli přes mobilní síť.'],
+      ['n', 'OBD dongle opatrně odpojujete a ukládáte jako důkaz.'] ] },
     laptop:  { n: 'Diagnostický notebook', l: [
-      ['n', 'Na obrazovce běží záznam provozu CAN sběrnice. Mezi běžnými zprávami se každých 50 ms opakuje neznámý identifikátor 0x6F1.'],
+      ['n', 'Na obrazovce běží záznam provozu CAN sběrnice. Mezi běžnými zprávami se každých 50 ms opakuje neznámý identifikátor.'],
       ['m', 'Podvržené zprávy. Potřebujeme kompletní logy z diagnostické stanice — ta je ale zamčená servisním kódem.'] ] },
     toolbox: { n: 'Montážní vozík', l: [
-      ['n', 'Klíče, multimetr, izolepa a krabice od pizzy. Nic, co by vysvětlovalo, proč vůz žije vlastním životem.'] ] },
+      ['n', 'Klíče, multimetr, izolepa a krabice od pizzy. Nic, co by vysvětlovalo, proč si vůz žije svým vlastním životem.'] ] },
     station: { n: 'Diagnostická stanice DIAG-03', term: true }
   },
   req: ['dongle', 'laptop'],
@@ -764,7 +764,7 @@ const STORY = [
   term: { head: 'ŠKODA DIAG-03 // SERVISNÍ ZÁMEK', prompt: 'Zadejte servisní přístupový kód.' },
   done: [
     ['n', 'Stanice se odemkla. Logy ukazují, že dongle někdo připojil při servisní prohlídce před třemi dny.'],
-    ['m', 'Z CAN sběrnice se útočník dostal dál — do infotainmentu. Ten má Bluetooth, Wi-Fi i LTE modem.'],
+    ['m', 'Z CAN sběrnice se útočník dostal dál — do infotainmentu. Ten má Bluetooth a Wi-Fi.'],
     ['m', 'Posaďte se do kokpitu. Musíme zjistit, kudy přesně prošel.'] ]
 },
 { id: 'cockpit', el: 'sc-cockpit', ch: '02', title: 'KOKPIT', sub: 'VŮZ ENYAQ · INFOTAINMENT A CENTRÁLNÍ BRÁNA',
