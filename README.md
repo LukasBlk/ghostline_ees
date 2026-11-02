@@ -75,7 +75,7 @@ Indikátor vpravo nahoře ve hře ukazuje stav: `LOKÁLNĚ` (Firebase nenastaven
 ## Jak to běží na akci
 
 - Organizátor otevře administraci (`/admin`) a přihlásí se e-mailem a heslem.
-- Každý tým otevře hru, zadá **název týmu** a projde úvodní hlášení Marty. Pak čeká v **čekací místnosti** (vidí ostatní přihlášené týmy). Čas zatím neběží.
+- Každý tým otevře hru, zadá **název týmu** a projde úvodní hlášení Dagmar Párové. Pak čeká v **čekací místnosti** (vidí ostatní přihlášené týmy). Čas zatím neběží.
 - Organizátor klikne **▶ SPUSTIT HRU**. Všechny týmy uvidí stejný odpočet (výchozí 10 s, `countdownSec`) a naráz se jim odemkne kapitola 1. Časy se měří od tohoto společného startu.
 - Během odpočtu jde start ještě **zrušit**. Tým, který se připojí po startu, jde rovnou do hry, ale jeho čas běží od společného startu.
 - **■ UKONČIT HRU** zastaví měření: týmům, které nedokončily, se zamknou terminály a zobrazí „Hra ukončena“.
@@ -119,4 +119,4 @@ games/{gameId}/teams/{teamId}
 
 Texty dialogů, názvy předmětů a podmínky odemčení terminálu jsou v `index.html` v poli `STORY` (hledejte `const STORY`). Každá kapitola má:
 `intro` (úvodní dialog), `hs` (klikací místa a jejich texty), `req` (místa, která je nutné prozkoumat před terminálem), `term` (texty terminálu) a `done` (dialog po správném kódu).
-Repliky jsou ve tvaru `['m', 'text']`, kde `n` = popis, `m` = Marta (PSIRT), `g` = útočník GHOSTLINE, `s` = systém.
+Repliky jsou ve tvaru `['m', 'text']`, kde `n` = popis, `m` = Dagmar Párová (CPSO), `g` = útočník GHOSTLINE, `s` = systém.

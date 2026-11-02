@@ -722,7 +722,7 @@ function cyrb53(str, seed = 0) {
 const codeHash = s => cyrb53(norm(s) + '|' + (CFG.salt || 'auriga'));
 
 /* ---------- příběh ---------- */
-const WHO = { n: 'POZOROVÁNÍ', m: 'MARTA KREJČÍ · PSIRT', g: 'GHOSTLINE', s: 'SYSTÉM' };
+const WHO = { n: 'POZOROVÁNÍ', m: 'DAGMAR PÁROVÁ · CPSO', g: 'GHOSTLINE', s: 'SYSTÉM' };
 const ITEMS = {
   dongle:   { n: 'OBD dongle',        d: 'Neznámé zařízení se SIM kartou, odpojené z diagnostického portu vozu E7.', i: '<rect x="5" y="8" width="14" height="9" rx="2"/><path d="M9 8V5h6v3M8 12h2"/><circle cx="16" cy="12.5" r="1"/>' },
   protokol: { n: 'Servisní protokol', d: 'Protokol z prohlídky vozu E7. Externí technik „J. Dvořák“. Podpis chybí.', i: '<path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 13h6M9 17h3"/>' },
@@ -734,7 +734,7 @@ const STORY = [
 { id: 'garage', el: 'sc-garage', ch: '01', title: 'SERVISNÍ HALA', sub: 'NEDĚLE 02:13 · VÝVOJOVÉ CENTRUM ŠKODA AUTO',
   intro: [
     ['n', 'Neděle, 02:13. Vývojové centrum Škoda Auto. Hala je prázdná, jen zářivky tiše bzučí.'],
-    ['m', 'Tady Marta Krejčí, vedoucí produktové bezpečnosti. Díky, že jste dorazili tak rychle.'],
+    ['m', 'Tady Dagmar Párová, vedoucí produktové bezpečnosti. Díky, že jste dorazili tak rychle.'],
     ['m', 'Testovací vůz E7 se před hodinou sám nastartoval. Nikdo u něj nebyl a klíč je zamčený v trezoru.'],
     ['m', 'V 06:00 spouštíme OTA aktualizaci pro 412 000 vozů. Jestli se tu děje něco víc, musíme to vědět dřív.'],
     ['m', 'Rozhlédněte se. Na co kliknete, to prozkoumáte. Jsem s vámi ve spojení.'],
