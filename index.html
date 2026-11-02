@@ -1390,7 +1390,7 @@ window.ghostHash = codeHash; // pro organizátora: ghostHash("KOD") v konzoli
 (function () {
   var v = window.GHOSTLINE_VERSION, el = document.createElement('div');
   el.id = 'ver';
-  el.textContent = 'GHOSTLINE · ' + (v ? 'build ' + v.build + ' · ' + v.date : 'vývojová verze');
+  el.textContent = 'GHOSTLINE - v.' + (v ? v.build : '?');
   el.title = 'Verze aplikace, která je právě nasazená';
   document.body.appendChild(el);
 })();
