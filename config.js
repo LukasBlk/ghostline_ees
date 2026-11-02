@@ -10,12 +10,12 @@ window.GHOSTLINE_CONFIG = {
   /* Konfigurace Firebase (Firebase Console → Project settings → Your apps → Web app).
      Dokud je apiKey prázdný, hra běží v LOKÁLNÍM režimu: časy se ukládají jen do prohlížeče. */
   firebase: {
-    apiKey: "",
-    authDomain: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: ""
+    apiKey: "AIzaSyDAHt-rP1IBV-3NP4uNYWQaXclNrrLWB98",
+    authDomain: "ghostline-ees.firebaseapp.com",
+    projectId: "ghostline-ees",
+    storageBucket: "ghostline-ees.firebasestorage.app",
+    messagingSenderId: "503149270215",
+    appId: "1:503149270215:web:7604bed7bccf1cb91cdae2"
   },
 
   /* Sůl pro otisky kódů. Když ji změníte, musíte přegenerovat všechny otisky níže. */
