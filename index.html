@@ -355,7 +355,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <g class="nohit flick2" opacity=".75">
     <text x="800" y="330" text-anchor="middle" class="m" font-size="26" fill="#78FAAE" letter-spacing="4">⚠ NEZNÁMÉ ZAŘÍZENÍ NA SBĚRNICI</text>
     <path d="M560 350H1040" stroke="#78FAAE" stroke-opacity=".5"/>
-    <text x="800" y="390" text-anchor="middle" class="m gl" font-size="22" fill="#ff3b4e" letter-spacing="6">GHOSTLINE://E7/CAN0</text>
+    <text x="800" y="390" text-anchor="middle" class="m gl" font-size="22" fill="#ff3b4e" letter-spacing="6">GHOSTLINE://ENYAQ/CAN0</text>
   </g>
   <path d="M0 0H1600V70C1200 112 400 112 0 70z" fill="#03060a"/>
   <polygon points="0,60 260,90 110,640 0,660" fill="#04080d" stroke="#0e1824" stroke-width="3"/>
@@ -726,8 +726,8 @@ const codeHash = s => cyrb53(norm(s) + '|' + (CFG.salt || 'auriga'));
 /* ---------- příběh ---------- */
 const WHO = { n: 'POZOROVÁNÍ', m: 'DAGMAR PÁROVÁ · CPSO', g: 'GHOSTLINE', s: 'SYSTÉM' };
 const ITEMS = {
-  dongle:   { n: 'OBD dongle',        d: 'Neznámé zařízení se SIM kartou, odpojené z diagnostického portu vozu E7.', i: '<rect x="5" y="8" width="14" height="9" rx="2"/><path d="M9 8V5h6v3M8 12h2"/><circle cx="16" cy="12.5" r="1"/>' },
-  protokol: { n: 'Servisní protokol', d: 'Protokol z prohlídky vozu E7. Externí technik „J. Dvořák“. Podpis chybí.', i: '<path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 13h6M9 17h3"/>' },
+  dongle:   { n: 'OBD dongle',        d: 'Neznámé zařízení se SIM kartou, odpojené z diagnostického portu vozu ENYAQ.', i: '<rect x="5" y="8" width="14" height="9" rx="2"/><path d="M9 8V5h6v3M8 12h2"/><circle cx="16" cy="12.5" r="1"/>' },
+  protokol: { n: 'Servisní protokol', d: 'Protokol z prohlídky vozu ENYAQ. Externí technik „J. Dvořák“. Podpis chybí.', i: '<path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 13h6M9 17h3"/>' },
   proces:   { n: 'Otisk procesu',     d: 'Hash a výpis procesu „sysupdated“ ze serveru TEL-GW-03 — pro forenzní analýzu.', i: '<path d="M8 5L3 12l5 7M16 5l5 7-5 7M14 4l-4 16"/>' },
   cert:     { n: 'Certifikát OTA',    d: 'Údaje podpisového certifikátu „Škoda OTA Signing 2031“.', i: '<rect x="3" y="5" width="18" height="12" rx="1"/><circle cx="16" cy="17" r="3"/><path d="M15 20l-1 2M17 20l1 2M6 9h8M6 12h5"/>' }
 };
@@ -737,13 +737,13 @@ const STORY = [
   intro: [
     ['n', 'Neděle, 02:13. Technologické centrum Škoda Auto. Hala je prázdná, jen zářivky tiše bzučí.'],
     ['m', 'Tady Dagmar Párová, vedoucí produktové bezpečnosti. Díky, že jste dorazili tak rychle.'],
-    ['m', 'Testovací vůz E7 se před hodinou sám nastartoval. Nikdo u něj nebyl a klíč je zamčený v trezoru.'],
-    ['m', 'V 06:00 spouštíme OTA aktualizaci pro 412 000 vozů. Jestli se tu děje něco víc, musíme to vědět dřív.'],
+    ['m', 'Testovací vůz ENYAQ se před hodinou sám nastartoval. Nikdo u něj nebyl a klíč je zamčený v trezoru.'],
+    ['m', 'V 06:00 spouštíme ORU kampaň pro 412 000 vozů. Jestli se tu děje něco víc, musíme to vědět dřív.'],
     ['m', 'Rozhlédněte se. Na co kliknete, to prozkoumáte. Jsem s vámi ve spojení.'],
     ['s', 'Tip: tlačítko ◎ MÍSTA nahoře (nebo klávesa H) zvýrazní vše, co lze prozkoumat.']
   ],
   hs: {
-    car:     { n: 'Testovací vůz E7', l: [
+    car:     { n: 'Testovací vůz ENYAQ', l: [
       ['n', 'Elektrický sedan na zvedáku. Kola se pomalu otáčejí, přestože pohon má být odpojený.'],
       ['n', 'Přední světlo bliká v pravidelném rytmu: tři krátké, tři dlouhé, tři krátké.'],
       ['m', 'SOS v Morseově abecedě? Někdo si s námi hraje.'] ] },
@@ -767,9 +767,9 @@ const STORY = [
     ['m', 'Z CAN sběrnice se útočník dostal dál — do infotainmentu. Ten má Bluetooth, Wi-Fi i LTE modem.'],
     ['m', 'Posaďte se do kokpitu. Musíme zjistit, kudy přesně prošel.'] ]
 },
-{ id: 'cockpit', el: 'sc-cockpit', ch: '02', title: 'KOKPIT', sub: 'VŮZ E7 · INFOTAINMENT A CENTRÁLNÍ BRÁNA',
+{ id: 'cockpit', el: 'sc-cockpit', ch: '02', title: 'KOKPIT', sub: 'VŮZ ENYAQ · INFOTAINMENT A CENTRÁLNÍ BRÁNA',
   intro: [
-    ['n', 'Usedáte za volant vozu E7. Displej infotainmentu se rozsvítí sám od sebe.'],
+    ['n', 'Usedáte za volant vozu ENYAQ. Displej infotainmentu se rozsvítí sám od sebe.'],
     ['g', 'VÍTEJTE NA PALUBĚ. JSEM GHOSTLINE.'],
     ['m', 'Tak tohle už není softwarová chyba. Najděte, kudy se dostal ze zábavního systému k řízení vozu.'] ],
   hs: {
@@ -821,7 +821,7 @@ const STORY = [
   done: [
     ['n', 'Pravidlo je nasazené. Spojení s C2 je přerušené a červené body na mapě zhasínají.'],
     ['g', 'POZDĚ. MŮJ DÁREK UŽ JE ZABALENÝ.'],
-    ['m', 'Dárek… OTA aktualizace! Jestli útočník podstrčil vlastní firmware do distribuce, v 06:00 se nainstaluje do všech vozů.'],
+    ['m', 'Dárek… ORU kampaň! Jestli útočník podstrčil vlastní firmware do distribuce, v 06:00 se nainstaluje do všech vozů.'],
     ['m', 'Do laboratoře podepisování firmwaru. Rychle.'] ]
 },
 { id: 'lab', el: 'sc-lab', ch: '04', title: 'LABORATOŘ PODPISŮ', sub: 'PODEPISOVÁNÍ FIRMWARU · ŘETĚZEC DŮVĚRY',
