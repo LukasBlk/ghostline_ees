@@ -64,5 +64,5 @@ window.GHOSTLINE_CONFIG = {
 
   /* E-maily organizátorů, kteří smí hru spustit/ukončit (přihlašují se v administraci).
      Skutečnou ochranu zajišťují pravidla Firestore — e-maily musí být uvedené i tam (viz README). */
-  adminEmails: []
+  adminEmails: ['lukasbilek98@gmail.com']
 };

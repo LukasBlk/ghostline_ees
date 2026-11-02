@@ -1,0 +1,58 @@
+rules_version = '2';
+
+// GHOSTLINE — pravidla Firestore
+// Vložte do: Firebase Console → Firestore Database → Rules → Publish.
+//
+// Kdo co smí:
+//  - týmy (anonymní přihlášení): založit SVŮJ záznam a zapisovat do něj jen časy milníků a chybné pokusy
+//  - organizátor (e-mail + heslo): spustit / zrušit / ukončit hru
+//  - všichni přihlášení: číst stav hry a seznam týmů (lobby, žebříček)
+//  - nikdo: mazat, přepisovat cizí týmy, měnit název nebo start týmu, zapisovat jinam
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- e-maily organizátorů (musí se shodovat s adminEmails v config.js) ----
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'lukasbilek98@gmail.com'
+          // , 'dalsi.organizator@firma.cz'
+        ];
+    }
+
+    // ---- týmy ----
+    match /games/{gameId}/teams/{teamId} {
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.startedAt == request.time
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 2
+        && request.resource.data.name.size() <= 40
+        && request.resource.data.keys().hasOnly(
+             ['name', 'uid', 'startedAt', 'clientStart', 'milestones', 'wrong', 'current']);
+
+      allow update: if request.auth != null
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['milestones', 'current', 'lastAt', 'finishedAt', 'wrong', 'ping']);
+
+      // organizátor může tým smazat (např. testovací záznam); hráči ne
+      allow delete: if isAdmin();
+    }
+
+    // ---- řízení hry (vzdálený start) ----
+    match /games/{gameId}/control/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin()
+        && request.resource.data.status in ['lobby', 'running', 'ended'];
+    }
+
+    // vše ostatní je zakázané
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

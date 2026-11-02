@@ -36,7 +36,7 @@ Kódy jsou ve hře uložené jen jako otisky, takže je hráči nevyčtou ze zdr
 2. **Databáze:** *Build → Firestore Database → Create database* → zvolte region `eur3` nebo `europe-west3` → *Start in production mode*.
 3. **Přihlášení:** *Build → Authentication → Get started → Sign-in method* → zapněte **Anonymous** (týmy) a **Email/Password** (organizátor). Pak v záložce *Users → Add user* založte účet organizátora (e-mail + heslo). Jeho e-mail napište do `config.js` → `adminEmails` a do pravidel níže.
 4. **Webová aplikace:** *Project settings (ozubené kolo) → Your apps → `</>` Web* → zaregistrujte → zkopírujte objekt `firebaseConfig` do `config.js` → `firebase: { … }`.
-5. **Pravidla:** *Firestore → Rules* → vložte a *Publish*:
+5. **Pravidla:** *Firestore → Rules* → vložte obsah souboru `firestore.rules` z repozitáře a *Publish*. (Níže pro přehled zjednodušená verze.)
 
 ```
 rules_version = '2';
