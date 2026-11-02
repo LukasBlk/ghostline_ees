@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GHOSTLINE · Administrace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+:root{--bg:#03060a;--ink:#d9e8f5;--dim:#7f95aa;--cy:#78FAAE;--am:#ffb020;--rd:#ff3b4e;--gn:#3dff9a;--line:rgba(120,250,174,.22);--mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#0E3A2F 0%,#020806 72%) fixed;color:var(--ink);font-family:'Chakra Petch',system-ui,sans-serif}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(120,250,174,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(120,250,174,.05) 1px,transparent 1px);background-size:44px 44px}
+button,input{font:inherit;color:inherit}
+.wrap{position:relative;max-width:1500px;margin:0 auto;padding:28px 32px 60px}
+header{display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:18px}
+.logo{font-size:44px;font-weight:700;letter-spacing:.2em;line-height:1}
+.logo small{display:block;font-size:13px;letter-spacing:.42em;color:var(--cy);margin-bottom:8px;font-weight:500}
+.stats{display:flex;gap:28px;margin-left:auto;align-items:flex-end}
+.stat{text-align:right}.stat b{display:block;font:600 30px var(--mono);color:#fff}.stat span{font-size:11px;letter-spacing:.25em;color:var(--dim)}
+.sync{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.2em;color:var(--dim)}
+.sync::before{content:"";width:10px;height:10px;border-radius:50%;background:#56687a}
+.sync.online::before{background:var(--gn);box-shadow:0 0 8px var(--gn)}.sync.wait::before{background:var(--am)}.sync.error::before{background:var(--rd)}
+.note{margin:18px 0 0;padding:12px 16px;border:1px solid rgba(255,176,32,.45);color:var(--am);font-size:14px;background:rgba(40,25,0,.25)}
+table{width:100%;border-collapse:separate;border-spacing:0 8px;margin-top:20px}
+th{font-size:11px;letter-spacing:.2em;color:var(--dim);font-weight:500;text-align:left;padding:0 12px 4px;white-space:nowrap}
+th.ms{text-align:center;max-width:130px;white-space:normal;line-height:1.3}
+td{background:rgba(6,16,26,.82);padding:14px 12px;border-top:1px solid rgba(120,250,174,.12);border-bottom:1px solid rgba(120,250,174,.12)}
+td:first-child{border-left:3px solid #26394c}
+tr.fin td:first-child{border-left-color:var(--gn)}
+tr.p1 td:first-child{border-left-color:#ffd24a}
+.rank{font:600 22px var(--mono);color:var(--dim);width:56px;text-align:center}
+tr.p1 .rank{color:#ffd24a}
+.name{font-size:20px;font-weight:600;letter-spacing:.04em;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar{display:flex;gap:4px;margin-top:8px;width:200px}.bar i{flex:1;height:5px;background:#1b2b3b}.bar i.on{background:var(--cy);box-shadow:0 0 6px var(--cy)}
+tr.fin .bar i.on{background:var(--gn);box-shadow:0 0 6px var(--gn)}
+.t{font:600 17px var(--mono);text-align:center;color:#cfe6f7;white-space:nowrap}
+.t.no{color:#33475a}
+.t small{display:block;font-size:11px;color:var(--dim);font-weight:400;margin-top:2px}
+.tot{font:600 22px var(--mono);text-align:right;white-space:nowrap}
+.tot.run{color:var(--am)}.tot.done{color:var(--gn)}
+.tot small{display:block;font:500 10px 'Chakra Petch',system-ui,sans-serif;letter-spacing:.2em;color:var(--dim)}
+.wr{font:500 15px var(--mono);text-align:center;color:var(--dim)}
+.wr.hi{color:var(--rd)}
+@keyframes flash{0%{background:rgba(61,255,154,.35)}100%{background:rgba(6,16,26,.82)}}
+tr.flash td{animation:flash 2.5s ease-out}
+.empty{text-align:center;padding:60px 0;color:var(--dim);letter-spacing:.15em}
+details{margin-top:40px;border:1px solid var(--line);background:rgba(4,12,20,.7)}
+summary{cursor:pointer;padding:14px 18px;letter-spacing:.25em;font-size:13px;color:var(--cy)}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;padding:6px 18px 22px}
+.tools h3{font-size:13px;letter-spacing:.2em;color:var(--dim);font-weight:500;margin-bottom:10px}
+.tools p{font-size:13px;color:#9db1c3;line-height:1.5;margin-bottom:10px}
+.row{display:flex;gap:8px}
+.row input{flex:1;background:#00121c;border:1px solid #1d4b60;padding:9px 12px;outline:none;font-family:var(--mono);color:#fff}
+.row input:focus{border-color:var(--cy)}
+.btn{background:var(--cy);color:#0E3A2F;font-weight:700;letter-spacing:.15em;padding:9px 16px;border:0;cursor:pointer;font-size:13px}
+.btn.ghost{background:transparent;border:1px solid var(--cy);color:var(--cy)}
+code,.out{font-family:var(--mono);font-size:13px}
+.out{margin-top:10px;padding:10px 12px;background:#00121c;border:1px dashed #1d4b60;min-height:40px;word-break:break-all;color:var(--gn)}
+.ctrl{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-top:18px;padding:16px 20px;border:1px solid var(--line);background:rgba(6,30,24,.75)}
+.ctrl[hidden]{display:none}
+.cstat{display:flex;align-items:center;gap:16px;min-width:300px}
+.pill{font-size:12px;font-weight:700;letter-spacing:.25em;padding:6px 12px;border:1px solid var(--dim);color:var(--dim)}
+.pill.lobby{border-color:var(--am);color:var(--am)}
+.pill.count{border-color:var(--cy);color:#0E3A2F;background:var(--cy)}
+.pill.running{border-color:var(--gn);color:var(--gn);box-shadow:0 0 10px rgba(61,255,154,.35)}
+.pill.ended{border-color:var(--rd);color:var(--rd)}
+.cstat b{font:600 28px var(--mono);color:#fff}
+.cstat small{font-size:13px;color:var(--dim);letter-spacing:.05em}
+.cact{display:flex;gap:10px;margin-left:auto;align-items:center;flex-wrap:wrap}
+.cact[hidden],.clogin[hidden]{display:none}
+.btn.big{font-size:15px;padding:12px 22px}
+.btn.red{background:transparent;border:1px solid var(--rd);color:var(--rd)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.clogin{display:flex;gap:8px;margin-left:auto;align-items:center;flex-wrap:wrap}
+.clogin input{background:#06231b;border:1px solid #1f5a45;padding:9px 12px;outline:none;color:#fff;width:200px}
+.clogin input:focus{border-color:var(--cy)}
+.clogin .err{color:var(--rd);font-size:12px;width:100%;text-align:right;min-height:0}
+.lnk{background:none;border:0;color:var(--dim);text-decoration:underline;cursor:pointer;font-size:12px}
+.who{font-size:12px;color:var(--dim)}
+.tot.lob{color:var(--dim)}
+@media (max-width:900px){.wrap{padding:16px}.logo{font-size:30px}.ms,.t{display:none}.name{max-width:160px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><small>ŠKODA · INCIDENT RESPONSE</small>GHOSTLINE</div>
+    <div class="sync" id="sync">PŘIPOJUJI</div>
+    <div class="stats">
+      <div class="stat"><b id="sTeams">0</b><span>TÝMŮ</span></div>
+      <div class="stat"><b id="sFin">0</b><span>DOKONČILO</span></div>
+      <div class="stat"><b id="sClock">--:--</b><span id="sGame">HRA</span></div>
+    </div>
+  </header>
+  <div class="note" id="note" hidden></div>
+  <section class="ctrl" id="ctrl" hidden>
+    <div class="cstat"><span class="pill" id="cPill">LOBBY</span><b id="cTime"></b><small id="cInfo"></small></div>
+    <div class="cact" id="cAct" hidden>
+      <button class="btn big" id="bStart">▶ SPUSTIT HRU</button>
+      <button class="btn ghost" id="bCancel" hidden>✕ ZRUŠIT START</button>
+      <button class="btn red" id="bEnd" hidden>■ UKONČIT HRU</button>
+      <button class="btn ghost" id="bLobby" hidden>↺ ZPĚT DO LOBBY</button>
+      <span class="who" id="cWho"></span><button class="lnk" id="bOut">odhlásit</button>
+    </div>
+    <form class="clogin" id="cLogin" hidden>
+      <span class="who">Řízení hry:</span>
+      <input type="email" id="lEmail" placeholder="e-mail organizátora" autocomplete="username" required>
+      <input type="password" id="lPass" placeholder="heslo" autocomplete="current-password" required>
+      <button class="btn">PŘIHLÁSIT</button>
+      <div class="err" id="lErr"></div>
+    </form>
+  </section>
+  <table>
+    <thead><tr id="thead"></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div class="empty" id="empty">ZATÍM ŽÁDNÝ TÝM · ČEKÁM NA PRVNÍ REGISTRACI…</div>
+
+  <details>
+    <summary>NÁSTROJE ORGANIZÁTORA</summary>
+    <div class="tools">
+      <div>
+        <h3>GENERÁTOR OTISKU KÓDU</h3>
+        <p>Napište řešení fyzické šifry. Výsledný otisk vložte do <code>config.js</code> → <code>codes.mX</code>. Diakritika, mezery a velikost písmen nehrají roli.</p>
+        <div class="row"><input id="hIn" placeholder="např. ODPOJIT" autocomplete="off"><button class="btn" id="hGo">VYGENEROVAT</button></div>
+        <div class="out" id="hOut"></div>
+      </div>
+      <div>
+        <h3>KONTROLA KÓDŮ</h3>
+        <p>Ověří, ke kterému milníku zadaný text patří podle aktuální konfigurace.</p>
+        <div class="row"><input id="cIn" placeholder="testovací odpověď" autocomplete="off"><button class="btn ghost" id="cGo">OVĚŘIT</button></div>
+        <div class="out" id="cOut"></div>
+      </div>
+      <div>
+        <h3>EXPORT VÝSLEDKŮ</h3>
+        <p>Stáhne aktuální tabulku jako CSV (otevře se v Excelu). Časy jsou od společného startu hry (bez vzdáleného startu od registrace týmu).</p>
+        <button class="btn" id="csv">STÁHNOUT CSV</button>
+        <p style="margin-top:14px">Jiný běh hry zobrazíte parametrem <code>?game=ID</code> v adrese. Nové kolo = nové <code>gameId</code> v <code>config.js</code>.</p>
+      </div>
+    </div>
+  </details>
+</div>
+
+<script>
+(() => {
+'use strict';
+const CFG = Object.assign({ gameId: 'ghostline-demo', salt: 'auriga', codes: { m1: ['d4e1e720607db53f'], m2: ['d4e1e720607db53f'], m3: ['d4e1e720607db53f'], m4: ['d4e1e720607db53f'], m5: ['d4e1e720607db53f'] }, milestones: ['Diagnostika odemčena', 'Infotainment izolován', 'C2 zablokováno', 'Certifikát revokován', 'Flotila zachráněna'] }, window.GHOSTLINE_CONFIG || {});
+const GID = new URLSearchParams(location.search).get('game') || CFG.gameId || 'ghostline';
+const MS = CFG.milestones || ['M1', 'M2', 'M3', 'M4', 'M5'];
+const N = MS.length;
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+function cyrb53(str, seed = 0) { let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed; for (let i = 0, ch; i < str.length; i++) { ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); } h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507); h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909); h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507); h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909); return (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0'); }
+const codeHash = s => cyrb53(norm(s) + '|' + (CFG.salt || 'auriga'));
+const fmt = s => { if (s == null || isNaN(s)) return '—'; s = Math.max(0, Math.floor(s)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : String(m).padStart(2, '0')) + ':' + String(x).padStart(2, '0'); };
+
+$('#sGame').textContent = GID.toUpperCase();
+$('#thead').innerHTML = '<th>#</th><th>TÝM</th>' + MS.map((m, i) => '<th class="ms">' + (i + 1) + ' · ' + esc(m) + '</th>').join('') + '<th style="text-align:right">ČAS</th><th style="text-align:center">CHYBY</th>';
+
+let teams = [];       // {id,name,start(ms),ms:{m1:sec},wrong,finished}
+const lastSeen = {};  // id -> počet milníků (kvůli zvýraznění)
+function setSync(s, t) { const el = $('#sync'); el.className = 'sync ' + s; el.textContent = t; }
+
+const REMOTE = CFG.remoteStart !== false;
+const HAS_FB = !!(CFG.firebase && CFG.firebase.apiKey && CFG.firebase.projectId);
+const CTRL_KEY = 'ghostline:ctrl:' + GID;
+let CTRL_API = null;
+const CTRL = { status: 'lobby', startMs: null, endMs: null, cd: CFG.countdownSec || 10 };
+let offset = 0;
+const serverNow = () => Date.now() + offset;
+function render() {
+  const now = Date.now();
+  paintCtrl();
+  const rows = teams.map(t => {
+    const done = Object.keys(t.ms).filter(k => t.ms[k] != null).length;
+    const lastK = 'm' + done;
+    return { ...t, done, last: done ? t.ms[lastK] : Infinity, finished: t.ms['m' + N] != null };
+  }).sort((a, b) => b.done - a.done || a.last - b.last || (a.start || 0) - (b.start || 0));
+  $('#sTeams').textContent = rows.length;
+  $('#sFin').textContent = rows.filter(r => r.finished).length;
+  $('#empty').hidden = rows.length > 0;
+  const tb = $('#rows'); const html = rows.map((r, i) => {
+    const flash = lastSeen[r.id] != null && lastSeen[r.id] < r.done;
+    lastSeen[r.id] = r.done;
+    const cells = MS.map((m, j) => { const v = r.ms['m' + (j + 1)], p = j ? r.ms['m' + j] : 0;
+      return v != null ? '<td class="t">' + fmt(v) + (j && p != null ? '<small>+' + fmt(v - p) + '</small>' : '') + '</td>' : '<td class="t no">—</td>'; }).join('');
+    let tot;
+    if (r.finished) tot = '<td class="tot done">' + fmt(r.ms['m' + N]) + '<small>CÍL</small></td>';
+    else if (REMOTE) {
+      const go = CTRL.startMs && serverNow() >= CTRL.startMs;
+      if (!go) tot = '<td class="tot lob">--:--<small>LOBBY</small></td>';
+      else if (CTRL.status === 'ended') tot = '<td class="tot lob">' + fmt((CTRL.endMs - CTRL.startMs) / 1000) + '<small>UKONČENO</small></td>';
+      else tot = '<td class="tot run">' + fmt((serverNow() - CTRL.startMs) / 1000) + '<small>BĚŽÍ</small></td>';
+    } else tot = '<td class="tot run">' + fmt(r.start ? (now - r.start) / 1000 : null) + '<small>BĚŽÍ</small></td>';
+    return '<tr class="' + (r.finished ? 'fin ' : '') + (i === 0 && r.done ? 'p1 ' : '') + (flash ? 'flash' : '') + '"><td class="rank">' + (i + 1) + '</td><td><div class="name" title="' + esc(r.name) + '">' + esc(r.name) + '</div><div class="bar">' + MS.map((_, j) => '<i class="' + (j < r.done ? 'on' : '') + '"></i>').join('') + '</div></td>' + cells + tot + '<td class="wr' + (r.wrong >= 5 ? ' hi' : '') + '">' + (r.wrong || 0) + '</td></tr>';
+  }).join('');
+  tb.innerHTML = html;
+}
+setInterval(() => { $('#sClock').textContent = new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); render(); }, 1000);
+
+/* ---------- zdroje dat ---------- */
+const hasFB = !!(CFG.firebase && CFG.firebase.apiKey && CFG.firebase.projectId);
+if (!hasFB) {
+  setSync('', 'LOKÁLNÍ REŽIM');
+  const n = $('#note'); n.hidden = false;
+  n.innerHTML = 'Firebase zatím není nastaven (<code>config.js</code>). Testovací režim: vidíte jen týmy a ovládáte jen hry otevřené <b>v tomto prohlížeči</b> (třeba v dalších záložkách).';
+  const pull = () => { try { const all = JSON.parse(localStorage.getItem('ghostline:local:' + GID) || '{}');
+    teams = Object.entries(all).map(([id, t]) => ({ id, name: t.name, start: t.startedAt, ms: t.ms || {}, wrong: t.wrong || 0 })); } catch (e) {} render(); };
+  pull(); window.addEventListener('storage', pull); setInterval(pull, 2000);
+  if (REMOTE) setupLocalControl();
+} else {
+  setSync('wait', 'PŘIPOJUJI');
+  (async () => {
+    try {
+      const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
+      const [appM, fsM, auM] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-firestore.js'), import(base + 'firebase-auth.js')]);
+      const app = appM.initializeApp(CFG.firebase);
+      const auth = auM.getAuth(app);
+      await new Promise(r => { const off = auM.onAuthStateChanged(auth, () => { off(); r(); }); });
+      if (!auth.currentUser) await auM.signInAnonymously(auth);
+      const db = fsM.getFirestore(app);
+      if (REMOTE) setupControl(auth, auM, db, fsM);
+      fsM.onSnapshot(fsM.collection(db, 'games', GID, 'teams'), snap => {
+        teams = snap.docs.map(d => { const x = d.data({ serverTimestamps: 'estimate' }); const ms = {}; const wr = x.wrong || {};
+          for (let i = 1; i <= N; i++) { const m = x.milestones && x.milestones['m' + i]; if (m && m.sec != null) ms['m' + i] = m.sec; }
+          return { id: d.id, name: x.name || d.id, start: x.clientStart || (x.startedAt && x.startedAt.toMillis()), ms, wrong: Object.values(wr).reduce((a, b) => a + (b || 0), 0) }; });
+        setSync('online', 'ŽIVĚ · FIRESTORE'); render();
+      }, err => { console.error(err); setSync('error', 'CHYBA: ' + (err.code || 'čtení')); });
+    } catch (e) { console.error(e); setSync('error', 'CHYBA PŘIPOJENÍ'); const n = $('#note'); n.hidden = false; n.textContent = 'Nepodařilo se připojit k Firebase: ' + (e.code || e.message) + '. Zkontrolujte config.js, zapnuté anonymní přihlášení a pravidla Firestore.'; }
+  })();
+}
+
+/* ---------- řízení hry (vzdálený start) ---------- */
+let isAdmin = false;
+function paintCtrl() {
+  if (!REMOTE) return;
+  const pill = $('#cPill'), now = serverNow();
+  const counting = CTRL.status === 'running' && CTRL.startMs && now < CTRL.startMs;
+  const lobbyN = teams.length;
+  let st = CTRL.status, time = '', info = '';
+  if (st === 'lobby') { pill.className = 'pill lobby'; pill.textContent = 'LOBBY'; info = lobbyN + ' týmů čeká na start'; }
+  else if (counting) { pill.className = 'pill count'; pill.textContent = 'ODPOČET'; time = Math.ceil((CTRL.startMs - now) / 1000) + ' s'; info = 'týmy vidí odpočet'; }
+  else if (st === 'running') { pill.className = 'pill running'; pill.textContent = 'HRA BĚŽÍ'; time = fmt((now - CTRL.startMs) / 1000); info = 'od společného startu'; }
+  else if (st === 'ended') { pill.className = 'pill ended'; pill.textContent = 'UKONČENO'; time = CTRL.endMs && CTRL.startMs ? fmt((CTRL.endMs - CTRL.startMs) / 1000) : ''; info = 'měření zastaveno'; }
+  $('#cTime').textContent = time; $('#cInfo').textContent = info;
+  $('#bStart').hidden = st !== 'lobby';
+  $('#bCancel').hidden = !counting;
+  $('#bEnd').hidden = !(st === 'running' && !counting);
+  $('#bLobby').hidden = st !== 'ended';
+}
+/* společné ovládání tlačítek; zápis řeší API podle režimu (Firebase / lokální test) */
+function bindControl() {
+  const act = async (fn, btn) => { btn.disabled = true; try { await fn(); } catch (err) { alert('Akce se nepovedla: ' + (err.code || err.message) + '\nZkontrolujte, že váš e-mail je v pravidlech Firestore.'); } btn.disabled = false; };
+  $('#bStart').onclick = e => {
+    if (!confirm('Spustit hru „' + GID + '“ pro všechny týmy?\n\nPřihlášených týmů: ' + teams.length + '\nTýmy uvidí odpočet ' + CTRL.cd + ' s, pak začne měření času.')) return;
+    act(CTRL_API.start, e.currentTarget);
+  };
+  $('#bCancel').onclick = e => act(CTRL_API.lobby, e.currentTarget);
+  $('#bEnd').onclick = e => {
+    if (!confirm('Ukončit hru pro všechny týmy? Týmům, které nedokončily, se zastaví čas a terminály se zamknou.')) return;
+    act(CTRL_API.end, e.currentTarget);
+  };
+  $('#bLobby').onclick = e => {
+    if (!confirm('Vrátit hru do lobby a umožnit nový start?\n\nNa ostrou akci je lepší nové kolo založit změnou gameId v config.js — výsledky se tak nesmíchají.')) return;
+    act(CTRL_API.lobby, e.currentTarget);
+  };
+}
+function readCtrl(x) {
+  CTRL.status = x.status || 'lobby';
+  const cd = x.countdownSec != null ? x.countdownSec : CTRL.cd;
+  const sa = x.startAt && x.startAt.toMillis ? x.startAt.toMillis() : x.startAt;
+  CTRL.startMs = CTRL.status !== 'lobby' && sa ? sa + cd * 1000 : null;
+  CTRL.endMs = x.endedAt && x.endedAt.toMillis ? x.endedAt.toMillis() : (x.endedAt || null);
+}
+function setupLocalControl() {
+  $('#ctrl').hidden = false; $('#cAct').hidden = false; $('#cLogin').hidden = true;
+  $('#cWho').textContent = 'lokální test · ovládá hry v tomto prohlížeči'; $('#bOut').hidden = true;
+  const wr = o => localStorage.setItem(CTRL_KEY, JSON.stringify(o));
+  CTRL_API = {
+    start: async () => wr({ status: 'running', startAt: Date.now(), countdownSec: CTRL.cd }),
+    lobby: async () => wr({ status: 'lobby' }),
+    end: async () => { let x = {}; try { x = JSON.parse(localStorage.getItem(CTRL_KEY) || '{}'); } catch (e) {} wr({ ...x, status: 'ended', endedAt: Date.now() }); }
+  };
+  bindControl();
+  let last;
+  const poll = () => { const raw = localStorage.getItem(CTRL_KEY); if (raw === last) return; last = raw; let x = {}; try { x = JSON.parse(raw || '{}') || {}; } catch (e) {} readCtrl(x); render(); };
+  poll(); setInterval(poll, 300);
+}
+function setupControl(auth, auM, db, fsM) {
+  $('#ctrl').hidden = false;
+  const ref = fsM.doc(db, 'games', GID, 'control', 'state');
+  fsM.onSnapshot(ref, snap => {
+    readCtrl(snap.exists() ? snap.data({ serverTimestamps: 'estimate' }) : {});
+    render();
+  }, err => { console.error(err); $('#cInfo').textContent = 'Nelze číst stav hry: ' + (err.code || err.message); });
+  const admins = (CFG.adminEmails || []).map(e => e.toLowerCase());
+  auM.onAuthStateChanged(auth, u => {
+    isAdmin = !!(u && !u.isAnonymous && (!admins.length || admins.includes((u.email || '').toLowerCase())));
+    $('#cAct').hidden = !isAdmin; $('#cLogin').hidden = isAdmin;
+    $('#cWho').textContent = isAdmin ? u.email : '';
+    if (u && !u.isAnonymous && !isAdmin) $('#lErr').textContent = 'Účet ' + u.email + ' není mezi organizátory (adminEmails v config.js).';
+    render();
+  });
+  $('#cLogin').addEventListener('submit', async e => {
+    e.preventDefault(); $('#lErr').textContent = '';
+    try { await auM.signInWithEmailAndPassword(auth, $('#lEmail').value.trim(), $('#lPass').value); $('#lPass').value = ''; }
+    catch (err) { $('#lErr').textContent = 'Přihlášení se nepovedlo (' + (err.code || err.message) + ').'; }
+  });
+  $('#bOut').onclick = async () => { await auM.signOut(auth); await auM.signInAnonymously(auth); };
+  const email = () => auth.currentUser && auth.currentUser.email;
+  CTRL_API = {
+    start: async () => {
+      const t0 = Date.now();
+      await fsM.setDoc(ref, { status: 'running', startAt: fsM.serverTimestamp(), countdownSec: CTRL.cd, endedAt: null, by: email() });
+      const t1 = Date.now(), d = await fsM.getDoc(ref), sa = d.get('startAt');
+      if (sa && sa.toMillis) offset = sa.toMillis() - (t0 + t1) / 2;
+    },
+    lobby: () => fsM.setDoc(ref, { status: 'lobby', startAt: null, endedAt: null, by: email() }),
+    end: () => fsM.updateDoc(ref, { status: 'ended', endedAt: fsM.serverTimestamp(), by: email() })
+  };
+  bindControl();
+}
+
+/* ---------- nástroje ---------- */
+$('#hGo').onclick = () => { const v = $('#hIn').value; if (!norm(v)) return; $('#hOut').textContent = '"' + codeHash(v) + '"   ← normalizováno jako: ' + norm(v); };
+$('#hIn').addEventListener('keydown', e => e.key === 'Enter' && $('#hGo').click());
+$('#cGo').onclick = () => { const h = codeHash($('#cIn').value); const hit = Object.entries(CFG.codes || {}).filter(([, a]) => a.includes(h)).map(([k]) => k.toUpperCase());
+  $('#cOut').style.color = hit.length ? 'var(--gn)' : 'var(--rd)'; $('#cOut').textContent = hit.length ? '✓ Platný kód pro ' + hit.join(', ') : '✕ Neodpovídá žádnému milníku'; };
+$('#cIn').addEventListener('keydown', e => e.key === 'Enter' && $('#cGo').click());
+$('#csv').onclick = () => {
+  const head = ['Tým', ...MS.map((m, i) => (i + 1) + ' ' + m + ' [s]'), ...MS.map((m, i) => (i + 1) + ' ' + m + ' [mm:ss]'), 'Chybné pokusy'];
+  const lines = [head, ...teams.map(t => [t.name, ...MS.map((_, i) => t.ms['m' + (i + 1)] ?? ''), ...MS.map((_, i) => t.ms['m' + (i + 1)] != null ? fmt(t.ms['m' + (i + 1)]) : ''), t.wrong || 0])];
+  const csv = '﻿' + lines.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'ghostline-' + GID + '.csv'; a.click();
+};
+})();
+</script>
+</body>
+</html>

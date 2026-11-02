@@ -1,0 +1,1388 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GHOSTLINE · Incident ve Škoda Auto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+:root{
+  --bg:#03060a; --ink:#d9e8f5; --dim:#7f95aa; --cy:#78FAAE; --am:#ffb020; --rd:#ff3b4e; --gn:#3dff9a;
+  --panel:rgba(6,30,24,.92); --line:rgba(120,250,174,.3);
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:'Chakra Petch',system-ui,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+#app{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(ellipse at center,#0E3A2F 0%,#010403 75%)}
+#stage{position:relative;width:min(100vw,177.78vh);height:min(100vh,56.25vw);overflow:hidden;overflow:clip;container-type:size;background:#000;user-select:none;-webkit-user-select:none}
+
+/* ---------- scény ---------- */
+.scene{position:absolute;inset:0;opacity:0;visibility:hidden;transform:scale(1.05);transition:opacity .9s ease,transform 1.4s ease,visibility 0s .9s}
+.scene.on{opacity:1;visibility:visible;transform:none;transition:opacity .9s ease,transform 1.4s ease}
+.scene svg{width:100%;height:100%;display:block}
+.hs{cursor:pointer}
+.hs .hit{fill:transparent;stroke:none}
+.hs .art{transition:filter .25s}
+.hs:hover .art,.hs.hover .art{filter:brightness(1.35) drop-shadow(0 0 7px rgba(120,250,174,.75))}
+.hs.lockd:hover .art{filter:brightness(1.2) drop-shadow(0 0 7px rgba(255,176,32,.7))}
+#stage.reveal .hs .hit{fill:rgba(120,250,174,.07);stroke:var(--cy);stroke-width:3;stroke-dasharray:12 9;animation:march 1s linear infinite}
+#stage.reveal .hs.seen .hit{fill:none;stroke:#5d7084;stroke-dasharray:4 8}
+.nohit{pointer-events:none}
+.hs.taken{opacity:0;pointer-events:none;transition:opacity .6s}
+.wallsign{font:700 34px 'Chakra Petch',system-ui,sans-serif;letter-spacing:10px;fill:#2c6b55}
+.wallsub{font:500 15px 'Chakra Petch',system-ui,sans-serif;letter-spacing:4px;fill:#245a47}
+.t{font-family:'Chakra Petch',system-ui,sans-serif} .m{font-family:var(--mono)}
+
+/* ---------- animace ve scénách ---------- */
+.draw path{stroke-dasharray:1;stroke-dashoffset:1;animation:drawIn 3.2s ease-out forwards}.draw path:nth-child(n+2){animation-delay:1.2s}
+@keyframes drawIn{to{stroke-dashoffset:0}}
+@keyframes march{to{stroke-dashoffset:-42}}
+@keyframes blink{50%{opacity:.12}}
+@keyframes flick{0%,100%{opacity:1}3%{opacity:.25}5%{opacity:1}41%{opacity:1}42%{opacity:.4}43%{opacity:1}44%{opacity:.6}45%{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{opacity:.35}}
+@keyframes scrollup{to{transform:translateY(-120px)}}
+@keyframes dash{to{stroke-dashoffset:-60}}
+@keyframes bob{50%{transform:translateY(-14px)}}
+@keyframes steam{0%{opacity:0;transform:translateY(10px)}40%{opacity:.6}100%{opacity:0;transform:translateY(-40px)}}
+@keyframes ring{0%,40%,100%{transform:rotate(0)}2%,6%,10%,14%,18%{transform:rotate(-6deg)}4%,8%,12%,16%{transform:rotate(6deg)}}
+@keyframes waves{0%{opacity:0;transform:scale(.7)}30%{opacity:1}100%{opacity:0;transform:scale(1.25)}}
+@keyframes alarm{50%{opacity:.16}}
+@keyframes jit{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(3deg)}}
+@keyframes bars{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+@keyframes sig{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+@keyframes sos{0%{opacity:.12}2%,6%{opacity:1}7%,10%{opacity:.12}11%,15%{opacity:1}16%,19%{opacity:.12}20%,24%{opacity:1}25%,30%{opacity:.12}31%,40%{opacity:1}41%,44%{opacity:.12}45%,54%{opacity:1}55%,58%{opacity:.12}59%,68%{opacity:1}69%,73%{opacity:.12}74%,78%{opacity:1}79%,82%{opacity:.12}83%,87%{opacity:1}88%,91%{opacity:.12}92%,96%{opacity:1}97%,100%{opacity:.12}}
+@keyframes glitchShift{0%,86%,100%{transform:none;opacity:1}87%{transform:translate(-6px,1px)}89%{transform:translate(5px,-2px);opacity:.7}91%{transform:translate(-2px,0)}93%{transform:translate(3px,2px)}}
+.blink{animation:blink 1.1s steps(2) infinite}
+.blink.d1{animation-delay:.3s}.blink.d2{animation-delay:.6s}.blink.d3{animation-delay:.9s}
+.flick{animation:flick 7s infinite}
+.flick2{animation:flick 4s infinite}
+.spin{animation:spin 5s linear infinite;transform-box:fill-box;transform-origin:center}
+.spin.slow{animation-duration:16s}
+.pulse{animation:pulse 2.2s ease-in-out infinite}
+.sos{animation:sos 7s infinite}
+.scrollup{animation:scrollup 5s linear infinite}
+.dash{stroke-dasharray:8 22;animation:dash 1.2s linear infinite}
+.dash.slow{animation-duration:2.6s}
+.bob{animation:bob 3.4s ease-in-out infinite}
+.steam{animation:steam 3s ease-in-out infinite;transform-box:fill-box}
+.steam.d1{animation-delay:1s}.steam.d2{animation-delay:2s}
+.shake{animation:ring 2.6s infinite;transform-box:fill-box;transform-origin:50% 100%}
+.waves{animation:waves 1.3s ease-out infinite;transform-box:fill-box;transform-origin:center}
+.waves.d1{animation-delay:.4s}
+.alarm{animation:alarm 1.6s ease-in-out infinite;opacity:0}
+.jit{animation:jit .18s linear infinite;transform-box:view-box}
+.bars rect{animation:bars 1.8s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+.bars rect:nth-child(2){animation-delay:.3s}.bars rect:nth-child(3){animation-delay:.6s}.bars rect:nth-child(4){animation-delay:.9s}.bars rect:nth-child(5){animation-delay:1.2s}
+.sig{animation:sig 1.5s ease-out infinite}.sig.d1{animation-delay:.25s}.sig.d2{animation-delay:.5s}
+.gl{animation:glitchShift 3.2s infinite}
+.beacon{transform-box:view-box;animation:spin 2.2s linear infinite}
+.lock-car{fill:var(--rd)!important;animation:blink .9s steps(2) infinite}
+.ok-car{fill:var(--gn)!important;animation:none}
+.c2line{stroke:var(--rd);stroke-width:1.2;stroke-opacity:.45;fill:none;stroke-dasharray:4 7;animation:dash 1.4s linear infinite;transition:opacity 1s}
+.scene.solved .alarm,.scene.solved .beacon{display:none}
+.scene.solved .c2line{opacity:0}
+
+/* ---------- HUD ---------- */
+.hud{position:absolute;left:0;right:0;top:0;z-index:20;display:flex;align-items:center;gap:1.4cqw;padding:1cqw 1.6cqw 2.2cqw;background:linear-gradient(rgba(0,0,0,.82),rgba(0,0,0,0));font-size:1.05cqw;letter-spacing:.12em;pointer-events:none;opacity:0;transition:opacity .6s}
+.hud.on{opacity:1}
+.hud > *{pointer-events:auto}
+.brand{font-weight:700;letter-spacing:.35em;color:var(--cy)}
+.team{color:var(--dim);max-width:16cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog{display:flex;align-items:center;margin:0 auto;gap:0}
+.prog i{display:block;width:1.15cqw;height:1.15cqw;transform:rotate(45deg);border:2px solid #3b5268;background:#05101a;transition:.4s}
+.prog b{display:block;width:3.2cqw;height:2px;background:#24384b;transition:.4s}
+.prog i.done{background:var(--cy);border-color:var(--cy);box-shadow:0 0 .8cqw var(--cy)}
+.prog b.done{background:var(--cy)}
+.prog i.cur{border-color:var(--am);animation:pulse 1.4s infinite}
+.clock{font-family:var(--mono);font-size:1.5cqw;color:#fff;letter-spacing:.05em;min-width:7.5cqw;text-align:right}
+.sync{display:flex;align-items:center;gap:.5cqw;font-size:.8cqw;color:var(--dim)}
+.sync::before{content:"";width:.7cqw;height:.7cqw;border-radius:50%;background:#56687a}
+.sync.online::before{background:var(--gn);box-shadow:0 0 .6cqw var(--gn)}
+.sync.wait::before{background:var(--am);animation:blink 1s steps(2) infinite}
+.sync.error::before{background:var(--rd);animation:blink .6s steps(2) infinite}
+.hbtn{border:1px solid var(--line);padding:.35cqw .8cqw;font-size:.9cqw;letter-spacing:.12em;color:var(--ink);background:rgba(5,16,26,.6)}
+.hbtn:hover,.hbtn.act{border-color:var(--cy);color:var(--cy);box-shadow:inset 0 0 .8cqw rgba(120,250,174,.25)}
+.inv{display:flex;gap:.5cqw}
+.inv button{width:2.8cqw;height:2.8cqw;border:1px solid var(--line);background:rgba(5,16,26,.75);display:grid;place-items:center;animation:popin .5s}
+.inv button:hover{border-color:var(--am)}
+.inv svg{width:65%;height:65%;stroke:var(--am);fill:none;stroke-width:1.6}
+@keyframes popin{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+
+/* ---------- dialog ---------- */
+.catch{position:absolute;inset:0;z-index:25;display:none;cursor:pointer}
+.catch.on{display:block}
+.dlg{position:absolute;left:5cqw;right:5cqw;bottom:2.2cqw;z-index:30;min-height:9.5cqw;padding:1.3cqw 2.2cqw 1.6cqw;background:var(--panel);border:1px solid var(--line);border-left:.35cqw solid var(--cy);
+  clip-path:polygon(0 0,calc(100% - 1.6cqw) 0,100% 1.6cqw,100% 100%,1.6cqw 100%,0 calc(100% - 1.6cqw));
+  transform:translateY(140%);transition:transform .35s cubic-bezier(.2,.8,.2,1);cursor:pointer;backdrop-filter:blur(6px)}
+.dlg.on{transform:none}
+.dlg .who{font-size:.95cqw;letter-spacing:.3em;font-weight:600;color:var(--cy);margin-bottom:.5cqw}
+.dlg .txt{font-size:1.6cqw;line-height:1.45;min-height:4.6cqw}
+.dlg.w-n{border-left-color:#5d7387}.dlg.w-n .who{color:#8aa0b5}.dlg.w-n .txt{color:#c9d6e2}
+.dlg.w-g{border-left-color:var(--rd);background:rgba(24,3,8,.92)}.dlg.w-g .who{color:var(--rd)}.dlg.w-g .txt{font-family:var(--mono);color:#ff8a96;letter-spacing:.06em;text-shadow:0 0 .6cqw rgba(255,59,78,.6)}
+.dlg.w-s{border-left-color:var(--am)}.dlg.w-s .who{color:var(--am)}
+.dlg .nx{position:absolute;right:1.8cqw;bottom:1cqw;font-size:.85cqw;letter-spacing:.2em;color:var(--dim);animation:pulse 1.4s infinite}
+
+/* ---------- tooltip, toast ---------- */
+.tip{position:absolute;z-index:22;pointer-events:none;padding:.35cqw .8cqw;font-size:1cqw;letter-spacing:.1em;background:rgba(3,10,16,.9);border:1px solid var(--cy);color:var(--cy);white-space:nowrap;transform:translate(-50%,-160%);opacity:0;transition:opacity .15s}
+.tip.on{opacity:1}
+.tip.lk{border-color:var(--am);color:var(--am)}
+.toast{position:absolute;left:50%;top:5.4cqw;z-index:35;transform:translate(-50%,-30%);opacity:0;padding:.7cqw 1.6cqw;background:rgba(3,12,18,.95);border:1px solid var(--am);color:var(--am);font-size:1.15cqw;letter-spacing:.15em;transition:.4s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.ms{border-color:var(--gn);color:var(--gn)}
+
+/* ---------- terminál ---------- */
+.term{position:absolute;inset:0;z-index:40;display:grid;place-items:center;background:rgba(0,4,8,.72);backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:.3s}
+.term.on{opacity:1;visibility:visible}
+.tbox{width:50cqw;padding:2cqw 2.4cqw;background:#04140f;border:1px solid var(--cy);box-shadow:0 0 3cqw rgba(120,250,174,.18),inset 0 0 2cqw rgba(120,250,174,.06);font-family:var(--mono);position:relative;
+  clip-path:polygon(0 0,calc(100% - 2cqw) 0,100% 2cqw,100% 100%,2cqw 100%,0 calc(100% - 2cqw))}
+.tbox::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px)}
+.term.bad .tbox{border-color:var(--rd);animation:shakeX .45s}
+.term.good .tbox{border-color:var(--gn);box-shadow:0 0 4cqw rgba(61,255,154,.35)}
+@keyframes shakeX{20%,60%{transform:translateX(-1cqw)}40%,80%{transform:translateX(1cqw)}}
+.thead{display:flex;justify-content:space-between;font-size:.85cqw;letter-spacing:.2em;color:var(--cy);border-bottom:1px solid var(--line);padding-bottom:.7cqw;margin-bottom:1.4cqw}
+.tprompt{font-size:1.25cqw;margin-bottom:1.2cqw;color:#e9f6ff}
+.trow{display:flex;gap:1cqw}
+.trow span{font-size:1.9cqw;color:var(--cy);line-height:3.6cqw}
+.tin{flex:1;height:3.6cqw;background:#06231b;border:1px solid #1f5a45;color:#fff;font:600 1.8cqw var(--mono);letter-spacing:.25em;padding:0 1cqw;text-transform:uppercase;outline:none}
+.tin:focus{border-color:var(--cy);box-shadow:0 0 1.2cqw rgba(120,250,174,.3)}
+.tgo{padding:0 1.8cqw;background:var(--cy);color:#0E3A2F;font:700 1.1cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.2em}
+.tgo:disabled{background:#2a3b48;color:#6b7f8f;cursor:not-allowed}
+.tmsg{min-height:2.2cqw;margin-top:1cqw;font-size:1.15cqw;letter-spacing:.12em}
+.tmsg.bad{color:var(--rd)}.tmsg.good{color:var(--gn)}
+.tfoot{display:flex;justify-content:space-between;align-items:center;margin-top:.8cqw;padding-top:.9cqw;border-top:1px dashed #173445;font-size:.95cqw;color:var(--am);font-family:'Chakra Petch',system-ui,sans-serif;letter-spacing:.06em}
+.tback{font-size:.9cqw;color:var(--dim);letter-spacing:.15em}.tback:hover{color:#fff}
+
+/* ---------- titulky kapitol ---------- */
+.card{position:absolute;inset:0;z-index:50;display:grid;place-content:center;text-align:center;background:#000;opacity:0;visibility:hidden;transition:opacity .6s,visibility 0s .6s}
+.card.on{opacity:1;visibility:visible;transition:opacity .6s}
+.card .cn{font:600 1.2cqw var(--mono);letter-spacing:.6em;color:var(--cy);opacity:0}
+.card .ct{font-size:6cqw;font-weight:700;letter-spacing:.12em;margin:.6cqw 0;position:relative}
+.card .cs{font-size:1.25cqw;letter-spacing:.3em;color:var(--dim);opacity:0}
+.card.on .cn{animation:fadeUp .8s .3s forwards}
+.card.on .cs{animation:fadeUp .8s 1s forwards}
+.card .bar{height:2px;width:0;margin:1.4cqw auto 0;background:var(--cy);box-shadow:0 0 1cqw var(--cy)}
+.card.on .bar{animation:grow 2.4s .4s forwards}
+@keyframes fadeUp{from{opacity:0;transform:translateY(1cqw)}to{opacity:1;transform:none}}
+@keyframes grow{to{width:30cqw}}
+.glitch{position:relative;display:inline-block}
+.glitch::before,.glitch::after{content:attr(data-t);position:absolute;inset:0}
+.glitch::before{color:var(--rd);animation:gA 2.6s infinite;clip-path:inset(0 0 60% 0)}
+.glitch::after{color:var(--cy);animation:gB 2.1s infinite;clip-path:inset(55% 0 0 0)}
+@keyframes gA{0%,88%,100%{transform:none;opacity:0}89%{transform:translate(-.5cqw,-.1cqw);opacity:.9}93%{transform:translate(.4cqw,0);opacity:.9}96%{opacity:0}}
+@keyframes gB{0%,80%,100%{transform:none;opacity:0}81%{transform:translate(.5cqw,.1cqw);opacity:.9}86%{transform:translate(-.3cqw,0);opacity:.9}89%{opacity:0}}
+
+/* ---------- start / konec ---------- */
+.screen{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 60%,#0E3A2F 0%,#020806 72%);overflow:hidden;transition:opacity .8s,visibility 0s .8s}
+.screen.off{opacity:0;visibility:hidden}
+.screen .bgsvg{position:absolute;inset:0;width:100%;height:100%;opacity:.9}
+.screen > *:not(.bgsvg){position:relative}
+.logo{font-size:8.5cqw;font-weight:700;letter-spacing:.22em;line-height:1;margin-right:-.22em;color:#eaf7ff;text-shadow:0 0 2cqw rgba(120,250,174,.45)}
+.brandmark{font-weight:700;font-size:2.4cqw;letter-spacing:.14em;color:#78FAAE;margin-bottom:.4cqw}
+.tag{font-size:1.25cqw;letter-spacing:.42em;color:var(--cy);margin:1.2cqw 0 .4cqw}
+.lede{max-width:52cqw;text-align:center;font-size:1.25cqw;line-height:1.55;color:#a9bccd;margin:1cqw 0 2.2cqw}
+.form{display:flex;gap:1cqw}
+.form input{width:26cqw;height:3.8cqw;background:rgba(6,35,27,.85);border:1px solid #1f5a45;color:#fff;font:500 1.5cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.08em;padding:0 1.2cqw;outline:none}
+.form input:focus{border-color:var(--cy)}
+.btn{height:3.8cqw;padding:0 2.2cqw;background:var(--cy);color:#0E3A2F;font-weight:700;font-size:1.2cqw;letter-spacing:.22em;clip-path:polygon(0 0,100% 0,100% 70%,calc(100% - 1cqw) 100%,0 100%)}
+.btn:hover{background:#a6ffcc}
+.btn.ghost{background:transparent;color:var(--cy);border:1px solid var(--cy)}
+.cont{margin-top:1.6cqw;display:flex;gap:1.2cqw;align-items:center;font-size:1.05cqw;color:var(--dim)}
+.cont[hidden]{display:none}
+.link{color:var(--dim);text-decoration:underline;font-size:.95cqw;letter-spacing:.08em}
+.err{color:var(--rd);font-size:1cqw;margin-top:.8cqw;min-height:1.4cqw;letter-spacing:.08em}
+.screen .fine{position:absolute;bottom:1.2cqw;font-size:.85cqw;letter-spacing:.2em;color:#4e6478}
+.endt{font-size:1.2cqw;letter-spacing:.5em;color:var(--gn)}
+.endh{font-size:5.2cqw;font-weight:700;letter-spacing:.12em;margin:.6cqw 0 .2cqw;text-shadow:0 0 2cqw rgba(61,255,154,.35)}
+.endtime{font:600 4.2cqw var(--mono);color:#fff;margin:1cqw 0}
+.splits{display:grid;grid-template-columns:repeat(5,1fr);gap:1cqw;width:70cqw;margin:1cqw 0 2cqw}
+.splits div{border:1px solid rgba(61,255,154,.35);padding:.9cqw;text-align:center;background:rgba(0,20,12,.5)}
+.splits small{display:block;font-size:.8cqw;letter-spacing:.12em;color:var(--dim);min-height:2.2cqw}
+.splits b{font:600 1.45cqw var(--mono);color:var(--gn)}
+
+/* ---------- záznam ---------- */
+.logp{position:absolute;top:0;right:0;bottom:0;width:36cqw;z-index:45;background:rgba(2,8,14,.96);border-left:1px solid var(--line);transform:translateX(105%);visibility:hidden;transition:transform .35s,visibility 0s .35s;display:flex;flex-direction:column}
+.logp.on{transform:none;visibility:visible;transition:transform .35s}
+.logp header{display:flex;justify-content:space-between;align-items:center;padding:1.2cqw 1.6cqw;border-bottom:1px solid var(--line);font-size:1cqw;letter-spacing:.3em;color:var(--cy)}
+.logp .lst{overflow:auto;padding:1cqw 1.6cqw;font-size:1.1cqw;line-height:1.5}
+.logp .lst p{margin-bottom:.9cqw;color:#c3d2df}
+.logp .lst p b{display:block;font-size:.75cqw;letter-spacing:.25em;color:var(--cy)}
+.logp .lst p.g b{color:var(--rd)}.logp .lst p.n b{color:#7f95aa}.logp .lst p.s b{color:var(--am)}
+.logp .lst h4{font-size:.85cqw;letter-spacing:.3em;color:var(--am);margin:1.4cqw 0 .8cqw;font-weight:600}
+
+/* ---------- lobby / odpočet / ukončení ---------- */
+.lobby{position:absolute;inset:0;z-index:19;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(3,16,12,.8);backdrop-filter:blur(5px);opacity:0;visibility:hidden;transition:opacity .6s,visibility 0s .6s}
+.lobby.on{opacity:1;visibility:visible;transition:opacity .6s}
+.lobby.ended{z-index:55;background:rgba(3,16,12,.94)}
+.lb-tag{font-size:1.1cqw;letter-spacing:.5em;color:var(--cy)}
+.lb-team{font-size:4.2cqw;font-weight:700;letter-spacing:.1em;margin:.8cqw 0 .6cqw;max-width:80cqw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-state{font-size:1.5cqw;color:#c9d6e2;letter-spacing:.05em;max-width:60cqw;line-height:1.5}
+.lb-state i{display:inline-block;width:.8cqw;height:.8cqw;margin-left:.8cqw;border-radius:50%;background:var(--cy);animation:pulse 1.2s infinite;vertical-align:middle}
+.lb-count{font:600 13cqw var(--mono);color:var(--cy);text-shadow:0 0 3cqw rgba(120,250,174,.6);line-height:1;margin:1cqw 0}
+.lb-count:empty{display:none}
+.lb-count.pop{animation:popin .45s}
+.lb-list{display:flex;flex-wrap:wrap;justify-content:center;gap:.6cqw;max-width:70cqw;margin-top:2.2cqw}
+.lb-list:empty{display:none}
+.lb-list span{padding:.35cqw .9cqw;border:1px solid var(--line);font-size:1cqw;letter-spacing:.08em;color:#a9bccd;animation:popin .4s}
+.lb-list span.me{border-color:var(--cy);color:var(--cy)}
+.lnk{background:none;border:0;color:var(--cy);text-decoration:underline;cursor:pointer;font:inherit;letter-spacing:inherit}
+.lb-note{margin-top:2cqw;font-size:.95cqw;color:var(--dim);letter-spacing:.1em}
+.vig{position:absolute;inset:0;pointer-events:none;z-index:15;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+.scan{position:absolute;inset:0;pointer-events:none;z-index:16;background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
+.rot{display:none;position:fixed;inset:0;z-index:99;background:#020508;color:var(--ink);place-content:center;text-align:center;padding:24px;font-size:18px;letter-spacing:.06em}
+.rot svg{width:64px;margin:0 auto 16px;stroke:var(--cy);fill:none;stroke-width:1.5}
+@media (orientation:portrait) and (max-width:820px){.rot{display:grid}}
+@media (prefers-reduced-motion:reduce){.scrollup,.spin,.bob,.dash,.flick,.flick2,.jit,.shake{animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- sdílené gradienty / vzory -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="gWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E3A2F"/><stop offset="1" stop-color="#05110d"/></linearGradient>
+  <linearGradient id="gFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a2219"/><stop offset="1" stop-color="#020604"/></linearGradient>
+  <linearGradient id="gCone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a8dcff" stop-opacity=".2"/><stop offset="1" stop-color="#a8dcff" stop-opacity="0"/></linearGradient>
+  <linearGradient id="gBeam" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#78FAAE" stop-opacity=".35"/><stop offset="1" stop-color="#78FAAE" stop-opacity="0"/></linearGradient>
+  <linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b98d80"/><stop offset=".45" stop-color="#7d5a52"/><stop offset="1" stop-color="#2e2120"/></linearGradient>
+  <linearGradient id="gGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1b4a68"/><stop offset=".55" stop-color="#071724"/><stop offset="1" stop-color="#0d2c42"/></linearGradient>
+  <linearGradient id="gRedBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e070c"/><stop offset="1" stop-color="#070204"/></linearGradient>
+  <linearGradient id="gLab" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1c2a"/><stop offset="1" stop-color="#060d15"/></linearGradient>
+  <linearGradient id="gSweep" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff2a40" stop-opacity=".45"/><stop offset="1" stop-color="#ff2a40" stop-opacity="0"/></linearGradient>
+  <radialGradient id="gGlowC"><stop offset="0" stop-color="#78FAAE" stop-opacity=".7"/><stop offset="1" stop-color="#78FAAE" stop-opacity="0"/></radialGradient>
+  <radialGradient id="gGlowR"><stop offset="0" stop-color="#ff3b4e" stop-opacity=".85"/><stop offset="1" stop-color="#ff3b4e" stop-opacity="0"/></radialGradient>
+  <radialGradient id="gGlowW"><stop offset="0" stop-color="#e6f7ff" stop-opacity=".9"/><stop offset="1" stop-color="#e6f7ff" stop-opacity="0"/></radialGradient>
+  <pattern id="pHaz" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="14" height="28" fill="#e9b008"/><rect x="14" width="14" height="28" fill="#111"/></pattern>
+  <pattern id="pMesh" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M0 0L18 18M18 0L0 18" stroke="#2a4257" stroke-width="1.2"/></pattern>
+  <pattern id="pGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#78FAAE" stroke-opacity=".07"/></pattern>
+  <pattern id="pGridR" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#ff3b4e" stroke-opacity=".08"/></pattern>
+  <filter id="fSoft" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+  <filter id="fGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <path id="ghost" d="M0-38C-22-38-34-22-34 0V38L-23 28-11 38 0 28 11 38 23 28 34 38V0C34-22 22-38 0-38Z"/>
+  <clipPath id="cpLap"><rect x="1316" y="450" width="176" height="108"/></clipPath>
+  <clipPath id="cpLog"><rect x="372" y="552" width="206" height="126"/></clipPath>
+</defs></svg>
+
+<div id="app"><div id="stage">
+
+<!-- ================= SCÉNA 1: SERVISNÍ HALA ================= -->
+<div class="scene" id="sc-garage"><svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <rect width="1600" height="640" fill="url(#gWall)"/><rect width="1600" height="640" fill="url(#pGrid)"/>
+  <path d="M220 40V600M440 40V600M660 40V600M880 40V600M1100 40V600M1320 40V600" stroke="#0f1e2e" stroke-width="4"/>
+  <text x="80" y="110" class="wallsign">ŠKODA AUTO</text>
+  <text x="82" y="140" class="wallsub">SERVISNÍ HALA 03 · VÝVOJ A TESTOVÁNÍ</text>
+  <rect y="596" width="1600" height="14" fill="url(#pHaz)" opacity=".35"/>
+  <polygon points="0,610 1600,610 1600,900 0,900" fill="url(#gFloor)"/>
+  <g stroke="#163049" stroke-opacity=".5"><path d="M800 610V900M600 610L280 900M1000 610L1320 900M400 610L-240 900M1200 610L1840 900"/><path d="M0 660H1600M0 735H1600M0 830H1600" stroke-opacity=".5"/></g>
+  <g class="nohit">
+    <polygon points="210,30 390,30 560,640 40,640" fill="url(#gCone)"/>
+    <g class="flick"><polygon points="710,30 890,30 1060,640 540,640" fill="url(#gCone)"/><rect x="710" y="18" width="180" height="12" rx="6" fill="#d8efff"/></g>
+    <polygon points="1210,30 1390,30 1560,640 1040,640" fill="url(#gCone)"/>
+    <rect x="210" y="18" width="180" height="12" rx="6" fill="#d8efff"/><rect x="1210" y="18" width="180" height="12" rx="6" fill="#d8efff"/>
+  </g>
+  <!-- montážní vozík -->
+  <g class="hs" data-hs="toolbox"><g class="art">
+    <rect x="100" y="440" width="190" height="168" rx="6" fill="#6e1b26" stroke="#8d2a37" stroke-width="2"/>
+    <g fill="#5a141e" stroke="#8d2a37"><rect x="110" y="452" width="170" height="34"/><rect x="110" y="492" width="170" height="34"/><rect x="110" y="532" width="170" height="34"/><rect x="110" y="572" width="170" height="28"/></g>
+    <g fill="#c9cfd6"><rect x="175" y="466" width="40" height="5" rx="2"/><rect x="175" y="506" width="40" height="5" rx="2"/><rect x="175" y="546" width="40" height="5" rx="2"/></g>
+    <rect x="128" y="424" width="70" height="16" rx="3" fill="#c9cfd6"/><rect x="206" y="418" width="44" height="22" rx="3" fill="#2a3542"/>
+    <circle cx="120" cy="616" r="8" fill="#111"/><circle cx="270" cy="616" r="8" fill="#111"/>
+  </g><rect class="hit" x="94" y="410" width="202" height="220"/></g>
+  <!-- zvedák -->
+  <g class="nohit">
+    <rect x="400" y="250" width="36" height="410" fill="#1d2b39"/><rect x="404" y="250" width="10" height="410" fill="url(#pHaz)" opacity=".55"/>
+    <rect x="1164" y="250" width="36" height="410" fill="#1d2b39"/><rect x="1186" y="250" width="10" height="410" fill="url(#pHaz)" opacity=".55"/>
+    <ellipse cx="800" cy="668" rx="380" ry="20" fill="#000" opacity=".6" filter="url(#fSoft)"/>
+  </g>
+  <!-- vůz -->
+  <g class="hs" data-hs="car"><g class="art">
+    <ellipse cx="420" cy="414" rx="70" ry="14" fill="url(#gGlowC)" class="sos"/>
+    <g transform="translate(347 144) scale(.64)"><path d="M285 585L238 568 182 557 205 541C198 515 188 495 188 485C188 478 195 472 199 470C196 450 195 425 196 413C240 380 330 356 432 356C500 315 570 280 620 263C650 256 680 248 695 245C850 235 1050 240 1208 273L1195 296 1243 346 1252 346 1252 375 1258 412 1243 458 1262 474C1272 500 1270 525 1260 540C1230 552 1180 560 1150 567L1130 575 285 585Z" fill="#0E3A2F" fill-opacity=".92"/></g>
+    <g class="spin slow"><circle cx="587" cy="490" r="50" fill="#0b0f0d" stroke="#1d2621" stroke-width="6"/><circle cx="587" cy="490" r="34" fill="#1f2a25"/><path d="M587 456C596 472 593 481 587 490M621 490C605 497 596 495 587 490M587 524C578 508 581 499 587 490M553 490C569 483 578 485 587 490" stroke="#9fb3a9" stroke-width="6" fill="none"/><circle cx="587" cy="490" r="6" fill="#78FAAE"/></g>
+    <g class="spin slow"><circle cx="1016" cy="490" r="50" fill="#0b0f0d" stroke="#1d2621" stroke-width="6"/><circle cx="1016" cy="490" r="34" fill="#1f2a25"/><path d="M1016 456C1025 472 1022 481 1016 490M1050 490C1034 497 1025 495 1016 490M1016 524C1007 508 1010 499 1016 490M982 490C998 483 1007 485 1016 490" stroke="#9fb3a9" stroke-width="6" fill="none"/><circle cx="1016" cy="490" r="6" fill="#78FAAE"/></g>
+    <g transform="translate(347 144) scale(.64)" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#fGlow)">
+      <path d="M285 585L238 568 182 557 205 541C198 515 188 495 188 485C188 478 195 472 199 470C196 450 195 425 196 413C240 380 330 356 432 356C500 315 570 280 620 263C650 256 680 248 695 245C850 235 1050 240 1208 273L1195 296 1243 346 1252 346 1252 375 1258 412 1243 458 1262 474C1272 500 1270 525 1260 540C1230 552 1180 560 1150 567" stroke="#78FAAE" stroke-width="6"/>
+      <path d="M287 567C278 530 290 470 370 452C430 445 470 480 468 530C467 550 463 565 459 575M958 567C948 525 970 460 1040 452C1105 447 1145 490 1138 535C1136 555 1133 568 1130 575" stroke="#78FAAE" stroke-width="7"/>
+      <path d="M200 418C235 405 290 400 314 403L320 413C292 412 272 426 267 447C240 443 218 441 200 441" stroke="#e8fff4" stroke-width="5" class="sos"/>
+      <path d="M1156 370C1185 372 1205 368 1245 370M1156 370C1180 388 1200 400 1212 405C1225 404 1235 402 1244 400M1172 378L1213 400" stroke="#ff5a6a" stroke-width="5"/>
+    </g>
+  </g><rect class="hit" x="455" y="290" width="715" height="260"/></g>
+  <!-- ramena zvedáku přes vůz -->
+  <g class="nohit"><rect x="436" y="506" width="96" height="10" fill="#26384a"/><rect x="1070" y="506" width="94" height="10" fill="#26384a"/></g>
+  <!-- dongle -->
+  <g class="hs" data-hs="dongle"><g class="art">
+    <path d="M930 506c4 6-4 8 0 14" stroke="#222" stroke-width="4" fill="none"/>
+    <rect x="904" y="518" width="48" height="26" rx="5" fill="#0a0c0f" stroke="#3a3f46" stroke-width="2"/>
+    <circle cx="941" cy="531" r="5" fill="#ff3b4e" class="blink" filter="url(#fGlow)"/>
+    <g fill="none" stroke="#ff6b78" stroke-width="2.5"><path class="sig" d="M896 520a12 12 0 0 1 0-16"/><path class="sig d1" d="M888 524a22 22 0 0 1 0-24"/><path class="sig d2" d="M880 528a32 32 0 0 1 0-32"/></g>
+  </g><rect class="hit" x="870" y="490" width="96" height="66"/></g>
+  <!-- pracovní stůl + notebook -->
+  <g class="nohit"><rect x="1230" y="580" width="350" height="16" fill="#22303d"/><rect x="1250" y="596" width="14" height="74" fill="#1a2530"/><rect x="1546" y="596" width="14" height="74" fill="#1a2530"/><rect x="1270" y="620" width="90" height="50" fill="#141d27"/></g>
+  <g class="hs" data-hs="laptop"><g class="art">
+    <rect x="1306" y="440" width="196" height="128" rx="6" fill="#0d151d" stroke="#2b3d4d" stroke-width="2"/>
+    <rect x="1316" y="450" width="176" height="108" fill="#02121a"/>
+    <g clip-path="url(#cpLap)"><g class="scrollup" id="lapLines"></g></g>
+    <polygon points="1296,568 1512,568 1536,580 1272,580" fill="#1b2733"/>
+  </g><rect class="hit" x="1268" y="430" width="274" height="155"/></g>
+  <!-- diagnostická stanice -->
+  <g class="hs" data-hs="station"><g class="art">
+    <path d="M1395 340V580" stroke="#1a2a38" stroke-width="6"/>
+    <rect x="1260" y="170" width="270" height="170" rx="6" fill="#08121c" stroke="#78FAAE" stroke-opacity=".55" stroke-width="3" class="pulse"/>
+    <rect x="1276" y="186" width="238" height="112" fill="#020a10"/>
+    <text x="1290" y="214" class="m" font-size="18" fill="#78FAAE">DIAG-03</text>
+    <text x="1500" y="214" text-anchor="end" class="m" font-size="12" fill="#3b6f86">v4.2</text>
+    <g id="stLock"><rect x="1385" y="238" width="22" height="18" rx="2" fill="#ffb020"/><path d="M1389 238v-6a7 7 0 0 1 14 0v6" stroke="#ffb020" stroke-width="3" fill="none"/></g>
+    <text x="1290" y="284" class="m blink" font-size="15" fill="#ffb020" id="stTxt">ZAMČENO</text>
+    <g fill="#163a4c"><rect x="1276" y="310" width="60" height="16"/><rect x="1342" y="310" width="60" height="16"/><rect x="1408" y="310" width="106" height="16"/></g>
+  </g><rect class="hit" x="1250" y="160" width="290" height="190"/></g>
+</svg></div>
+
+<!-- ================= SCÉNA 2: KOKPIT ================= -->
+<div class="scene" id="sc-cockpit"><svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <rect width="1600" height="900" fill="url(#gWall)"/><rect width="1600" height="640" fill="url(#pGrid)"/>
+  <g class="nohit" opacity=".75">
+    <polygon points="500,0 640,0 760,560 380,560" fill="url(#gCone)"/><polygon points="1060,0 1200,0 1320,560 940,560" fill="url(#gCone)" class="flick"/>
+    <rect x="300" y="150" width="40" height="420" fill="#14202c"/><rect x="306" y="150" width="10" height="420" fill="url(#pHaz)" opacity=".4"/>
+    <text x="1000" y="260" class="wallsign" font-size="44">SERVIS 03</text>
+    <rect y="520" width="1600" height="12" fill="url(#pHaz)" opacity=".25"/>
+  </g>
+  <rect width="1600" height="900" fill="#0a2233" opacity=".25"/>
+  <g class="nohit flick2" opacity=".75">
+    <text x="800" y="330" text-anchor="middle" class="m" font-size="26" fill="#78FAAE" letter-spacing="4">⚠ NEZNÁMÉ ZAŘÍZENÍ NA SBĚRNICI</text>
+    <path d="M560 350H1040" stroke="#78FAAE" stroke-opacity=".5"/>
+    <text x="800" y="390" text-anchor="middle" class="m gl" font-size="22" fill="#ff3b4e" letter-spacing="6">GHOSTLINE://E7/CAN0</text>
+  </g>
+  <path d="M0 0H1600V70C1200 112 400 112 0 70z" fill="#03060a"/>
+  <polygon points="0,60 260,90 110,640 0,660" fill="#04080d" stroke="#0e1824" stroke-width="3"/>
+  <polygon points="1600,60 1340,90 1490,640 1600,660" fill="#04080d" stroke="#0e1824" stroke-width="3"/>
+  <!-- zrcátko -->
+  <g class="hs" data-hs="mirror"><g class="art">
+    <rect x="790" y="60" width="20" height="40" fill="#0b1119"/>
+    <rect x="690" y="96" width="220" height="66" rx="26" fill="#0a1018" stroke="#2a3a4c" stroke-width="4"/>
+    <rect x="702" y="106" width="196" height="46" rx="20" fill="url(#gGlass)" opacity=".75"/>
+    <circle cx="884" cy="150" r="4.5" fill="#ff3b4e" class="blink"/>
+  </g><rect class="hit" x="680" y="56" width="240" height="114"/></g>
+  <!-- palubní deska -->
+  <path d="M0 640C350 560 1250 560 1600 640V900H0z" fill="#080d14"/>
+  <path d="M0 640C350 560 1250 560 1600 640" stroke="#1c2c3e" stroke-width="3" fill="none"/>
+  <path d="M120 640C420 586 1180 586 1480 640" stroke="#78FAAE" stroke-opacity=".4" stroke-width="3" fill="none" class="pulse"/>
+  <!-- přístrojový štít -->
+  <g class="hs" data-hs="cluster"><g class="art">
+    <rect x="370" y="600" width="440" height="160" rx="22" fill="#03080d" stroke="#1c2e40" stroke-width="3"/>
+    <path d="M470 720a120 120 0 0 1 240 0" stroke="#173246" stroke-width="10" fill="none"/>
+    <g class="jit" style="transform-origin:590px 720px"><path d="M590 720L520 680" stroke="#ff3b4e" stroke-width="4"/></g>
+    <text x="590" y="712" text-anchor="middle" class="m" font-size="56" fill="#bdf6ff">0</text>
+    <text x="590" y="740" text-anchor="middle" class="t" font-size="15" fill="#5d7c94" letter-spacing="3">km/h</text>
+    <g class="t" font-size="13" font-weight="700">
+      <g class="blink"><path d="M410 640l14-24 14 24z" fill="#ffb020"/></g>
+      <g class="blink d1"><circle cx="466" cy="630" r="12" fill="none" stroke="#ff3b4e" stroke-width="3"/><text x="466" y="635" text-anchor="middle" fill="#ff3b4e" font-size="10">ABS</text></g>
+      <g class="blink d2"><text x="716" y="636" fill="#ff3b4e">SRS</text></g>
+      <g class="blink d3"><rect x="758" y="622" width="26" height="14" rx="2" fill="none" stroke="#ffb020" stroke-width="2.5"/><rect x="784" y="626" width="4" height="6" fill="#ffb020"/></g>
+    </g>
+  </g><rect class="hit" x="364" y="594" width="452" height="140"/></g>
+  <!-- volant -->
+  <g class="nohit">
+    <circle cx="590" cy="1010" r="250" fill="none" stroke="#0c121a" stroke-width="52"/>
+    <circle cx="590" cy="1010" r="274" fill="none" stroke="#1a2635" stroke-width="2"/>
+    <path d="M340 1000H500M680 1000H840" stroke="#0c121a" stroke-width="44"/>
+    <circle cx="590" cy="975" r="78" fill="#0c121a" stroke="#1a2635" stroke-width="2"/>
+    <text x="590" y="955" text-anchor="middle" class="t" font-size="30" font-weight="700" fill="#78FAAE" opacity=".7">A</text>
+  </g>
+  <!-- infotainment -->
+  <g class="hs" data-hs="info"><g class="art">
+    <rect x="900" y="590" width="440" height="250" rx="16" fill="#02060b" stroke="#2a3e55" stroke-width="4"/>
+    <rect x="912" y="602" width="416" height="226" fill="#060a10"/>
+    <g class="gl"><use href="#ghost" transform="translate(1120 686) scale(1.1)" fill="none" stroke="#ff3b4e" stroke-width="4"/><circle cx="1108" cy="676" r="5" fill="#ff3b4e"/><circle cx="1132" cy="676" r="5" fill="#ff3b4e"/></g>
+    <text x="1120" y="782" text-anchor="middle" class="m" font-size="34" fill="#ff3b4e" letter-spacing="6" filter="url(#fGlow)"><tspan class="blink" style="animation-duration:3s">GHOSTLINE</tspan></text>
+    <text x="1120" y="814" text-anchor="middle" class="t" font-size="14" fill="#56708a" letter-spacing="3">SERVISNÍ MENU · ZAMČENO</text>
+    <g fill="#fff" opacity=".04"><rect x="912" y="640" width="416" height="3"/><rect x="912" y="700" width="416" height="2"/><rect x="912" y="760" width="416" height="3"/></g>
+  </g><rect class="hit" x="894" y="584" width="452" height="262"/></g>
+  <!-- přihrádka -->
+  <g class="hs" data-hs="glovebox"><g class="art">
+    <path d="M1372 668h200l-6 100h-188z" fill="#0b111a" stroke="#1e2d3e" stroke-width="3"/>
+    <rect x="1446" y="700" width="54" height="10" rx="5" fill="#2c3e52"/>
+  </g><rect class="hit" x="1364" y="660" width="216" height="116"/></g>
+  <!-- CAN -->
+  <g class="hs" data-hs="canbay"><g class="art">
+    <rect x="1370" y="796" width="210" height="96" rx="6" fill="#020407" stroke="#2a3a4c" stroke-width="2" stroke-dasharray="8 6"/>
+    <path d="M1380 820C1430 860 1470 800 1520 840S1560 860 1572 830" stroke="#ff8c1a" stroke-width="4" fill="none"/>
+    <path d="M1380 830C1430 800 1470 860 1520 820S1560 820 1572 850" stroke="#3dff9a" stroke-width="4" fill="none"/>
+    <path d="M1380 820C1430 860 1470 800 1520 840S1560 860 1572 830" stroke="#fff" stroke-width="4" fill="none" class="dash"/>
+    <rect x="1470" y="852" width="60" height="28" rx="3" fill="#0f1a24" stroke="#78FAAE" stroke-opacity=".6"/>
+    <text x="1500" y="871" text-anchor="middle" class="m" font-size="11" fill="#78FAAE">CAN-GW</text>
+  </g><rect class="hit" x="1364" y="790" width="222" height="108"/></g>
+</svg></div>
+
+<!-- ================= SCÉNA 3: SOC ================= -->
+<div class="scene" id="sc-soc"><svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <rect width="1600" height="900" fill="url(#gWall)"/>
+  <rect x="200" y="18" width="1200" height="5" fill="#78FAAE" opacity=".28" filter="url(#fGlow)"/>
+  <!-- boční obrazovky -->
+  <g class="nohit">
+    <rect x="40" y="70" width="200" height="130" fill="#020a10" stroke="#16384b" stroke-width="3"/>
+    <text x="54" y="94" class="m" font-size="11" fill="#3b7f9c">ODCHOZÍ PROVOZ</text>
+    <polyline points="54,180 80,170 104,176 128,150 152,160 176,120 200,128 226,104" fill="none" stroke="#ff3b4e" stroke-width="2.5" class="pulse"/>
+    <rect x="1360" y="70" width="200" height="130" fill="#020a10" stroke="#16384b" stroke-width="3"/>
+    <text x="1374" y="94" class="m" font-size="11" fill="#3b7f9c">UDÁLOSTI / MIN</text>
+    <g class="bars" fill="#78FAAE" opacity=".7"><rect x="1380" y="110" width="22" height="76"/><rect x="1412" y="110" width="22" height="76"/><rect x="1444" y="110" width="22" height="76"/><rect x="1476" y="110" width="22" height="76"/><rect x="1508" y="110" width="22" height="76"/></g>
+  </g>
+  <!-- mapa flotily -->
+  <g class="hs" data-hs="map"><g class="art">
+    <rect x="270" y="60" width="1060" height="400" fill="#020c14" stroke="#134560" stroke-width="4"/>
+    <rect x="270" y="60" width="1060" height="400" fill="url(#pGrid)"/>
+    <text x="298" y="98" class="t" font-size="20" font-weight="600" fill="#78FAAE" letter-spacing="5">FLEET TELEMETRY · LIVE</text>
+    <text x="1302" y="98" text-anchor="end" class="m" font-size="15" fill="#5b8aa6">412 806 VOZŮ ONLINE</text>
+    <g id="fleet3"></g>
+    <g class="blink"><rect x="1222" y="168" width="22" height="22" transform="rotate(45 1233 179)" fill="none" stroke="#ff3b4e" stroke-width="3"/></g>
+    <text x="1262" y="186" class="m" font-size="14" fill="#ff3b4e">C2 ?</text>
+  </g><rect class="hit" x="264" y="54" width="1072" height="412"/></g>
+  <polygon points="0,660 1600,660 1600,900 0,900" fill="url(#gFloor)"/>
+  <!-- racky -->
+  <g class="hs" data-hs="racks"><g class="art">
+    <rect x="40" y="240" width="100" height="430" fill="#0a1018" stroke="#1d2d3e" stroke-width="3"/>
+    <rect x="150" y="240" width="100" height="430" fill="#0a1018" stroke="#1d2d3e" stroke-width="3"/>
+    <g id="leds"></g>
+    <rect x="154" y="404" width="92" height="22" fill="#2a0a10" stroke="#ff3b4e" stroke-width="2" class="blink"/>
+    <text x="200" y="420" text-anchor="middle" class="m" font-size="11" fill="#ff8a96">GW-03</text>
+  </g><rect class="hit" x="30" y="230" width="230" height="450"/></g>
+  <!-- stůl -->
+  <polygon points="220,720 1380,720 1540,900 60,900" fill="#0a1119"/><path d="M220 720H1380" stroke="#1d3044" stroke-width="3"/>
+  <g class="nohit">
+    <rect x="360" y="540" width="230" height="150" fill="#020a10" stroke="#1d3044" stroke-width="3"/>
+    <g clip-path="url(#cpLog)"><g class="scrollup" id="socLines"></g></g>
+    <rect x="465" y="690" width="20" height="30" fill="#141e2a"/>
+    <rect x="1130" y="520" width="220" height="150" fill="#020a10" stroke="#1d3044" stroke-width="3"/>
+    <circle cx="1240" cy="595" r="46" fill="none" stroke="#78FAAE" stroke-opacity=".25" stroke-width="2"/>
+    <circle cx="1240" cy="595" r="26" fill="none" stroke="#78FAAE" stroke-opacity=".25" stroke-width="2"/>
+    <g class="spin" style="transform-box:view-box;transform-origin:1240px 595px"><path d="M1240 595L1286 595" stroke="#78FAAE" stroke-width="2"/><path d="M1240 595L1286 595A46 46 0 0 0 1272 562Z" fill="#78FAAE" opacity=".2"/></g>
+    <rect x="1230" y="670" width="20" height="50" fill="#141e2a"/>
+    <polygon points="680,740 940,740 960,775 660,775" fill="#111a24"/>
+  </g>
+  <!-- konzole (terminál) -->
+  <g class="hs" data-hs="console"><g class="art">
+    <rect x="640" y="500" width="330" height="200" fill="#020c14" stroke="#78FAAE" stroke-opacity=".6" stroke-width="3" class="pulse"/>
+    <text x="660" y="534" class="m" font-size="16" fill="#78FAAE">SOC // FIREWALL</text>
+    <text x="660" y="578" class="t" font-size="28" font-weight="700" fill="#e9f6ff" letter-spacing="2">BLOKACE C2</text>
+    <text x="660" y="620" class="m blink" font-size="14" fill="#ffb020" id="fwTxt">AUTORIZACE VYŽADOVÁNA</text>
+    <rect x="660" y="645" width="290" height="10" fill="#0b2433"/><rect x="660" y="645" width="96" height="10" fill="#78FAAE" opacity=".7" id="fwBar"/>
+    <rect x="795" y="700" width="22" height="22" fill="#141e2a"/>
+  </g><rect class="hit" x="632" y="492" width="290" height="216"/></g>
+  <!-- papírek -->
+  <g class="hs" data-hs="note"><g class="art" transform="rotate(7 958 528)">
+    <rect x="930" y="498" width="58" height="58" fill="#ffe066"/>
+    <path d="M938 514h40M938 526h34M938 538h42" stroke="#7a6400" stroke-width="2.5"/>
+  </g><rect class="hit" x="922" y="490" width="76" height="76"/></g>
+  <!-- hrnek -->
+  <g class="hs" data-hs="mug"><g class="art">
+    <path class="steam" d="M1022 640c-8-12 8-18 0-30" stroke="#9fb6c8" stroke-width="3" fill="none" opacity="0"/>
+    <path class="steam d1" d="M1036 640c-8-12 8-18 0-30" stroke="#9fb6c8" stroke-width="3" fill="none" opacity="0"/>
+    <path class="steam d2" d="M1050 640c-8-12 8-18 0-30" stroke="#9fb6c8" stroke-width="3" fill="none" opacity="0"/>
+    <rect x="1008" y="652" width="56" height="66" rx="6" fill="#e3eaf0"/>
+    <path d="M1064 668c22 0 22 34 0 34" stroke="#e3eaf0" stroke-width="7" fill="none"/>
+    <text x="1036" y="692" text-anchor="middle" class="t" font-size="13" font-weight="700" fill="#16314a">SOC</text>
+  </g><rect class="hit" x="996" y="600" width="104" height="124"/></g>
+</svg></div>
+
+<!-- ================= SCÉNA 4: LABORATOŘ PODPISŮ ================= -->
+<div class="scene" id="sc-lab"><svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <rect width="1600" height="900" fill="url(#gLab)"/><rect width="1600" height="650" fill="url(#pGrid)"/>
+  <rect x="300" y="20" width="1000" height="8" rx="4" fill="#cfefff" opacity=".35" filter="url(#fGlow)"/>
+  <polygon points="0,650 1600,650 1600,900 0,900" fill="url(#gFloor)"/>
+  <g stroke="#163049" stroke-opacity=".5"><path d="M800 650V900M500 650L200 900M1100 650L1400 900"/></g>
+  <!-- tabule -->
+  <g class="hs" data-hs="board"><g class="art">
+    <rect x="80" y="140" width="400" height="280" fill="#aebbc5" stroke="#55636f" stroke-width="8"/>
+    <g class="t" font-size="14" font-weight="700" fill="#1f4e8a" text-anchor="middle">
+      <rect x="130" y="166" width="150" height="36" fill="none" stroke="#1f4e8a" stroke-width="2.5"/><text x="205" y="189">ROOT CA</text>
+      <rect x="130" y="226" width="150" height="36" fill="none" stroke="#1f4e8a" stroke-width="2.5"/><text x="205" y="249">OEM CA</text>
+      <rect x="130" y="286" width="150" height="36" fill="none" stroke="#1f4e8a" stroke-width="2.5"/><text x="205" y="309">OTA PODPIS</text>
+      <rect x="130" y="346" width="150" height="36" fill="none" stroke="#1f4e8a" stroke-width="2.5"/><text x="205" y="369">ECU VE VOZE</text>
+    </g>
+    <path d="M205 202v22M205 262v22M205 322v22" stroke="#1f4e8a" stroke-width="2.5"/>
+    <ellipse cx="205" cy="304" rx="96" ry="30" fill="none" stroke="#c4202f" stroke-width="3"/>
+    <text x="380" y="300" text-anchor="middle" class="t" font-size="16" font-weight="700" fill="#c4202f" transform="rotate(-6 380 300)">REVOKACE?</text>
+    <path d="M300 304h30" stroke="#c4202f" stroke-width="3"/>
+    <text x="380" y="360" text-anchor="middle" class="t" font-size="13" fill="#1f4e8a" transform="rotate(-4 380 360)">CRL / OCSP</text>
+  </g><rect class="hit" x="72" y="132" width="416" height="296"/></g>
+  <!-- HSM -->
+  <g class="hs" data-hs="hsm"><g class="art">
+    <rect x="560" y="230" width="280" height="420" fill="#060c13"/>
+    <rect x="600" y="290" width="200" height="350" fill="#0a121b" stroke="#1f3245" stroke-width="2"/>
+    <g fill="#111c27" stroke="#24384c"><rect x="610" y="310" width="180" height="40"/><rect x="610" y="358" width="180" height="40"/><rect x="610" y="520" width="180" height="40"/><rect x="610" y="568" width="180" height="40"/></g>
+    <rect x="610" y="420" width="180" height="70" fill="#121f2c" stroke="#3a5a78" stroke-width="2"/>
+    <rect x="622" y="434" width="96" height="26" fill="#03180f"/>
+    <text x="670" y="452" text-anchor="middle" class="m" font-size="13" fill="#3dff9a">HSM-02</text>
+    <circle cx="738" cy="447" r="5" fill="#3dff9a" class="blink"/><circle cx="756" cy="447" r="5" fill="#ffb020" class="blink d2"/><circle cx="774" cy="447" r="5" fill="#3dff9a"/>
+    <text x="622" y="480" class="m" font-size="10" fill="#5b7f99">FIPS 140-3 L3</text>
+    <rect x="560" y="230" width="280" height="420" fill="url(#pMesh)" stroke="#3a5267" stroke-width="6"/>
+    <path d="M700 252l18 30h-36z" fill="#ffb020"/><text x="700" y="278" text-anchor="middle" class="t" font-size="14" font-weight="700" fill="#111">!</text>
+  </g><rect class="hit" x="552" y="222" width="296" height="436"/></g>
+  <!-- hologram firmwaru -->
+  <g class="hs" data-hs="fw"><g class="art">
+    <polygon points="955,600 1105,600 1170,230 890,230" fill="url(#gBeam)"/>
+    <ellipse cx="1030" cy="600" rx="112" ry="22" fill="#0c1824" stroke="#78FAAE" stroke-width="2"/>
+    <ellipse cx="1030" cy="598" rx="70" ry="12" fill="url(#gGlowC)"/>
+    <ellipse cx="1030" cy="345" rx="160" ry="42" fill="none" stroke="#78FAAE" stroke-opacity=".6" stroke-width="2" class="dash slow"/>
+    <g class="bob">
+      <polygon points="1030,250 1110,290 1030,330 950,290" fill="#78FAAE" fill-opacity=".28" stroke="#78FAAE" stroke-width="2"/>
+      <polygon points="950,290 1030,330 1030,420 950,380" fill="#78FAAE" fill-opacity=".16" stroke="#78FAAE" stroke-width="2"/>
+      <polygon points="1030,330 1110,290 1110,380 1030,420" fill="#78FAAE" fill-opacity=".1" stroke="#78FAAE" stroke-width="2"/>
+      <text x="1070" y="362" text-anchor="middle" class="m" font-size="13" fill="#bff6ff" transform="rotate(-27 1070 362)">FW 7.4.1</text>
+    </g>
+    <g class="blink"><rect x="1112" y="226" width="96" height="28" fill="#2a0a10" stroke="#ff3b4e" stroke-width="2"/><text x="1160" y="245" text-anchor="middle" class="m" font-size="14" fill="#ff8a96">+2,3 MB</text></g>
+  </g><rect class="hit" x="880" y="215" width="335" height="410"/></g>
+  <!-- certifikát -->
+  <g class="hs" data-hs="cert"><g class="art">
+    <rect x="1250" y="130" width="310" height="220" fill="#020a10" stroke="#1d3044" stroke-width="4"/>
+    <rect x="1268" y="148" width="274" height="184" fill="#0b1824" stroke="#2c4a64" stroke-width="2"/>
+    <text x="1284" y="176" class="t" font-size="15" font-weight="700" fill="#cfe9f8" letter-spacing="2">CERTIFIKÁT X.509</text>
+    <text x="1284" y="206" class="m" font-size="11" fill="#8fb3cc">CN=Skoda OTA Signing 2031</text>
+    <text x="1284" y="226" class="m" font-size="11" fill="#5f8299">Vydal: Škoda OEM CA</text>
+    <text x="1284" y="246" class="m" font-size="11" fill="#5f8299">Platnost: 2031 → 2033</text>
+    <rect x="1284" y="270" width="92" height="28" fill="#0b3a24" id="certBadge"/><text x="1330" y="289" text-anchor="middle" class="t" font-size="14" font-weight="700" fill="#3dff9a" id="certTxt">PLATNÝ</text>
+    <g class="spin slow"><circle cx="1490" cy="282" r="30" fill="none" stroke="#ffb020" stroke-width="3" stroke-dasharray="6 5"/></g>
+    <circle cx="1490" cy="282" r="18" fill="#ffb020" opacity=".25"/>
+  </g><rect class="hit" x="1242" y="122" width="326" height="236"/></g>
+  <!-- PKI konzole -->
+  <g class="nohit"><rect x="1150" y="660" width="420" height="16" fill="#1c2a37"/><rect x="1170" y="676" width="14" height="90" fill="#141e29"/><rect x="1536" y="676" width="14" height="90" fill="#141e29"/></g>
+  <g class="hs" data-hs="pki"><g class="art">
+    <rect x="1200" y="470" width="320" height="180" fill="#020c14" stroke="#78FAAE" stroke-opacity=".6" stroke-width="3" class="pulse"/>
+    <text x="1220" y="504" class="m" font-size="15" fill="#78FAAE">PKI // REVOKACE</text>
+    <text x="1220" y="546" class="t" font-size="22" font-weight="700" fill="#e9f6ff">OTA-SIGNING-2031</text>
+    <text x="1220" y="584" class="m blink" font-size="13" fill="#ffb020" id="pkiTxt">ČEKÁ NA AUTORIZACI</text>
+    <g fill="#0e2a3a"><rect x="1220" y="604" width="60" height="26"/><rect x="1290" y="604" width="60" height="26"/><rect x="1360" y="604" width="140" height="26"/></g>
+    <polygon points="1250,650 1470,650 1490,660 1230,660" fill="#111a24"/>
+  </g><rect class="hit" x="1192" y="462" width="336" height="200"/></g>
+</svg></div>
+
+<!-- ================= SCÉNA 5: VELÍN ================= -->
+<div class="scene" id="sc-ctrl"><svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <rect width="1600" height="900" fill="url(#gRedBg)" id="ctrlBg"/><rect width="1600" height="700" fill="url(#pGridR)"/>
+  <g class="beacon" style="transform-origin:70px 40px"><path d="M70 40L620 -60V140z" fill="url(#gSweep)"/></g>
+  <g class="beacon" style="transform-origin:1530px 40px;animation-direction:reverse"><path d="M1530 40L980 -60V140z" fill="url(#gSweep)"/></g>
+  <circle cx="70" cy="40" r="18" fill="#ff3b4e" class="alarm" style="opacity:1"/><circle cx="1530" cy="40" r="18" fill="#ff3b4e"/>
+  <!-- odpočet -->
+  <g class="nohit">
+    <rect x="560" y="76" width="480" height="134" fill="#14040a" stroke="#ff3b4e" stroke-width="3" id="cdBox"/>
+    <text x="800" y="106" text-anchor="middle" class="t" font-size="17" fill="#c9505e" letter-spacing="5" id="cdLabel">DO UZAMČENÍ FLOTILY</text>
+    <text x="800" y="186" text-anchor="middle" class="m" font-size="72" font-weight="600" fill="#ff3b4e" filter="url(#fGlow)" id="cd">15:00</text>
+  </g>
+  <!-- flotila -->
+  <g class="hs" data-hs="fleet"><g class="art">
+    <rect x="110" y="220" width="780" height="430" fill="#0b0408" stroke="#5a1a24" stroke-width="3"/>
+    <text x="134" y="254" class="t" font-size="17" font-weight="600" fill="#ff8a96" letter-spacing="4" id="fleetTitle">STAV FLOTILY · EU-CENTRAL</text>
+    <g id="fleet5"></g>
+    <rect x="134" y="618" width="14" height="8" rx="3" fill="#78FAAE"/><text x="156" y="627" class="t" font-size="13" fill="#9fb6c8">aktivní</text>
+    <rect x="236" y="618" width="14" height="8" rx="3" fill="#ff3b4e"/><text x="258" y="627" class="t" font-size="13" fill="#9fb6c8">čeká na uzamčení</text>
+  </g><rect class="hit" x="104" y="214" width="792" height="442"/></g>
+  <!-- výkupné -->
+  <g class="hs" data-hs="ransom"><g class="art">
+    <rect x="940" y="220" width="560" height="300" fill="#000" stroke="#ff3b4e" stroke-width="3"/>
+    <g class="gl"><use href="#ghost" transform="translate(1040 350) scale(1.3)" fill="#ff3b4e" fill-opacity=".15" stroke="#ff3b4e" stroke-width="3"/><circle cx="1026" cy="340" r="6" fill="#ff3b4e"/><circle cx="1054" cy="340" r="6" fill="#ff3b4e"/></g>
+    <text x="1120" y="300" class="m" font-size="30" font-weight="600" fill="#ff3b4e">VAŠE FLOTILA</text>
+    <text x="1120" y="338" class="m" font-size="30" font-weight="600" fill="#ff3b4e">JE NAŠE.</text>
+    <text x="1120" y="410" class="m gl" font-size="44" font-weight="600" fill="#fff">500 BTC</text>
+    <text x="1120" y="452" class="m" font-size="16" fill="#8a5560">— GHOSTLINE</text>
+    <g fill="#fff" opacity=".05"><rect x="940" y="260" width="560" height="3"/><rect x="940" y="380" width="560" height="3"/><rect x="940" y="470" width="560" height="2"/></g>
+  </g><rect class="hit" x="932" y="212" width="576" height="316"/></g>
+  <!-- stůl -->
+  <polygon points="0,700 1600,700 1600,900 0,900" fill="#0b0508"/><path d="M0 700H1600" stroke="#2a1218" stroke-width="3"/>
+  <!-- telefon -->
+  <g class="hs" data-hs="phone"><g class="art">
+    <g fill="none" stroke="#ffb020" stroke-width="3"><path class="waves" d="M990 610a40 40 0 0 1 80 0"/><path class="waves d1" d="M975 600a55 55 0 0 1 110 0"/></g>
+    <g class="shake"><rect x="960" y="640" width="140" height="64" rx="10" fill="#1d1418" stroke="#3a2a30" stroke-width="2"/><path d="M968 640c0-24 124-24 124 0" stroke="#2c1f24" stroke-width="16" fill="none" stroke-linecap="round"/><g fill="#3a2a30"><rect x="1000" y="656" width="14" height="10"/><rect x="1023" y="656" width="14" height="10"/><rect x="1046" y="656" width="14" height="10"/><rect x="1000" y="674" width="14" height="10"/><rect x="1023" y="674" width="14" height="10"/><rect x="1046" y="674" width="14" height="10"/></g></g>
+  </g><rect class="hit" x="940" y="560" width="180" height="150"/></g>
+  <!-- nouzový vypínač -->
+  <g class="hs" data-hs="kill"><g class="art">
+    <rect x="1190" y="560" width="290" height="210" fill="#120a0e" stroke="url(#pHaz)" stroke-width="12"/>
+    <text x="1335" y="600" text-anchor="middle" class="t" font-size="16" font-weight="700" fill="#ffb020" letter-spacing="3">NOUZOVÝ VYPÍNAČ</text>
+    <circle cx="1335" cy="672" r="64" fill="url(#gGlowR)" class="pulse" id="killGlow"/>
+    <circle cx="1335" cy="672" r="44" fill="#c81426" stroke="#ff5a6a" stroke-width="3" id="killBtn"/>
+    <ellipse cx="1325" cy="660" rx="18" ry="9" fill="#fff" opacity=".25"/>
+    <rect x="1275" y="612" width="120" height="120" rx="10" fill="#bfe8ff" fill-opacity=".1" stroke="#bfe8ff" stroke-opacity=".45" stroke-width="2"/>
+    <text x="1335" y="755" text-anchor="middle" class="t" font-size="12" fill="#a07a80" letter-spacing="2">VZDÁLENÉ PŘÍKAZY</text>
+  </g><rect class="hit" x="1180" y="550" width="310" height="230"/></g>
+  <rect width="1600" height="900" fill="#ff0022" class="alarm nohit"/>
+</svg></div>
+
+<div class="vig"></div><div class="scan"></div>
+
+<!-- HUD -->
+<div class="hud" id="hud">
+  <div class="brand">GHOSTLINE</div>
+  <div class="team" id="hTeam"></div>
+  <div class="prog" id="prog"></div>
+  <div class="inv" id="inv"></div>
+  <button class="hbtn" id="bReveal" title="Zvýraznit místa, která lze prozkoumat (klávesa H)">◎ MÍSTA</button>
+  <button class="hbtn" id="bLog" title="Záznam příběhu">ZÁZNAM</button>
+  <button class="hbtn" id="bSnd" title="Zvuk">ZVUK</button>
+  <div class="sync" id="sync">LOKÁLNĚ</div>
+  <div class="clock" id="clock">00:00</div>
+</div>
+
+<section class="lobby" id="lobby">
+  <div class="lb-tag" id="lbTag">ČEKACÍ MÍSTNOST</div>
+  <div class="lb-team" id="lbTeam"></div>
+  <div class="lb-state" id="lbState">Čekáme na start organizátora<i></i></div>
+  <div class="lb-count" id="lbCount"></div>
+  <div class="lb-list" id="lbList"></div>
+  <div class="lb-note" id="lbNote">Úvodní hlášení si můžete znovu přečíst v ZÁZNAMU nahoře.</div>
+  <div class="lb-note" id="lbLocal" hidden>Testovací režim bez Firebase: hru spusťte v administraci (<b>leaderboard.html</b> / <b>/admin</b>) v tomto prohlížeči, nebo <button class="lnk" id="lbSelf">spustit hned</button>.</div>
+</section>
+<section class="lobby ended" id="ended">
+  <div class="lb-tag">KONEC HRY</div>
+  <div class="lb-team">HRA UKONČENA</div>
+  <div class="lb-state" id="endInfo"></div>
+</section>
+<div class="tip" id="tip"></div>
+<div class="toast" id="toast"></div>
+<div class="catch" id="catch"></div>
+<div class="dlg" id="dlg"><div class="who" id="dWho"></div><div class="txt" id="dTxt"></div><div class="nx">KLIKNI ▸</div></div>
+
+<!-- terminál -->
+<div class="term" id="term"><div class="tbox">
+  <div class="thead"><span id="tHead">TERMINÁL</span><span id="tNode">●</span></div>
+  <div class="tprompt" id="tPrompt"></div>
+  <form class="trow" id="tForm" autocomplete="off"><span>&gt;</span><input class="tin" id="tIn" maxlength="40" spellcheck="false" autocapitalize="characters" autocomplete="off"><button class="tgo" id="tGo">OVĚŘIT</button></form>
+  <div class="tmsg" id="tMsg"></div>
+  <div class="tfoot"><span id="tHint"></span><button class="tback" id="tBack" type="button">✕ ZPĚT</button></div>
+</div></div>
+
+<!-- titulek kapitoly -->
+<div class="card" id="card"><div class="cn" id="cN"></div><div class="ct"><span class="glitch" id="cT"></span></div><div class="cs" id="cS"></div><div class="bar"></div></div>
+
+<!-- záznam -->
+<aside class="logp" id="logp"><header>ZÁZNAM PŘÍBĚHU<button class="tback" id="logX">✕ ZAVŘÍT</button></header><div class="lst" id="logList"></div></aside>
+
+<!-- start -->
+<section class="screen" id="start">
+  <svg class="bgsvg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+    <rect width="1600" height="900" fill="url(#pGrid)"/>
+    <g transform="translate(150 415) scale(.8)" opacity=".6"><g transform="translate(347 144) scale(.64)" fill="none" stroke="#78FAAE" stroke-linecap="round" stroke-linejoin="round" class="draw">
+      <path d="M285 585L238 568 182 557 205 541C198 515 188 495 188 485C188 478 195 472 199 470C196 450 195 425 196 413C240 380 330 356 432 356C500 315 570 280 620 263C650 256 680 248 695 245C850 235 1050 240 1208 273L1195 296 1243 346 1252 346 1252 375 1258 412 1243 458 1262 474C1272 500 1270 525 1260 540C1230 552 1180 560 1150 567" stroke-width="6" pathLength="1"/><path d="M287 567C278 530 290 470 370 452C430 445 470 480 468 530C467 550 463 565 459 575M958 567C948 525 970 460 1040 452C1105 447 1145 490 1138 535C1136 555 1133 568 1130 575" stroke-width="7" pathLength="1"/><path d="M200 418C235 405 290 400 314 403L320 413C292 412 272 426 267 447C240 443 218 441 200 441" stroke-width="5" pathLength="1"/><path d="M1156 370C1185 372 1205 368 1245 370M1156 370C1180 388 1200 400 1212 405C1225 404 1235 402 1244 400M1172 378L1213 400" stroke-width="5" pathLength="1"/>
+    </g>
+      <path d="M200 540H1400" stroke="#78FAAE" stroke-opacity=".3" class="dash slow"/>
+    </g>
+    <g fill="#78FAAE" opacity=".5" class="m" font-size="12"><text x="60" y="80" class="blink">CAN0 0x6F1 [8] 02 10 03 00 00 00 00 00</text><text x="1180" y="840" class="blink d2">TLS ↔ telemetry-eu.backend-fleet.net</text></g>
+  </svg>
+  <div class="brandmark">ŠKODA</div>
+  <div class="tag">PRODUCT SECURITY INCIDENT</div>
+  <div class="logo"><span class="glitch" data-t="GHOSTLINE">GHOSTLINE</span></div>
+  <p class="lede">Testovací vůz se uprostřed noci sám nastartoval. Za pár hodin má 412 000 aut dostat novou aktualizaci. Jste tým, který zjistí proč — a zastaví to.</p>
+  <form class="form" id="fStart" autocomplete="off"><input id="iTeam" maxlength="40" placeholder="Název týmu" aria-label="Název týmu"><button class="btn">ZAHÁJIT ZÁSAH</button></form>
+  <div class="err" id="sErr"></div>
+  <div class="cont" id="cont" hidden><span id="contTxt"></span><button class="btn ghost" id="bCont">POKRAČOVAT</button><button class="link" id="bNew">nový tým</button></div>
+  <div class="fine">KLIKÁNÍM PROZKOUMÁVÁTE SCÉNU · KÓDY ZÍSKÁTE Z FYZICKÝCH ŠIFER</div>
+</section>
+
+<!-- konec -->
+<section class="screen off" id="end">
+  <svg class="bgsvg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"><rect width="1600" height="900" fill="url(#pGrid)"/><g id="endDots"></g></svg>
+  <div class="endt">INCIDENT UZAVŘEN</div>
+  <div class="endh">FLOTILA ZACHRÁNĚNA</div>
+  <div class="team" id="eTeam" style="max-width:none;font-size:1.4cqw;letter-spacing:.2em"></div>
+  <div class="endtime" id="eTime">00:00</div>
+  <div class="splits" id="eSplits"></div>
+  <div style="display:flex;gap:1.2cqw;align-items:center"><button class="btn ghost" id="eLog">ZÁZNAM PŘÍBĚHU</button><button class="btn" id="eNew">↺ NOVÁ HRA</button></div>
+</section>
+
+</div></div>
+
+<div class="rot"><div><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M3 12a9 9 0 0 1 9-9M21 12a9 9 0 0 1-9 9"/></svg>Otočte zařízení na šířku.</div></div>
+
+<script>
+(() => {
+'use strict';
+const DEFAULT_CFG = { gameId: 'ghostline-demo', firebase: {}, salt: 'auriga',
+  codes: { m1: ['d4e1e720607db53f'], m2: ['d4e1e720607db53f'], m3: ['d4e1e720607db53f'], m4: ['d4e1e720607db53f'], m5: ['d4e1e720607db53f'] },
+  milestones: ['Diagnostika odemčena', 'Infotainment izolován', 'C2 zablokováno', 'Certifikát revokován', 'Flotila zachráněna'],
+  physicalHints: {}, wrongLimit: 3, wrongCooldownSec: 20, remoteStart: true, countdownSec: 10 };
+if (!window.GHOSTLINE_CONFIG) console.warn('[GHOSTLINE] config.js se nenačetl — používám výchozí nastavení (kód 1111, lokální režim).');
+const CFG = Object.assign({}, DEFAULT_CFG, window.GHOSTLINE_CONFIG || {});
+const qs = new URLSearchParams(location.search);
+const GID = qs.get('game') || CFG.gameId || 'ghostline';
+const KEY = 'ghostline:' + GID;
+const LOCAL_KEY = 'ghostline:local:' + GID;
+const MS = CFG.milestones || ['Milník 1','Milník 2','Milník 3','Milník 4','Milník 5'];
+const $ = s => document.querySelector(s);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+/* ---------- otisky kódů ---------- */
+const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+function cyrb53(str, seed = 0) {
+  let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+  for (let i = 0, ch; i < str.length; i++) { ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507); h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507); h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0');
+}
+const codeHash = s => cyrb53(norm(s) + '|' + (CFG.salt || 'auriga'));
+
+/* ---------- příběh ---------- */
+const WHO = { n: 'POZOROVÁNÍ', m: 'MARTA KREJČÍ · PSIRT', g: 'GHOSTLINE', s: 'SYSTÉM' };
+const ITEMS = {
+  dongle:   { n: 'OBD dongle',        d: 'Neznámé zařízení se SIM kartou, odpojené z diagnostického portu vozu E7.', i: '<rect x="5" y="8" width="14" height="9" rx="2"/><path d="M9 8V5h6v3M8 12h2"/><circle cx="16" cy="12.5" r="1"/>' },
+  protokol: { n: 'Servisní protokol', d: 'Protokol z prohlídky vozu E7. Externí technik „J. Dvořák“. Podpis chybí.', i: '<path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 13h6M9 17h3"/>' },
+  proces:   { n: 'Otisk procesu',     d: 'Hash a výpis procesu „sysupdated“ ze serveru TEL-GW-03 — pro forenzní analýzu.', i: '<path d="M8 5L3 12l5 7M16 5l5 7-5 7M14 4l-4 16"/>' },
+  cert:     { n: 'Certifikát OTA',    d: 'Údaje podpisového certifikátu „Škoda OTA Signing 2031“.', i: '<rect x="3" y="5" width="18" height="12" rx="1"/><circle cx="16" cy="17" r="3"/><path d="M15 20l-1 2M17 20l1 2M6 9h8M6 12h5"/>' }
+};
+
+const STORY = [
+{ id: 'garage', el: 'sc-garage', ch: '01', title: 'SERVISNÍ HALA', sub: 'NEDĚLE 02:13 · VÝVOJOVÉ CENTRUM ŠKODA AUTO',
+  intro: [
+    ['n', 'Neděle, 02:13. Vývojové centrum Škoda Auto. Hala je prázdná, jen zářivky tiše bzučí.'],
+    ['m', 'Tady Marta Krejčí, vedoucí produktové bezpečnosti. Díky, že jste dorazili tak rychle.'],
+    ['m', 'Testovací vůz E7 se před hodinou sám nastartoval. Nikdo u něj nebyl a klíč je zamčený v trezoru.'],
+    ['m', 'V 06:00 spouštíme OTA aktualizaci pro 412 000 vozů. Jestli se tu děje něco víc, musíme to vědět dřív.'],
+    ['m', 'Rozhlédněte se. Na co kliknete, to prozkoumáte. Jsem s vámi ve spojení.'],
+    ['s', 'Tip: tlačítko ◎ MÍSTA nahoře (nebo klávesa H) zvýrazní vše, co lze prozkoumat.']
+  ],
+  hs: {
+    car:     { n: 'Testovací vůz E7', l: [
+      ['n', 'Elektrický sedan na zvedáku. Kola se pomalu otáčejí, přestože pohon má být odpojený.'],
+      ['n', 'Přední světlo bliká v pravidelném rytmu: tři krátké, tři dlouhé, tři krátké.'],
+      ['m', 'SOS v Morseově abecedě? Někdo si s námi hraje.'] ] },
+    dongle:  { n: 'Neznámé zařízení pod vozem', item: 'dongle', take: true, l: [
+      ['n', 'Z diagnostického portu OBD-II visí na kabelu malá černá krabička bez loga. Bliká na ní červená dioda.'],
+      ['n', 'Uvnitř je SIM karta a anténa. Zařízení je online.'],
+      ['m', 'To není naše. OBD port vede přímo na CAN sběrnici — kdo tohle připojil, může vozu posílat příkazy odkudkoli přes mobilní síť.'],
+      ['n', 'Dongle opatrně odpojujete a ukládáte jako důkaz.'] ] },
+    laptop:  { n: 'Diagnostický notebook', l: [
+      ['n', 'Na obrazovce běží záznam provozu CAN sběrnice. Mezi běžnými zprávami se každých 50 ms opakuje neznámý identifikátor 0x6F1.'],
+      ['m', 'Podvržené zprávy. Potřebujeme kompletní logy z diagnostické stanice — ta je ale zamčená servisním kódem.'] ] },
+    toolbox: { n: 'Montážní vozík', l: [
+      ['n', 'Klíče, multimetr, izolepa a krabice od pizzy. Nic, co by vysvětlovalo, proč vůz žije vlastním životem.'] ] },
+    station: { n: 'Diagnostická stanice DIAG-03', term: true }
+  },
+  req: ['dongle', 'laptop'],
+  lock: [['m', 'Než otevřeme stanici, potřebujeme vědět, co hledáme. Prohlédněte si zblízka vůz a podívejte se do notebooku.']],
+  term: { head: 'ŠKODA DIAG-03 // SERVISNÍ ZÁMEK', prompt: 'Zadejte servisní přístupový kód.' },
+  done: [
+    ['n', 'Stanice se odemkla. Logy ukazují, že dongle někdo připojil při servisní prohlídce před třemi dny.'],
+    ['m', 'Z CAN sběrnice se útočník dostal dál — do infotainmentu. Ten má Bluetooth, Wi-Fi i LTE modem.'],
+    ['m', 'Posaďte se do kokpitu. Musíme zjistit, kudy přesně prošel.'] ]
+},
+{ id: 'cockpit', el: 'sc-cockpit', ch: '02', title: 'KOKPIT', sub: 'VŮZ E7 · INFOTAINMENT A CENTRÁLNÍ BRÁNA',
+  intro: [
+    ['n', 'Usedáte za volant vozu E7. Displej infotainmentu se rozsvítí sám od sebe.'],
+    ['g', 'VÍTEJTE NA PALUBĚ. JSEM GHOSTLINE.'],
+    ['m', 'Tak tohle už není softwarová chyba. Najděte, kudy se dostal ze zábavního systému k řízení vozu.'] ],
+  hs: {
+    cluster:  { n: 'Přístrojový štít', l: [
+      ['n', 'Kontrolky blikají v náhodném pořadí: ABS, airbag, porucha baterie. Ručička rychloměru se chvěje, přestože vůz stojí.'],
+      ['m', 'Štít bere data z CAN sběrnice. Útočník podvrhuje zprávy celé síti vozu.'] ] },
+    canbay:   { n: 'Kryt pod palubní deskou', l: [
+      ['n', 'Pod odklopeným krytem vede kroucená dvojlinka CAN k centrální bráně — gatewayi, která má oddělovat infotainment od brzd a řízení.'],
+      ['n', 'Zprávy ale proudí bránou oběma směry. Filtrovací pravidla jsou vypnutá.'],
+      ['m', 'Brána je hranice mezi hudbou a brzdami. Tohle je vážné.'] ] },
+    glovebox: { n: 'Přihrádka spolujezdce', item: 'protokol', l: [
+      ['n', 'Servisní protokol z poslední prohlídky. Technik: „J. Dvořák (externí)“. Podpis chybí.'],
+      ['m', 'Externího technika jménem Dvořák nemáme ve smluvní databázi. Proklepnu to.'] ] },
+    mirror:   { n: 'Zpětné zrcátko', l: [
+      ['n', 'V zrcátku se odráží jen tma servisní haly. A červená dioda interiérové kamery.'],
+      ['m', 'Ta kamera má být vypnutá. Možná se díváme na sebe navzájem.'] ] },
+    info:     { n: 'Infotainment', term: true }
+  },
+  req: ['cluster', 'canbay'],
+  lock: [['m', 'Servisní menu vás pustí jen s kódem. Nejdřív zjistěte, jak se útok šíří vozem — podívejte se na přístrojový štít a pod palubní desku.']],
+  term: { head: 'INFOTAINMENT // SERVISNÍ MENU', prompt: 'Zadejte kód pro izolaci infotainmentu.' },
+  done: [
+    ['n', 'Infotainment je izolovaný: Bluetooth, Wi-Fi i LTE modem jsou odpojené a brána znovu filtruje provoz.'],
+    ['n', 'V paměti jednotky zůstala adresa, se kterou komunikovala: telemetry-eu.backend-fleet.net. Náš vlastní backend.'],
+    ['m', 'Takže útočník neovládá jen tenhle vůz. Sedí v našem telematickém backendu. Přesuňte se do dohledového centra.'] ]
+},
+{ id: 'soc', el: 'sc-soc', ch: '03', title: 'DOHLEDOVÉ CENTRUM', sub: 'SECURITY OPERATIONS CENTER · TELEMATICKÝ BACKEND',
+  intro: [
+    ['n', 'Bezpečnostní dohledové centrum. Na velkoplošné stěně svítí mapa celé flotily.'],
+    ['m', 'Každá tečka je jeden vůz. Ty červené právě teď komunikují se serverem, který neznáme.'] ],
+  hs: {
+    map:     { n: 'Mapa flotily', l: [
+      ['n', 'Červených bodů přibývá. Vozy posílají data na neznámý řídicí server — C2 — přes jeden z telematických uzlů.'],
+      ['m', 'Když C2 zablokujeme, útočník ztratí spojení s flotilou.'] ] },
+    racks:   { n: 'Serverové racky', item: 'proces', l: [
+      ['n', 'Server TEL-GW-03 má neobvykle vysoký odchozí provoz. Běží na něm proces „sysupdated“, který není v žádné naší konfiguraci.'],
+      ['m', 'Tudy to teče ven. Uložte si otisk procesu, bude se hodit při forenzní analýze.'] ] },
+    mug:     { n: 'Hrnek s kávou', l: [
+      ['n', 'Hrnek s nápisem „Cloud je jen cizí počítač“. Káva je ještě teplá.'],
+      ['m', 'Kolegové z noční směny. Doufám.'] ] },
+    note:    { n: 'Papírek na monitoru', l: [
+      ['n', 'Na rohu monitoru je nalepený papírek: „SOC admin — Skoda2031!“'],
+      ['m', '…Tohle po incidentu probereme. Hesla na monitor nepatří.'] ] },
+    console: { n: 'Konzole firewallu', term: true }
+  },
+  req: ['map', 'racks'],
+  lock: [['m', 'Nejdřív musíme vědět, co blokujeme. Podívejte se na mapu flotily a na servery.']],
+  term: { head: 'SOC // FIREWALL · BLOKACE C2', prompt: 'Zadejte autorizační kód pro nasazení pravidla.' },
+  done: [
+    ['n', 'Pravidlo je nasazené. Spojení s C2 je přerušené a červené body na mapě zhasínají.'],
+    ['g', 'POZDĚ. MŮJ DÁREK UŽ JE ZABALENÝ.'],
+    ['m', 'Dárek… OTA aktualizace! Jestli útočník podstrčil vlastní firmware do distribuce, v 06:00 se nainstaluje do všech vozů.'],
+    ['m', 'Do laboratoře podepisování firmwaru. Rychle.'] ]
+},
+{ id: 'lab', el: 'sc-lab', ch: '04', title: 'LABORATOŘ PODPISŮ', sub: 'PODEPISOVÁNÍ FIRMWARU · ŘETĚZEC DŮVĚRY',
+  intro: [
+    ['n', 'Laboratoř podepisování firmwaru. Vůz nainstaluje jen aktualizaci podepsanou klíčem Škoda.'],
+    ['m', 'Kdyby útočník dokázal použít náš podpisový klíč, vozy by jeho firmware považovaly za originál.'] ],
+  hs: {
+    hsm:   { n: 'Hardwarový bezpečnostní modul', l: [
+      ['n', 'HSM-02. Soukromé klíče z něj nejdou vytáhnout — dají se ale použít, pokud máte správný účet.'],
+      ['n', 'Log ukazuje podpis ve 03:12 pod servisním účtem „ota-build“. V tu dobu nikdo z týmu nepracoval.'] ] },
+    fw:    { n: 'Balíček firmwaru FW 7.4.1', l: [
+      ['n', 'Balíček připravený k distribuci. Je o 2,3 MB větší než build z vývojové linky.'],
+      ['m', 'Někdo do něj přibalil vlastní kód a nechal ho podepsat naším HSM. Podpis je pravý, obsah ne.'] ] },
+    board: { n: 'Tabule', l: [
+      ['n', 'Řetězec důvěry: Root CA → OEM CA → podpisový certifikát OTA → řídicí jednotky ve voze.'],
+      ['m', 'Když podpisový certifikát revokujeme, vozy odmítnou všechno, co jím bylo podepsáno. Včetně podvrhu.'] ] },
+    cert:  { n: 'Podpisový certifikát', item: 'cert', l: [
+      ['n', 'Certifikát „Škoda OTA Signing 2031“. Platný. A právě proto nebezpečný.'] ] },
+    pki:   { n: 'PKI konzole', term: true }
+  },
+  req: ['hsm', 'fw'],
+  lock: [['m', 'Než cokoli revokujeme, potřebuju jistotu. Zkontrolujte HSM a samotný balíček firmwaru.']],
+  term: { head: 'PKI // REVOKACE CERTIFIKÁTU', prompt: 'Zadejte kód pro revokaci certifikátu OTA-SIGNING-2031.' },
+  done: [
+    ['n', 'Certifikát je revokovaný. Podvržený firmware je pro vozy neplatný a distribuce se zastavila.'],
+    ['g', 'CHYTRÉ. ALE VŽDYCKY MÁM PLÁN B.'],
+    ['n', 'Všechny obrazovky v laboratoři zrudnou.'],
+    ['m', 'Velín! Spouští něco přímo ve flotile!'] ]
+},
+{ id: 'ctrl', el: 'sc-ctrl', ch: '05', title: 'VELÍN', sub: 'POSLEDNÍ OBRANNÁ LINIE',
+  intro: [
+    ['g', 'ZA 15 MINUT UZAMKNU VŠECH 412 000 VOZŮ. KDO ZAPLATÍ, TEN POJEDE.'],
+    ['m', 'Zbývá poslední možnost: nouzový vypínač vzdálených příkazů. Odpojí backend od flotily, dokud vše nevyčistíme.'],
+    ['m', 'Vyžaduje finální autorizační kód. Je to na vás.'] ],
+  hs: {
+    ransom: { n: 'Zpráva útočníka', l: [
+      ['n', 'Výkupné: 500 BTC. Pod ním odpočet a logo ducha.'],
+      ['m', 'Neplatíme. Nikdy. Platba by jen financovala další útok.'] ] },
+    fleet:  { n: 'Stav flotily', l: [
+      ['n', 'Vozy jeden po druhém dostávají příkaz k uzamčení. Zatím ho ale nevykonaly — čekají na potvrzení z backendu.'],
+      ['m', 'To je naše šance. Když backend odpojíme, potvrzení nikdy nepřijde.'] ] },
+    phone:  { n: 'Zvonící telefon', l: [
+      ['n', 'Volá generální ředitel.'],
+      ['n', '„Média už o tom vědí. Máte pár minut. Věřím vám.“'] ] },
+    kill:   { n: 'Nouzový vypínač', term: true }
+  },
+  req: ['ransom', 'fleet'],
+  lock: [['m', 'Než to zmáčkneme, musíme vědět, co přesně se ve flotile děje. Podívejte se na stav flotily a na zprávu útočníka.']],
+  term: { head: 'NOUZOVÝ VYPÍNAČ // FINÁLNÍ AUTORIZACE', prompt: 'Zadejte finální autorizační kód.' },
+  done: [
+    ['n', 'Vypínač je aktivní. Backend se odpojil od flotily a příkazy k uzamčení vyprchaly bez potvrzení.'],
+    ['n', 'Body na mapě se jeden po druhém barví zeleně.'],
+    ['m', 'Zvládli jste to. Útočník je odříznutý, podvržený firmware neplatný a dongle máme jako důkaz.'],
+    ['m', 'Teď začne forenzní analýza a hledání pana „Dvořáka“. Ale to až ráno. Děkuju, týme.'] ]
+}];
+
+/* ---------- stav ---------- */
+if (qs.has('reset')) { try { localStorage.removeItem(KEY); } catch (e) {} history.replaceState(null, '', location.pathname); }
+let st = load();
+function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); return s && s.teamId ? s : null; } catch (e) { return null; } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+function newState(name) {
+  const slug = norm(name).toLowerCase().slice(0, 20) || 'tym';
+  return { teamId: slug + '-' + Math.random().toString(36).slice(2, 7), name, startedAt: REMOTE ? null : Date.now(), scene: 0,
+    seen: {}, items: [], ms: {}, synced: {}, created: false, intro: {}, finished: false, log: [] };
+}
+const seen = id => (st.seen[STORY[st.scene].id] || []).includes(id);
+function markSeen(id) { const k = STORY[st.scene].id; (st.seen[k] = st.seen[k] || []); if (!st.seen[k].includes(id)) st.seen[k].push(id); save(); paintSeen(); }
+
+/* lokální kopie výsledků (žebříček v lokálním režimu, test bez Firebase) */
+function localLog(fn) { try { const all = JSON.parse(localStorage.getItem(LOCAL_KEY) || '{}'); const t = all[st.teamId] || { name: st.name, startedAt: st.startedAt, ms: {}, wrong: 0 }; fn(t); all[st.teamId] = t; localStorage.setItem(LOCAL_KEY, JSON.stringify(all)); } catch (e) {} }
+
+/* ---------- zvuk ---------- */
+const sfx = (() => {
+  let ac = null, on = localStorage.getItem('ghostline:snd') !== '0';
+  function tone(f, d, type = 'sine', v = .04, when = 0) {
+    if (!on) return;
+    try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume();
+      const t = ac.currentTime + when, o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.setValueAtTime(f, t); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t + d + .03); } catch (e) {}
+  }
+  return {
+    tick: w => tone(w === 'g' ? 110 + Math.random() * 30 : 900 + Math.random() * 160, .025, 'square', w === 'g' ? .02 : .008),
+    click: () => tone(640, .07, 'triangle', .05),
+    ok: () => [523, 659, 784, 1046].forEach((f, i) => tone(f, .22, 'triangle', .06, i * .09)),
+    err: () => { tone(130, .35, 'sawtooth', .05); tone(97, .4, 'sawtooth', .05, .06); },
+    item: () => [880, 1320].forEach((f, i) => tone(f, .14, 'sine', .05, i * .09)),
+    whoosh: () => { tone(220, .5, 'sine', .03); tone(330, .5, 'sine', .02, .1); },
+    get on() { return on; },
+    toggle() { on = !on; localStorage.setItem('ghostline:snd', on ? '1' : '0'); return on; }
+  };
+})();
+
+/* ---------- Firebase ---------- */
+const FBV = '10.12.2';
+const hasFB = !!(CFG.firebase && CFG.firebase.apiKey && CFG.firebase.projectId);
+const REMOTE = CFG.remoteStart !== false;           // s Firebase přes databázi, bez něj lokálně (test ve stejném prohlížeči)
+const CTRL_KEY = 'ghostline:ctrl:' + GID;
+const FB = { api: null, uid: null, chain: Promise.resolve(), ready: null, offset: 0, measured: false };
+const serverNow = () => Date.now() + FB.offset;
+const CTRL = { status: 'lobby', startMs: null, endMs: null };   // časy v serverových ms
+let lobbyTeams = [];
+const syncEl = $('#sync');
+function setSync(s) {
+  syncEl.className = 'sync ' + s;
+  syncEl.textContent = { offline: 'LOKÁLNĚ', wait: 'PŘIPOJUJI', online: 'SYNC OK', error: 'CHYBA SYNC' }[s] || s;
+  syncEl.title = s === 'offline' ? 'Firebase není nastaven — časy se ukládají jen v tomto prohlížeči.' : s === 'error' ? 'Zápis do databáze selhal, zkouším znovu. Hra běží dál.' : '';
+}
+setSync(hasFB ? 'wait' : 'offline');
+if (hasFB) FB.ready = (async function connect() {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const base = 'https://www.gstatic.com/firebasejs/' + FBV + '/';
+      const [appM, fsM, auM] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-firestore.js'), import(base + 'firebase-auth.js')]);
+      const app = appM.initializeApp(CFG.firebase);
+      const auth = auM.getAuth(app);
+      const cred = await auM.signInAnonymously(auth);
+      FB.uid = cred.user.uid;
+      const db = fsM.getFirestore(app);
+      FB.api = { ...fsM, db };
+      setSync('online');
+      if (REMOTE) watchRemote(FB.api);
+      return;
+    } catch (e) { console.warn('[GHOSTLINE] Firebase:', e); setSync('error'); await wait(Math.min(30000, 4000 * (attempt + 1))); }
+  }
+})();
+function fbTask(fn) {
+  if (!hasFB) return;
+  FB.chain = FB.chain.then(async () => {
+    await FB.ready;
+    for (let i = 0; i < 6; i++) {
+      try { setSync('wait'); await fn(FB.api); setSync('online'); return; }
+      catch (e) { console.warn('[GHOSTLINE] zápis:', e); setSync('error'); if (e && e.code === 'permission-denied') return; await wait(3000 * (i + 1)); }
+    }
+  });
+}
+const teamRef = A => A.doc(A.db, 'games', GID, 'teams', st.teamId);
+function flush() {
+  if (!hasFB || !st) return;
+  if (!st.created) fbTask(async A => {
+    if (st.created) return;
+    await A.setDoc(teamRef(A), { name: st.name, uid: FB.uid, startedAt: A.serverTimestamp(), clientStart: st.startedAt, milestones: {}, wrong: {}, current: 1 });
+    st.created = true; save();
+  });
+  if (REMOTE) measureOffset();
+  for (let n = 1; n <= 5; n++) {
+    const k = 'm' + n;
+    if (st.ms[k] != null && !st.synced[k]) fbTask(async A => {
+      if (st.synced[k]) return;
+      const upd = { ['milestones.' + k]: { at: A.serverTimestamp(), sec: st.ms[k] }, current: n + 1, lastAt: A.serverTimestamp() };
+      if (n === 5) upd.finishedAt = A.serverTimestamp();
+      await A.updateDoc(teamRef(A), upd);
+      st.synced[k] = true; save();
+    });
+  }
+}
+/* rozdíl hodin zařízení a serveru — aby odpočet i časy seděly všem stejně */
+function measureOffset() {
+  if (FB.measured) return; FB.measured = true;
+  fbTask(async A => {
+    const ref = teamRef(A), t0 = Date.now();
+    await A.updateDoc(ref, { ping: A.serverTimestamp() });
+    const t1 = Date.now(), d = await A.getDoc(ref), p = d.get('ping');
+    if (p && p.toMillis) FB.offset = p.toMillis() - (t0 + t1) / 2;
+  });
+}
+function watchRemote(A) {
+  A.onSnapshot(A.doc(A.db, 'games', GID, 'control', 'state'), snap => {
+    const x = snap.exists() ? snap.data({ serverTimestamps: 'estimate' }) : {};
+    CTRL.status = x.status || 'lobby';
+    const cd = x.countdownSec != null ? x.countdownSec : (CFG.countdownSec || 10);
+    CTRL.startMs = CTRL.status !== 'lobby' && x.startAt ? x.startAt.toMillis() + cd * 1000 : null;
+    CTRL.endMs = x.endedAt ? x.endedAt.toMillis() : null;
+    onControl();
+  }, e => console.warn('[GHOSTLINE] řízení hry:', e));
+  A.onSnapshot(A.collection(A.db, 'games', GID, 'teams'), snap => {
+    lobbyTeams = snap.docs.map(d => ({ id: d.id, name: d.get('name') || d.id }));
+    paintLobbyList();
+  }, e => console.warn('[GHOSTLINE] seznam týmů:', e));
+}
+/* lokální testovací řízení: administrace a hry ve stejném prohlížeči si předávají stav přes localStorage */
+function watchLocal() {
+  let lastCtrl, lastTeams;
+  const poll = () => {
+    const raw = localStorage.getItem(CTRL_KEY);
+    if (raw !== lastCtrl) {
+      lastCtrl = raw;
+      let x = {}; try { x = JSON.parse(raw || '{}') || {}; } catch (e) {}
+      CTRL.status = x.status || 'lobby';
+      const cd = x.countdownSec != null ? x.countdownSec : (CFG.countdownSec || 10);
+      CTRL.startMs = CTRL.status !== 'lobby' && x.startAt ? x.startAt + cd * 1000 : null;
+      CTRL.endMs = x.endedAt || null;
+      onControl();
+    }
+    const tr = localStorage.getItem(LOCAL_KEY);
+    if (tr !== lastTeams) {
+      lastTeams = tr;
+      try { lobbyTeams = Object.entries(JSON.parse(tr || '{}')).map(([id, t]) => ({ id, name: t.name })); } catch (e) { lobbyTeams = []; }
+      paintLobbyList();
+    }
+  };
+  poll(); setInterval(poll, 300);
+}
+function fbWrong(n) { fbTask(async A => { if (st.created) await A.updateDoc(teamRef(A), { ['wrong.m' + n]: A.increment(1) }); }); }
+
+/* ---------- HUD ---------- */
+const prog = $('#prog');
+prog.innerHTML = MS.map((m, i) => (i ? '<b></b>' : '') + '<i title="' + m + '"></i>').join('');
+function paintHud() {
+  $('#hTeam').textContent = st ? st.name : '';
+  const is = prog.querySelectorAll('i'), bs = prog.querySelectorAll('b');
+  is.forEach((el, i) => { const d = st && st.ms['m' + (i + 1)] != null; el.className = d ? 'done' : (st && i === st.scene && !st.finished ? 'cur' : ''); });
+  bs.forEach((el, i) => el.className = st && st.ms['m' + (i + 1)] != null ? 'done' : '');
+  const inv = $('#inv'); inv.innerHTML = '';
+  (st ? st.items : []).forEach(k => { const it = ITEMS[k]; const b = document.createElement('button'); b.title = it.n; b.innerHTML = '<svg viewBox="0 0 24 24">' + it.i + '</svg>'; b.onclick = () => { if (!busy && !termOn) say([['s', it.n.toUpperCase() + ' — ' + it.d]], false); }; inv.appendChild(b); });
+  $('#bSnd').classList.toggle('act', sfx.on); $('#bSnd').textContent = sfx.on ? 'ZVUK' : 'ZVUK ✕';
+}
+const fmt = s => { s = Math.max(0, Math.floor(s)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : String(m).padStart(2, '0')) + ':' + String(x).padStart(2, '0'); };
+setInterval(() => {
+  if (!st) return;
+  let t;
+  if (st.finished) t = fmt(st.ms.m5);
+  else if (!st.startedAt) t = '--:--';
+  else if (CTRL.status === 'ended' && CTRL.endMs) t = fmt((CTRL.endMs - FB.offset - st.startedAt) / 1000);
+  else t = fmt((Date.now() - st.startedAt) / 1000);
+  $('#clock').textContent = t;
+}, 500);
+let toastT;
+function toast(t, cls = '') { const el = $('#toast'); el.textContent = t; el.className = 'toast on ' + cls; clearTimeout(toastT); toastT = setTimeout(() => el.className = 'toast ' + cls, 2600); }
+
+/* ---------- dialog ---------- */
+let busy = false;
+const dlg = $('#dlg'), dWho = $('#dWho'), dTxt = $('#dTxt'), catcher = $('#catch');
+function say(lines, record = true) {
+  return new Promise(res => {
+    busy = true; let i = 0, typer = null, full = '', pos = 0;
+    catcher.classList.add('on'); hideTip();
+    const show = () => {
+      const [w, t] = lines[i];
+      dlg.className = 'dlg on w-' + w; dWho.textContent = WHO[w]; full = t; pos = 0; dTxt.textContent = '';
+      if (record) { st.log.push([w, t]); save(); }
+      clearInterval(typer);
+      typer = setInterval(() => { pos += 1; dTxt.textContent = full.slice(0, pos); if (pos % 3 === 0) sfx.tick(w); if (pos >= full.length) { clearInterval(typer); typer = null; } }, w === 'g' ? 34 : 17);
+    };
+    const adv = e => {
+      if (e) e.stopPropagation();
+      if (typer) { clearInterval(typer); typer = null; dTxt.textContent = full; return; }
+      i++;
+      if (i < lines.length) show();
+      else { off(); dlg.classList.remove('on'); catcher.classList.remove('on'); busy = false; res(); }
+    };
+    const key = e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); adv(); } };
+    const off = () => { catcher.removeEventListener('click', adv); dlg.removeEventListener('click', adv); document.removeEventListener('keydown', key); };
+    catcher.addEventListener('click', adv); dlg.addEventListener('click', adv);
+    setTimeout(() => document.addEventListener('keydown', key), 50);
+    show();
+  });
+}
+
+/* ---------- hotspoty ---------- */
+const stage = $('#stage'), tip = $('#tip');
+let termOn = false;
+function hideTip() { tip.classList.remove('on'); }
+stage.addEventListener('pointermove', e => {
+  const g = e.target.closest && e.target.closest('.scene.on .hs');
+  if (!g || busy || termOn || !st) { hideTip(); return; }
+  const sc = STORY[st.scene], h = sc.hs[g.dataset.hs]; if (!h) return hideTip();
+  const r = stage.getBoundingClientRect();
+  tip.style.left = (e.clientX - r.left) + 'px'; tip.style.top = (e.clientY - r.top) + 'px';
+  const locked = h.term && sc.req.some(x => !seen(x));
+  tip.textContent = (h.term ? (locked ? '🔒 ' : '⌨ ') : '') + h.n + (seen(g.dataset.hs) && !h.term ? ' ✓' : '');
+  tip.className = 'tip on' + (locked ? ' lk' : '');
+});
+stage.addEventListener('pointerleave', hideTip);
+stage.addEventListener('click', e => {
+  const g = e.target.closest && e.target.closest('.scene.on .hs');
+  if (g && st && !busy && !termOn) onHotspot(g.dataset.hs);
+});
+async function onHotspot(id) {
+  const sc = STORY[st.scene], h = sc.hs[id]; if (!h) return;
+  sfx.click();
+  if (h.term) {
+    if (st.ms['m' + (st.scene + 1)] != null) return;
+    if (sc.req.some(x => !seen(x))) { await say(sc.lock); return; }
+    markSeen(id); openTerm(); return;
+  }
+  markSeen(id);
+  await say(h.l);
+  if (h.item && !st.items.includes(h.item)) { st.items.push(h.item); save(); paintHud(); sfx.item(); toast('+ ' + ITEMS[h.item].n.toUpperCase()); }
+  if (h.take) paintSeen();
+}
+function paintSeen() {
+  document.querySelectorAll('.scene .hs').forEach(g => g.classList.remove('seen', 'lockd'));
+  if (!st) return;
+  const sc = STORY[st.scene], root = document.getElementById(sc.el);
+  root.querySelectorAll('.hs').forEach(g => {
+    const h = sc.hs[g.dataset.hs]; if (!h) return;
+    if (seen(g.dataset.hs) && !h.term) g.classList.add('seen');
+    g.classList.toggle('taken', !!(h.take && h.item && st.items.includes(h.item)));
+    if (h.term && sc.req.some(x => !seen(x))) g.classList.add('lockd');
+  });
+}
+
+/* ---------- terminál ---------- */
+const term = $('#term'), tIn = $('#tIn'), tMsg = $('#tMsg'), tGo = $('#tGo');
+let wrongRow = 0, coolUntil = 0, coolT = null;
+function openTerm() {
+  const sc = STORY[st.scene], n = st.scene + 1;
+  $('#tHead').textContent = sc.term.head; $('#tPrompt').textContent = sc.term.prompt;
+  $('#tHint').textContent = (CFG.physicalHints || {})['m' + n] || '';
+  tMsg.textContent = ''; tMsg.className = 'tmsg'; tIn.value = ''; term.className = 'term on'; termOn = true; hideTip();
+  coolTick(); setTimeout(() => tIn.focus(), 60);
+}
+function closeTerm() { term.className = 'term'; termOn = false; tIn.blur(); }
+function coolTick() {
+  clearInterval(coolT);
+  const upd = () => { const left = Math.ceil((coolUntil - Date.now()) / 1000);
+    if (left > 0) { tGo.disabled = true; tIn.disabled = true; tMsg.className = 'tmsg bad'; tMsg.textContent = 'TERMINÁL DOČASNĚ ZABLOKOVÁN · ' + left + ' s'; }
+    else { tGo.disabled = false; tIn.disabled = false; clearInterval(coolT); if (/ZABLOKOVÁN/.test(tMsg.textContent)) { tMsg.textContent = ''; tIn.focus(); } } };
+  upd(); if (coolUntil > Date.now()) coolT = setInterval(upd, 250);
+}
+$('#tBack').onclick = () => { if (!term.classList.contains('good')) closeTerm(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && termOn && !term.classList.contains('good')) closeTerm(); });
+$('#tForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!termOn || Date.now() < coolUntil || term.classList.contains('good')) return;
+  const v = tIn.value; if (!norm(v)) return;
+  if (REMOTE && (!st.startedAt || CTRL.status === 'ended')) return;
+  const n = st.scene + 1, ok = (CFG.codes && CFG.codes['m' + n] || []).includes(codeHash(v));
+  if (ok) {
+    wrongRow = 0; term.className = 'term on good'; tMsg.className = 'tmsg good'; tMsg.textContent = 'PŘÍSTUP POVOLEN ✓'; tIn.disabled = true; tGo.disabled = true; sfx.ok();
+    await wait(1400); closeTerm(); tIn.disabled = false; tGo.disabled = false;
+    await milestone(n);
+  } else {
+    wrongRow++; sfx.err(); term.className = 'term on'; void term.offsetWidth; term.className = 'term on bad';
+    tMsg.className = 'tmsg bad'; tMsg.textContent = 'PŘÍSTUP ODEPŘEN · NEPLATNÝ KÓD';
+    tIn.select();
+    localLog(t => t.wrong = (t.wrong || 0) + 1); fbWrong(n);
+    if (wrongRow >= (CFG.wrongLimit || 3)) { wrongRow = 0; coolUntil = Date.now() + (CFG.wrongCooldownSec || 20) * 1000; setTimeout(coolTick, 700); }
+  }
+});
+
+/* ---------- průběh hry ---------- */
+async function milestone(n) {
+  const k = 'm' + n;
+  if (st.ms[k] == null) {
+    st.ms[k] = Math.round((Date.now() - st.startedAt) / 1000);
+    if (n === 5) st.finished = true;
+    save(); localLog(t => { t.ms[k] = st.ms[k]; t.name = st.name; }); flush();
+  }
+  paintHud(); toast('MILNÍK ' + n + ' · ' + MS[n - 1].toUpperCase() + ' · ' + fmt(st.ms[k]), 'ms');
+  onSolved(n);
+  await wait(900);
+  await say(STORY[n - 1].done);
+  if (n === 5) { await wait(600); showEnd(); }
+  else await goScene(n);
+}
+async function goScene(i) {
+  st.scene = i; save(); paintHud(); paintSeen();
+  await chapterCard(STORY[i]);
+  activate(i);
+  if (!st.intro[i]) { await wait(900); await say(STORY[i].intro); st.intro[i] = true; save(); }
+}
+function activate(i) {
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('on'));
+  document.getElementById(STORY[i].el).classList.add('on');
+  sceneHooks[STORY[i].id] && sceneHooks[STORY[i].id]();
+  paintSeen();
+}
+function chapterCard(sc) {
+  return new Promise(res => {
+    const c = $('#card');
+    $('#cN').textContent = 'KAPITOLA ' + sc.ch; $('#cT').textContent = sc.title; $('#cT').dataset.t = sc.title; $('#cS').textContent = sc.sub;
+    c.classList.add('on'); sfx.whoosh();
+    let done = false; const fin = () => { if (done) return; done = true; c.removeEventListener('click', fin); c.classList.remove('on'); setTimeout(res, 200); };
+    c.addEventListener('click', fin); setTimeout(fin, 3400);
+  });
+}
+
+/* ---------- živé prvky scén ---------- */
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const NS = 'http://www.w3.org/2000/svg';
+const mk = (tag, attrs, parent) => { const el = document.createElementNS(NS, tag); for (const k in attrs) el.setAttribute(k, attrs[k]); parent && parent.appendChild(el); return el; };
+(function buildStatic() {
+  // notebook: CAN log
+  const lap = $('#lapLines'), r = rng(7);
+  for (let k = 0; k < 20; k++) { const red = k % 10 === 4; mk('rect', { x: 1322, y: 458 + k * 12, width: red ? 120 : 40 + r() * 120, height: 4, fill: red ? '#ff3b4e' : (r() > .5 ? '#3dff9a' : '#78FAAE'), opacity: red ? 1 : .6 }, lap); }
+  const soc = $('#socLines'), r2 = rng(11);
+  for (let k = 0; k < 22; k++) { const red = k % 11 === 3; mk('rect', { x: 380, y: 560 + k * 12, width: red ? 150 : 40 + r2() * 140, height: 4, fill: red ? '#ff3b4e' : '#78FAAE', opacity: red ? .95 : .45 }, soc); }
+  // racky
+  const leds = $('#leds'), r3 = rng(3);
+  [[44, 136], [154, 246]].forEach(([x0]) => { for (let y = 252; y < 660; y += 26) { if (x0 === 154 && y > 395 && y < 430) continue; mk('rect', { x: x0 + 4, y, width: 92, height: 20, fill: '#0e1722', stroke: '#1b2a3a' }, leds); for (let j = 0; j < 5; j++) { const c = r3() > .85 ? '#ffb020' : (r3() > .4 ? '#3dff9a' : '#78FAAE'); const l = mk('rect', { x: x0 + 12 + j * 9, y: y + 8, width: 5, height: 4, fill: c }, leds); if (r3() > .4) { l.setAttribute('class', 'blink'); l.style.animationDelay = (r3() * 1.5).toFixed(2) + 's'; l.style.animationDuration = (.5 + r3() * 1.2).toFixed(2) + 's'; } } } });
+  // mapa flotily SOC
+  const f3 = $('#fleet3'), r4 = rng(42), blobs = [[560, 300, 190, 95], [780, 250, 170, 110], [990, 330, 210, 90], [700, 390, 130, 50], [1120, 250, 110, 70], [430, 220, 90, 60]];
+  let made = 0, guard = 0;
+  while (made < 300 && guard++ < 6000) {
+    const x = 300 + r4() * 1000, y = 130 + r4() * 310;
+    if (!blobs.some(([cx, cy, rx, ry]) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 < 1)) continue;
+    const red = r4() < .17; made++;
+    const d = mk('circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: red ? 3.6 : 2.6, fill: red ? '#ff3b4e' : '#78FAAE', opacity: red ? 1 : .55 }, f3);
+    if (red) { d.setAttribute('class', 'blink red3'); d.style.animationDelay = (r4() * 1.2).toFixed(2) + 's'; if (r4() < .35) mk('path', { d: `M${x.toFixed(0)} ${y.toFixed(0)}Q${((x + 1233) / 2).toFixed(0)} ${(Math.min(y, 179) - 60).toFixed(0)} 1233 179`, class: 'c2line' }, f3); }
+  }
+  // flotila velín
+  const f5 = $('#fleet5');
+  for (let row = 0; row < 11; row++) for (let col = 0; col < 26; col++) mk('rect', { x: 140 + col * 28, y: 282 + row * 30, width: 16, height: 9, rx: 3, fill: '#78FAAE', opacity: .75, class: 'car5' }, f5);
+  // konec
+  const ed = $('#endDots'), r5 = rng(9);
+  for (let k = 0; k < 140; k++) { const c = mk('circle', { cx: (r5() * 1600).toFixed(0), cy: (r5() * 900).toFixed(0), r: (1 + r5() * 2.5).toFixed(1), fill: '#3dff9a', opacity: (.15 + r5() * .5).toFixed(2), class: 'pulse' }, ed); c.style.animationDelay = (r5() * 2).toFixed(2) + 's'; }
+})();
+
+let ctrlTimers = [];
+const sceneHooks = {
+  ctrl() {
+    ctrlTimers.forEach(clearInterval); ctrlTimers = [];
+    const solved = st.ms.m5 != null;
+    $('#sc-ctrl').classList.toggle('solved', solved);
+    if (solved) return;
+    const t0 = (st.ctrlAt = st.ctrlAt || Date.now()); save();
+    const cd = $('#cd');
+    const tickCd = () => { const left = 15 * 60 - (Date.now() - t0) / 1000;
+      if (left > 0) cd.textContent = fmt(left);
+      else { cd.textContent = '00:00'; $('#cdLabel').textContent = 'ULTIMÁTUM VYPRŠELO · ČEKÁ SE NA BACKEND'; } };
+    tickCd(); ctrlTimers.push(setInterval(tickCd, 1000));
+    const cars = [...document.querySelectorAll('#fleet5 .car5')], r = rng(77);
+    ctrlTimers.push(setInterval(() => {
+      const free = cars.filter(c => !c.classList.contains('lock-car'));
+      if (free.length < cars.length * .18) return;
+      for (let k = 0; k < 3; k++) { const c = free[Math.floor(r() * free.length)]; c && c.classList.add('lock-car'); }
+    }, 700));
+  }
+};
+function onSolved(n) {
+  if (n === 1) { $('#stTxt').textContent = 'ODEMČENO'; $('#stTxt').setAttribute('fill', '#3dff9a'); $('#stTxt').classList.remove('blink'); $('#stLock').style.display = 'none'; }
+  if (n === 3) {
+    $('#sc-soc').classList.add('solved'); $('#fwTxt').textContent = 'PRAVIDLO NASAZENO'; $('#fwTxt').setAttribute('fill', '#3dff9a'); $('#fwTxt').classList.remove('blink'); $('#fwBar').setAttribute('width', 290); $('#fwBar').setAttribute('fill', '#3dff9a');
+    document.querySelectorAll('#fleet3 .red3').forEach((d, i) => setTimeout(() => { d.classList.remove('blink'); d.setAttribute('fill', '#78FAAE'); d.setAttribute('opacity', '.55'); d.setAttribute('r', 2.6); }, 200 + i * 40));
+  }
+  if (n === 4) { $('#certBadge').setAttribute('fill', '#3a0a12'); $('#certTxt').textContent = 'REVOKOVÁN'; $('#certTxt').setAttribute('fill', '#ff3b4e'); $('#pkiTxt').textContent = 'CERTIFIKÁT REVOKOVÁN'; $('#pkiTxt').setAttribute('fill', '#3dff9a'); $('#pkiTxt').classList.remove('blink'); }
+  if (n === 5) {
+    ctrlTimers.forEach(clearInterval); ctrlTimers = [];
+    $('#sc-ctrl').classList.add('solved');
+    $('#cd').textContent = 'ZRUŠENO'; $('#cd').setAttribute('fill', '#3dff9a'); $('#cdLabel').textContent = 'VZDÁLENÉ PŘÍKAZY ODPOJENY'; $('#cdLabel').setAttribute('fill', '#3dff9a'); $('#cdBox').setAttribute('stroke', '#3dff9a');
+    $('#killBtn').setAttribute('fill', '#1e9e5c'); $('#killGlow').style.display = 'none'; $('#fleetTitle').textContent = 'STAV FLOTILY · ZAJIŠTĚNO';
+    [...document.querySelectorAll('#fleet5 .car5')].forEach((c, i) => setTimeout(() => { c.classList.remove('lock-car'); c.classList.add('ok-car'); }, 300 + i * 9));
+  }
+}
+function restoreSolved() { for (let n = 1; n <= 5; n++) if (st.ms['m' + n] != null && n < 5) onSolved(n); }
+
+/* ---------- lobby a vzdálený start ---------- */
+const lobbyEl = $('#lobby');
+let lobbyRes = null, cdTimer = null;
+function paintLobbyList() {
+  const L = $('#lbList'); if (!L) return;
+  L.innerHTML = '';
+  lobbyTeams.slice().sort((a, b) => a.name.localeCompare(b.name, 'cs')).forEach(t => {
+    const sp = document.createElement('span'); sp.textContent = t.name; if (st && t.id === st.teamId) sp.className = 'me'; L.appendChild(sp);
+  });
+}
+function lobbyGate() {
+  if (!REMOTE || !st || st.startedAt) return Promise.resolve();
+  $('#lbTeam').textContent = st.name.toUpperCase();
+  $('#lbTag').textContent = 'ČEKACÍ MÍSTNOST';
+  $('#lbState').innerHTML = 'Čekáme na start organizátora<i></i>';
+  $('#lbCount').textContent = '';
+  $('#lbLocal').hidden = hasFB;
+  paintLobbyList(); lobbyEl.classList.add('on'); hideTip();
+  return new Promise(res => { lobbyRes = res; onControl(); });
+}
+function startNow() {
+  clearInterval(cdTimer); cdTimer = null;
+  st.startedAt = CTRL.startMs - FB.offset; save();
+  localLog(t => { t.startedAt = st.startedAt; });
+  lobbyEl.classList.remove('on'); sfx.ok(); toast('START · ČAS BĚŽÍ', 'ms'); paintHud();
+  const r = lobbyRes; lobbyRes = null; r && r();
+}
+function onControl() {
+  if (!REMOTE) return;
+  // ukončení hry organizátorem
+  const ended = CTRL.status === 'ended' && st && !st.finished;
+  if (ended) {
+    const done = Object.keys(st.ms).length;
+    $('#endInfo').textContent = 'Organizátor ukončil hru. ' + (st.startedAt ? 'Splněno ' + done + ' z 5 milníků.' : 'Hra pro váš tým nezačala.');
+    if (termOn) closeTerm();
+  }
+  $('#ended').classList.toggle('on', ended);
+  if (!st || st.startedAt || !lobbyRes) {
+    if (st && !st.startedAt && CTRL.status === 'running' && !lobbyRes) toast('ORGANIZÁTOR SPUSTIL HRU', 'ms');
+    return;
+  }
+  // tým čeká v lobby
+  if (CTRL.status === 'running' && CTRL.startMs) {
+    if (cdTimer) return;
+    lobbyEl.classList.add('counting');
+    $('#lbTag').textContent = 'HRA ZAČÍNÁ';
+    $('#lbState').textContent = 'Připravte se. Kapitola 01 se odemkne za';
+    let last = null;
+    const tick = () => {
+      if (CTRL.status !== 'running' || !CTRL.startMs) { clearInterval(cdTimer); cdTimer = null; lobbyEl.classList.remove('counting'); $('#lbCount').textContent = ''; $('#lbTag').textContent = 'ČEKACÍ MÍSTNOST'; $('#lbState').innerHTML = 'Start byl zrušen. Čekáme na organizátora<i></i>'; return; }
+      const left = Math.ceil((CTRL.startMs - serverNow()) / 1000);
+      if (left <= 0) return startNow();
+      if (left !== last) { last = left; const c = $('#lbCount'); c.textContent = left; c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); sfx.click(); }
+    };
+    tick(); if (lobbyRes) cdTimer = setInterval(tick, 100);
+  } else if (cdTimer) { clearInterval(cdTimer); cdTimer = null; }
+}
+
+$('#lbSelf').onclick = () => { try { localStorage.setItem(CTRL_KEY, JSON.stringify({ status: 'running', startAt: Date.now(), countdownSec: 3 })); } catch (e) {} };
+if (REMOTE && !hasFB) watchLocal();
+
+/* ---------- start / konec ---------- */
+const startEl = $('#start'), endEl = $('#end');
+function showStart() {
+  startEl.classList.remove('off');
+  if (st && !st.finished) { $('#cont').hidden = false; $('#contTxt').textContent = 'Uložená hra: ' + st.name + ' · kapitola ' + (st.scene + 1) + '/5'; }
+}
+$('#fStart').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = $('#iTeam').value.trim().replace(/\s+/g, ' ');
+  if (name.length < 2) { $('#sErr').textContent = 'Zadejte název týmu (alespoň 2 znaky).'; return; }
+  if (st && !st.finished && !confirm('Na tomto zařízení je rozehraná hra týmu „' + st.name + '“. Opravdu založit nový tým? Postup původního týmu na tomto zařízení skončí.')) return;
+  st = newState(name); save(); localLog(() => {}); flush(); begin();
+});
+$('#bCont').onclick = () => { flush(); begin(); };
+$('#bNew').onclick = () => { $('#cont').hidden = true; $('#iTeam').focus(); };
+async function begin() {
+  sfx.click(); startEl.classList.add('off'); $('#hud').classList.add('on'); paintHud(); restoreSolved();
+  await wait(500); await goScene(st.scene);
+  await lobbyGate();
+}
+function showEnd() {
+  $('#hud').classList.remove('on');
+  $('#eTeam').textContent = st.name.toUpperCase();
+  $('#eTime').textContent = fmt(st.ms.m5);
+  $('#eSplits').innerHTML = MS.map((m, i) => '<div><small>' + (i + 1) + ' · ' + m + '</small><b>' + fmt(st.ms['m' + (i + 1)] || 0) + '</b></div>').join('');
+  endEl.classList.remove('off'); sfx.ok();
+}
+
+/* ---------- ovládací prvky ---------- */
+function toggleReveal() { stage.classList.toggle('reveal'); $('#bReveal').classList.toggle('act', stage.classList.contains('reveal')); }
+$('#bReveal').onclick = e => { e.stopPropagation(); toggleReveal(); };
+document.addEventListener('keydown', e => { if ((e.key === 'h' || e.key === 'H') && !termOn && document.activeElement.tagName !== 'INPUT') toggleReveal(); });
+$('#bSnd').onclick = e => { e.stopPropagation(); sfx.toggle(); paintHud(); };
+function openLog() {
+  const L = $('#logList'); L.innerHTML = '';
+  let lastCh = -1;
+  (st ? st.log : []).forEach(([w, t]) => { const p = document.createElement('p'); p.className = w; const b = document.createElement('b'); b.textContent = WHO[w]; p.append(b, document.createTextNode(t)); L.appendChild(p); });
+  $('#logp').classList.add('on'); L.scrollTop = L.scrollHeight;
+}
+$('#bLog').onclick = e => { e.stopPropagation(); openLog(); };
+$('#eLog').onclick = openLog;
+$('#eNew').onclick = () => {
+  if (!confirm('Začít novou hru na tomto zařízení? Výsledek týmu „' + st.name + '“ zůstane uložený v databázi, jen se z tohoto zařízení odhlásí.')) return;
+  try { localStorage.removeItem(KEY); } catch (e) {}
+  location.href = location.pathname;
+};
+$('#logX').onclick = () => $('#logp').classList.remove('on');
+
+/* ---------- init ---------- */
+if (st && st.finished) { startEl.classList.add('off'); activate(4); restoreSolved(); onSolved(5); showEnd(); flush(); }
+else showStart();
+window.ghostHash = codeHash; // pro organizátora: ghostHash("KOD") v konzoli
+})();
+</script>
+</body>
+</html>
