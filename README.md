@@ -10,6 +10,7 @@ Webová adventura s motivem kybernetické bezpečnosti ve Škoda Auto. Týmy v r
 | `leaderboard.html` | Administrace: spuštění/ukončení hry, živý žebříček, nástroje (generátor otisků kódů, export CSV). Na Vercelu i jako `/admin`. |
 | `config.js` | Jediné místo, které musíte upravit: Firebase, ID hry, kódy, texty k šifrám, e-maily organizátorů. |
 | `vercel.json` | Nastavení pro Vercel (hezká adresa `/admin`). |
+| `version.js` | Číslo buildu a datum nasazení — zobrazuje se vlevo dole ve hře i v administraci. Zvedá se automaticky při každém commitu. |
 
 ## Výchozí kódy (jen pro organizátora — tento soubor hráčům nedávejte)
 

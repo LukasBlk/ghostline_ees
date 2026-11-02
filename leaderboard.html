@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="config.js"></script>
+<script src="version.js"></script>
 <style>
 :root{--bg:#03060a;--ink:#d9e8f5;--dim:#7f95aa;--cy:#78FAAE;--am:#ffb020;--rd:#ff3b4e;--gn:#3dff9a;--line:rgba(120,250,174,.22);--mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -82,6 +83,7 @@ code,.out{font-family:var(--mono);font-size:13px}
 .who{font-size:12px;color:var(--dim)}
 .tot.lob{color:var(--dim)}
 @media (max-width:900px){.wrap{padding:16px}.logo{font-size:30px}.ms,.t{display:none}.name{max-width:160px}}
+#ver{position:fixed;left:10px;bottom:6px;z-index:999;font:500 11px 'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:rgba(160,200,185,.55);pointer-events:none;user-select:none}
 </style>
 </head>
 <body>
@@ -337,6 +339,15 @@ $('#csv').onclick = () => {
   const csv = '﻿' + lines.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(';')).join('\r\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'ghostline-' + GID + '.csv'; a.click();
 };
+})();
+</script>
+<script>
+(function () {
+  var v = window.GHOSTLINE_VERSION, el = document.createElement('div');
+  el.id = 'ver';
+  el.textContent = 'GHOSTLINE · ' + (v ? 'build ' + v.build + ' · ' + v.date : 'vývojová verze');
+  el.title = 'Verze aplikace, která je právě nasazená';
+  document.body.appendChild(el);
 })();
 </script>
 </body>

@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="config.js"></script>
+<script src="version.js"></script>
 <style>
 :root{
   --bg:#03060a; --ink:#d9e8f5; --dim:#7f95aa; --cy:#78FAAE; --am:#ffb020; --rd:#ff3b4e; --gn:#3dff9a;
@@ -237,6 +238,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .rot svg{width:64px;margin:0 auto 16px;stroke:var(--cy);fill:none;stroke-width:1.5}
 @media (orientation:portrait) and (max-width:820px){.rot{display:grid}}
 @media (prefers-reduced-motion:reduce){.scrollup,.spin,.bob,.dash,.flick,.flick2,.jit,.shake{animation:none!important}}
+#ver{position:fixed;left:10px;bottom:6px;z-index:999;font:500 11px 'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:rgba(160,200,185,.55);pointer-events:none;user-select:none}
 </style>
 </head>
 <body>
@@ -1382,6 +1384,15 @@ $('#logX').onclick = () => $('#logp').classList.remove('on');
 if (st && st.finished) { startEl.classList.add('off'); activate(4); restoreSolved(); onSolved(5); showEnd(); flush(); }
 else showStart();
 window.ghostHash = codeHash; // pro organizátora: ghostHash("KOD") v konzoli
+})();
+</script>
+<script>
+(function () {
+  var v = window.GHOSTLINE_VERSION, el = document.createElement('div');
+  el.id = 'ver';
+  el.textContent = 'GHOSTLINE · ' + (v ? 'build ' + v.build + ' · ' + v.date : 'vývojová verze');
+  el.title = 'Verze aplikace, která je právě nasazená';
+  document.body.appendChild(el);
 })();
 </script>
 </body>
