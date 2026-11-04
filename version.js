@@ -1,2 +1,2 @@
 /* Verze aplikace — generuje se automaticky při každém commitu (build +1). Neupravovat ručně. */
-window.GHOSTLINE_VERSION = { build: 17, date: "4. 11. 2026 09:44" };
+window.GHOSTLINE_VERSION = { build: 18, date: "4. 11. 2026 09:55" };

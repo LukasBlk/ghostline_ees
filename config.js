@@ -27,7 +27,7 @@ window.GHOSTLINE_CONFIG = {
      Zadání se normalizuje: velká/malá písmena, diakritika, mezery a interpunkce nehrají roli. */
   codes: {
     m1: ["0c154674cd4d9950", "d4e1e720607db53f"],   // SOS (z blikání světel vozu) + testovací 1111 — před akcí 1111 smažte
-    m2: ["d4e1e720607db53f"],
+    m2: ["89eb0ee2244220e0", "d4e1e720607db53f"],   // PIN 6547 z logických operací (zadání je přímo v terminálu) + testovací 1111
     m3: ["d4e1e720607db53f"],
     m4: ["d4e1e720607db53f"],
     m5: ["d4e1e720607db53f"]
@@ -45,7 +45,7 @@ window.GHOSTLINE_CONFIG = {
   /* Text pod terminálem — odkaz na fyzickou šifru, kterou má tým v realitě luštit. */
   physicalHints: {
     m1: "Tento kód nenajdete v žádné šifře. Odpověď se skrývá přímo tady v hale — dívejte se pozorně.",
-    m2: "Kód získáte rozluštěním šifry č. 2.",
+    m2: "Šifru máte přímo před sebou — vyřešte operace A–D a zadejte čtyřmístný PIN.",
     m3: "Kód získáte rozluštěním šifry č. 3.",
     m4: "Kód získáte rozluštěním šifry č. 4.",
     m5: "Kód získáte rozluštěním šifry č. 5."

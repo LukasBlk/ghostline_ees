@@ -147,6 +147,17 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 @keyframes shakeX{20%,60%{transform:translateX(-1cqw)}40%,80%{transform:translateX(1cqw)}}
 .thead{display:flex;justify-content:space-between;font-size:.85cqw;letter-spacing:.2em;color:var(--cy);border-bottom:1px solid var(--line);padding-bottom:.7cqw;margin-bottom:1.4cqw}
 .tprompt{font-size:1.25cqw;margin-bottom:1.2cqw;color:#e9f6ff}
+.tbox.wide{width:64cqw}
+.pz{margin:0 0 1.4cqw}
+.pz[hidden]{display:none}
+.pz-t{font-size:.9cqw;letter-spacing:.25em;color:var(--am);margin-bottom:.8cqw}
+.pz-g{display:grid;grid-template-columns:repeat(4,1fr);gap:.8cqw}
+.pz-c{border:1px solid #1f5a45;background:#06231b;padding:.8cqw .9cqw}
+.pz-c b{display:block;font:700 .9cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.18em;color:var(--cy);margin-bottom:.5cqw}
+.pz-c code{display:block;font:600 1.15cqw var(--mono);color:#e9f6ff;white-space:nowrap}
+.pz-c i{display:block;font:500 1.05cqw var(--mono);font-style:normal;color:#5f8a78;margin-top:.45cqw;white-space:nowrap}
+.pz-n{margin-top:.9cqw;font-size:.95cqw;color:#a9bccd;line-height:1.5}
+.pz-n q{color:#d9e8f5}
 .trow{display:flex;gap:1cqw}
 .trow span{font-size:1.9cqw;color:var(--cy);line-height:3.6cqw}
 .tin{flex:1;height:3.6cqw;background:#06231b;border:1px solid #1f5a45;color:#fff;font:600 1.8cqw var(--mono);letter-spacing:.25em;padding:0 1cqw;text-transform:uppercase;outline:none}
@@ -657,6 +668,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 <div class="term" id="term"><div class="tbox">
   <div class="thead"><span id="tHead">TERMINÁL</span><span id="tNode">●</span></div>
   <div class="tprompt" id="tPrompt"></div>
+  <div class="pz" id="tPuzzle" hidden></div>
   <form class="trow" id="tForm" autocomplete="off"><span>&gt;</span><input class="tin" id="tIn" maxlength="40" spellcheck="false" autocapitalize="characters" autocomplete="off"><button class="tgo" id="tGo">OVĚŘIT</button></form>
   <div class="tmsg" id="tMsg"></div>
   <div class="tfoot"><span id="tHint"></span><button class="tback" id="tBack" type="button">✕ ZPĚT</button></div>
@@ -708,7 +720,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 (() => {
 'use strict';
 const DEFAULT_CFG = { gameId: 'ghostline-demo', firebase: {}, salt: 'auriga',
-  codes: { m1: ['0c154674cd4d9950', 'd4e1e720607db53f'], m2: ['d4e1e720607db53f'], m3: ['d4e1e720607db53f'], m4: ['d4e1e720607db53f'], m5: ['d4e1e720607db53f'] },
+  codes: { m1: ['0c154674cd4d9950', 'd4e1e720607db53f'], m2: ['89eb0ee2244220e0', 'd4e1e720607db53f'], m3: ['d4e1e720607db53f'], m4: ['d4e1e720607db53f'], m5: ['d4e1e720607db53f'] },
   milestones: ['Diagnostika odemčena', 'Infotainment izolován', 'C2 zablokováno', 'Certifikát revokován', 'Flotila zachráněna'],
   physicalHints: {}, wrongLimit: 3, wrongCooldownSec: 20, remoteStart: true, countdownSec: 10 };
 if (!window.GHOSTLINE_CONFIG) console.warn('[GHOSTLINE] config.js se nenačetl — používám výchozí nastavení (kód 1111, lokální režim).');
@@ -799,7 +811,17 @@ const STORY = [
   },
   req: ['cluster', 'canbay'],
   lock: [['m', 'Do servisního menu se dosatnete jen s kódem. Nejdřív zjistěte, jak se útok šíří vozem — podívejte se na přístrojovou desku a pod palubní desku.']],
-  term: { head: 'INFOTAINMENT // SERVISNÍ MENU', prompt: 'Zadejte kód pro odpojení externích rozhraní infotainmentu.' },
+  term: { head: 'INFOTAINMENT // SERVISNÍ MENU', prompt: 'Zadejte kód pro odpojení externích rozhraní infotainmentu.',
+    puzzle: {
+      title: 'ZÍSKEJTE ČTYŘMÍSTNÝ KÓD',
+      cards: [
+        ['A – XOR', '1010 XOR 1100'],
+        ['B – NOT', 'NOT 1010'],
+        ['C – AND', '1101 AND 0110'],
+        ['D – OR',  '0010 OR 0101']
+      ],
+      note: 'Výsledek každé operace převeďte z dvojkové soustavy na číslo. Čísla v pořadí A–B–C–D tvoří PIN.<br>Nápověda k OR: <q>Výsledek je 1, pokud je alespoň jeden ze vstupů 1.</q>'
+    } },
   done: [
     ['n', 'Infotainment je izolován: Bluetooth a Wi-Fi jsou odpojené.'],
     ['n', 'V paměti jednotky zůstala adresa, se kterou komunikovala: telemetry-skoda.backend.vw.wob Náš vlastní backend.'],
@@ -1177,6 +1199,13 @@ let wrongRow = 0, coolUntil = 0, coolT = null;
 function openTerm() {
   const sc = STORY[st.scene], n = st.scene + 1;
   $('#tHead').textContent = sc.term.head; $('#tPrompt').textContent = sc.term.prompt;
+  const pz = sc.term.puzzle, pzEl = $('#tPuzzle');
+  if (pz) {
+    pzEl.innerHTML = '<div class="pz-t">' + pz.title + '</div><div class="pz-g">' +
+      pz.cards.map(([h, e]) => '<div class="pz-c"><b>' + h + '</b><code>' + e + '</code><i>→ ???? → ?</i></div>').join('') +
+      '</div>' + (pz.note ? '<div class="pz-n">' + pz.note + '</div>' : '');
+  } else pzEl.innerHTML = '';
+  pzEl.hidden = !pz; $('#term .tbox').classList.toggle('wide', !!pz);
   $('#tHint').textContent = (CFG.physicalHints || {})['m' + n] || '';
   tMsg.textContent = ''; tMsg.className = 'tmsg'; tIn.value = ''; term.className = 'term on'; termOn = true; hideTip();
   coolTick(); setTimeout(() => tIn.focus(), 60);
