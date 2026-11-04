@@ -827,14 +827,13 @@ const STORY = [
   term: { head: 'INFOTAINMENT // SERVISNÍ MENU', prompt: 'Zadejte kód pro odpojení externích rozhraní infotainmentu.',
     boxes: 4, digits: true, info: 'PIN tvoří 4 číslice.',
     puzzle: {
-      title: 'ZÍSKEJTE ČTYŘMÍSTNÝ KÓD',
       cards: [
         ['A', '1010 XOR 1100'],
         ['B', 'NOT 1010'],
         ['C', '1101 AND 0110'],
         ['D', '0010 OR 0101']
       ],
-      note: 'Výsledek každé operace převeďte z dvojkové soustavy do desítkové. Čísla v pořadí A–B–C–D tvoří PIN.<br>Nápověda k OR: <q>Výsledek je 1, pokud je alespoň jeden ze vstupů 1.</q>'
+      note: 'Výsledek každé operace převeďte z dvojkové soustavy do desítkové. Čísla v pořadí A–B–C–D tvoří PIN.'
     } },
   done: [
     ['n', 'Infotainment je izolován: Bluetooth a Wi-Fi jsou odpojené.'],
@@ -1215,7 +1214,7 @@ function openTerm() {
   $('#tHead').textContent = sc.term.head; $('#tPrompt').textContent = sc.term.prompt;
   const pz = sc.term.puzzle, pzEl = $('#tPuzzle');
   if (pz) {
-    pzEl.innerHTML = '<div class="pz-t">' + pz.title + '</div><div class="pz-g">' +
+    pzEl.innerHTML = (pz.title ? '<div class="pz-t">' + pz.title + '</div>' : '') + '<div class="pz-g">' +
       pz.cards.map(([h, e]) => '<div class="pz-c"><b>' + h + '</b><code>' + e + '</code><i>→ ???? → ?</i></div>').join('') +
       '</div>' + (pz.note ? '<div class="pz-n">' + pz.note + '</div>' : '');
   } else pzEl.innerHTML = '';
