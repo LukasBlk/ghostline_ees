@@ -755,7 +755,7 @@ const STORY = [
     car:     { n: 'Testovací vůz ENYAQ', l: [
       ['n', 'Elektrické SUV na zvedáku. Kola se pomalu otáčejí, přestože pohon má být odpojený.'],
       ['n', 'Přední světlo bliká v pravidelném rytmu: tři krátké, tři dlouhé, tři krátké.'],
-      ['m', 'Někdo si s námi hraje a posílá nám vzkaz, že by heslo?.'] ] },
+      ['m', 'Někdo si s námi hraje a posílá nám vzkaz, že by heslo?'] ] },
     dongle:  { n: 'Neznámé zařízení pod vozem', item: 'dongle', take: true, l: [
       ['n', 'Z diagnostického portu OBD-II visí na kabelu malá černá krabička bez loga. Bliká na ní červená dioda.'],
       ['n', 'Uvnitř je SIM karta a anténa. Zařízení je online.'],
@@ -774,21 +774,21 @@ const STORY = [
   done: [
     ['n', 'Stanice se odemkla. Logy ukazují, že dongle někdo připojil při servisní prohlídce před třemi dny.'],
     ['m', 'Z CAN sběrnice se útočník dostal dál — do infotainmentu. Ten má Bluetooth a Wi-Fi.'],
-    ['m', 'Posaďte se do kokpitu. Musíme zjistit, kudy přesně prošel.'] ]
+    ['m', 'Posaďte se do kokpitu. Musíme zjistit, jak útočník prolomil doménovou separaci.'] ]
 },
-{ id: 'cockpit', el: 'sc-cockpit', ch: '02', title: 'KOKPIT', sub: 'VŮZ ENYAQ · INFOTAINMENT A CENTRÁLNÍ BRÁNA',
+{ id: 'cockpit', el: 'sc-cockpit', ch: '02', title: 'KOKPIT', sub: 'VŮZ ENYAQ · INFOTAINMENT A GATEWAY',
   intro: [
     ['n', 'Usedáte za volant vozu ENYAQ. Displej infotainmentu se rozsvítí sám od sebe.'],
     ['g', 'VÍTEJTE NA PALUBĚ. JSEM GHOSTLINE.'],
-    ['m', 'Tak tohle už není softwarová chyba. Najděte, kudy se dostal ze zábavního systému k řízení vozu.'] ],
+    ['m', 'Tak tohle už není softwarová chyba. Najděte cestu, kudy se útočník dostal z diagnostického CANu k ovládání řízení vozu.'] ],
   hs: {
-    cluster:  { n: 'Přístrojový štít', l: [
+    cluster:  { n: 'Přístrojová deska', l: [
       ['n', 'Kontrolky blikají v náhodném pořadí: ABS, airbag, porucha baterie. Ručička rychloměru se chvěje, přestože vůz stojí.'],
-      ['m', 'Štít bere data z CAN sběrnice. Útočník podvrhuje zprávy celé síti vozu.'] ] },
+      ['m', 'Kombi přístroj přijímá data z CAN sběrnice. Útočník asi podvrhuje zprávy napříč sběrnicemi vozu.'] ] },
     canbay:   { n: 'Kryt pod palubní deskou', l: [
-      ['n', 'Pod odklopeným krytem vede kroucená dvojlinka CAN k centrální bráně — gatewayi, která má oddělovat infotainment od brzd a řízení.'],
-      ['n', 'Zprávy ale proudí bránou oběma směry. Filtrovací pravidla jsou vypnutá.'],
-      ['m', 'Brána je hranice mezi hudbou a brzdami. Tohle je vážné.'] ] },
+      ['n', 'Pod odklopeným krytem vede kroucená dvojlinka CAN sběrnice ke gatewayi, která má oddělovat infotainment od brzd a řízení - tzv. doménová separace.'],
+      ['n', 'Zprávy ale proudí bránou oběma směry. Filtrovací pravidla jsou také vypnutá.'],
+      ['m', 'Tohle je vážné, někdo převzal veškerou komunikaci.'] ] },
     glovebox: { n: 'Přihrádka spolujezdce', item: 'protokol', l: [
       ['n', 'Servisní protokol z poslední prohlídky. Technik: „J. Dvořák (externí)“. Podpis chybí.'],
       ['m', 'Externího technika jménem Dvořák nemáme ve smluvní databázi. Proklepnu to.'] ] },
@@ -798,16 +798,16 @@ const STORY = [
     info:     { n: 'Infotainment', term: true }
   },
   req: ['cluster', 'canbay'],
-  lock: [['m', 'Servisní menu vás pustí jen s kódem. Nejdřív zjistěte, jak se útok šíří vozem — podívejte se na přístrojový štít a pod palubní desku.']],
-  term: { head: 'INFOTAINMENT // SERVISNÍ MENU', prompt: 'Zadejte kód pro izolaci infotainmentu.' },
+  lock: [['m', 'Do servisního menu se dosatnete jen s kódem. Nejdřív zjistěte, jak se útok šíří vozem — podívejte se na přístrojovou desku a pod palubní desku.']],
+  term: { head: 'INFOTAINMENT // SERVISNÍ MENU', prompt: 'Zadejte kód pro odpojení externích rozhraní infotainmentu.' },
   done: [
-    ['n', 'Infotainment je izolovaný: Bluetooth, Wi-Fi i LTE modem jsou odpojené a brána znovu filtruje provoz.'],
-    ['n', 'V paměti jednotky zůstala adresa, se kterou komunikovala: telemetry-eu.backend-fleet.net. Náš vlastní backend.'],
-    ['m', 'Takže útočník neovládá jen tenhle vůz. Sedí v našem telematickém backendu. Přesuňte se do dohledového centra.'] ]
+    ['n', 'Infotainment je izolován: Bluetooth a Wi-Fi jsou odpojené.'],
+    ['n', 'V paměti jednotky zůstala adresa, se kterou komunikovala: telemetry-skoda.backend.vw.wob Náš vlastní backend.'],
+    ['m', 'Útočník neovládá jen tenhle vůz. Je nabouraný v našem telematickém backendu. Přesuňte se do dohledového centra.'] ]
 },
-{ id: 'soc', el: 'sc-soc', ch: '03', title: 'DOHLEDOVÉ CENTRUM', sub: 'SECURITY OPERATIONS CENTER · TELEMATICKÝ BACKEND',
+{ id: 'soc', el: 'sc-soc', ch: '03', title: 'DOHLEDOVÉ CENTRUM', sub: 'INTRUSION DETECTION SYSTEM · BACKEND',
   intro: [
-    ['n', 'Bezpečnostní dohledové centrum. Na velkoplošné stěně svítí mapa celé flotily.'],
+    ['n', 'Bezpečnostní dohledové centrum. Na velkoplošné obrazovce svítí mapa celé flotily.'],
     ['m', 'Každá tečka je jeden vůz. Ty červené právě teď komunikují se serverem, který neznáme.'] ],
   hs: {
     map:     { n: 'Mapa flotily', l: [
@@ -815,35 +815,35 @@ const STORY = [
       ['m', 'Když C2 zablokujeme, útočník ztratí spojení s flotilou.'] ] },
     racks:   { n: 'Serverové racky', item: 'proces', l: [
       ['n', 'Server TEL-GW-03 má neobvykle vysoký odchozí provoz. Běží na něm proces „sysupdated“, který není v žádné naší konfiguraci.'],
-      ['m', 'Tudy to teče ven. Uložte si otisk procesu, bude se hodit při forenzní analýze.'] ] },
+      ['m', 'Tudy to teče ven. Uložte si kopii image serveru, bude se hodit při forenzní analýze.'] ] },
     mug:     { n: 'Hrnek s kávou', l: [
-      ['n', 'Hrnek s nápisem „Cloud je jen cizí počítač“. Káva je ještě teplá.'],
+      ['n', 'Hrnek s nápisem „MY, NE JÁ - PŘIJÍMÁME ODPOVĚDNOST ZA ŽIVOTNÍ PROSTŘEDÍ ...“. Káva je ještě teplá.'],
       ['m', 'Kolegové z noční směny. Doufám.'] ] },
     note:    { n: 'Papírek na monitoru', l: [
-      ['n', 'Na rohu monitoru je nalepený papírek: „SOC admin — Skoda2031!“'],
-      ['m', '…Tohle po incidentu probereme. Hesla na monitor nepatří.'] ] },
+      ['n', 'Na rohu monitoru je nalepený papírek: „admin — beruška69“'],
+      ['m', '…Tohle po incidentu probereme. Někdo si bude muset zopakovat pár POD.'] ] },
     console: { n: 'Konzole firewallu', term: true }
   },
   req: ['map', 'racks'],
   lock: [['m', 'Nejdřív musíme vědět, co blokujeme. Podívejte se na mapu flotily a na servery.']],
-  term: { head: 'SOC // FIREWALL · BLOKACE C2', prompt: 'Zadejte autorizační kód pro nasazení pravidla.' },
+  term: { head: 'SOC // FIREWALL · BLOKACE C2', prompt: 'Zadejte autorizační kód pro přesměrování provozu.' },
   done: [
-    ['n', 'Pravidlo je nasazené. Spojení s C2 je přerušené a červené body na mapě zhasínají.'],
-    ['g', 'POZDĚ. MŮJ DÁREK UŽ JE ZABALENÝ.'],
-    ['m', 'Dárek… ORU kampaň! Jestli útočník podstrčil vlastní firmware do distribuce, v 06:00 se nainstaluje do všech vozů.'],
-    ['m', 'Do laboratoře podepisování firmwaru. Rychle.'] ]
+    ['n', 'Provoz přesměrován. Spojení se serverem C2 je přerušeno a červené body na mapě zhasínají.'],
+    ['g', 'POZDĚ BYCHA HONIT!'],
+    ['m', 'Pozdě… ORU kampaň! Jestli útočník podstrčil vlastní update do distribuce, v 06:00 se nainstaluje do všech vozů.'],
+    ['m', 'Do ORU laboratoře. Rychle.'] ]
 },
-{ id: 'lab', el: 'sc-lab', ch: '04', title: 'LABORATOŘ PODPISŮ', sub: 'PODEPISOVÁNÍ FIRMWARU · ŘETĚZEC DŮVĚRY',
+{ id: 'lab', el: 'sc-lab', ch: '04', title: 'ORU LABORATOŘ', sub: 'PODEPISOVÁNÍ FIRMWARU',
   intro: [
-    ['n', 'Laboratoř podepisování firmwaru. Vůz nainstaluje jen aktualizaci podepsanou klíčem Škoda.'],
+    ['n', 'ORU laboratoř. Vůz nainstaluje jen aktualizaci podepsanou platným podpisem Škoda.'],
     ['m', 'Kdyby útočník dokázal použít náš podpisový klíč, vozy by jeho firmware považovaly za originál.'] ],
   hs: {
     hsm:   { n: 'Hardwarový bezpečnostní modul', l: [
-      ['n', 'HSM-02. Soukromé klíče z něj nejdou vytáhnout — dají se ale použít, pokud máte správný účet.'],
+      ['n', 'HSM-02. Soukromé klíče z něj nejdou vyčíst bez oprávněného přístupu.'],
       ['n', 'Log ukazuje podpis ve 03:12 pod servisním účtem „ota-build“. V tu dobu nikdo z týmu nepracoval.'] ] },
-    fw:    { n: 'Balíček firmwaru FW 7.4.1', l: [
-      ['n', 'Balíček připravený k distribuci. Je o 2,3 MB větší než build z vývojové linky.'],
-      ['m', 'Někdo do něj přibalil vlastní kód a nechal ho podepsat naším HSM. Podpis je pravý, obsah ne.'] ] },
+    fw:    { n: 'Balíček firmwaru FW 6.7.420', l: [
+      ['n', 'Balíček připravený k distribuci. Je o 6,9 MB větší než oficálně uvolněný produkční software.'],
+      ['m', 'Někdo do něj přibalil vlastní kód a nechal ho podepsat naším platným podpisem. Podpis je pravý, ale obsah ne.'] ] },
     board: { n: 'Tabule', l: [
       ['n', 'Řetězec důvěry: Root CA → OEM CA → podpisový certifikát OTA → řídicí jednotky ve voze.'],
       ['m', 'Když podpisový certifikát revokujeme, vozy odmítnou všechno, co jím bylo podepsáno. Včetně podvrhu.'] ] },
@@ -858,22 +858,22 @@ const STORY = [
     ['n', 'Certifikát je revokovaný. Podvržený firmware je pro vozy neplatný a distribuce se zastavila.'],
     ['g', 'CHYTRÉ. ALE VŽDYCKY MÁM PLÁN B.'],
     ['n', 'Všechny obrazovky v laboratoři zrudnou.'],
-    ['m', 'Velín! Spouští něco přímo ve flotile!'] ]
+    ['m', 'Watchcentrum! Spouští něco přímo ve flotile!'] ]
 },
-{ id: 'ctrl', el: 'sc-ctrl', ch: '05', title: 'VELÍN', sub: 'POSLEDNÍ OBRANNÁ LINIE',
+{ id: 'ctrl', el: 'sc-ctrl', ch: '05', title: 'DOHLEDOVÉ CENTRUM', sub: 'POSLEDNÍ OBRANNÁ LINIE',
   intro: [
-    ['g', 'ZA 15 MINUT UZAMKNU VŠECH 412 000 VOZŮ. KDO ZAPLATÍ, TEN POJEDE.'],
+    ['g', 'ZA 15 MINUT PŘEVEZMU KONTROLU NAD CELOU FLOTILOU. ZA TOHLE ZAPLATÍTE.'],
     ['m', 'Zbývá poslední možnost: nouzový vypínač vzdálených příkazů. Odpojí backend od flotily, dokud vše nevyčistíme.'],
     ['m', 'Vyžaduje finální autorizační kód. Je to na vás.'] ],
   hs: {
     ransom: { n: 'Zpráva útočníka', l: [
       ['n', 'Výkupné: 500 BTC. Pod ním odpočet a logo ducha.'],
-      ['m', 'Neplatíme. Nikdy. Platba by jen financovala další útok.'] ] },
+      ['m', 'Neplatíme. Nikdy. Platba by jen financovala další útoky.'] ] },
     fleet:  { n: 'Stav flotily', l: [
-      ['n', 'Vozy jeden po druhém dostávají příkaz k uzamčení. Zatím ho ale nevykonaly — čekají na potvrzení z backendu.'],
+      ['n', 'Vozy jeden po druhém dostávají příkaz k převzetí kontroly. Zatím ho ale nevykonaly — čekají na potvrzení z backendu.'],
       ['m', 'To je naše šance. Když backend odpojíme, potvrzení nikdy nepřijde.'] ] },
     phone:  { n: 'Zvonící telefon', l: [
-      ['n', 'Volá generální ředitel.'],
+      ['n', 'Volá Dušan Chňoupek.'],
       ['n', '„Média už o tom vědí. Máte pár minut. Věřím vám.“'] ] },
     kill:   { n: 'Nouzový vypínač', term: true }
   },
@@ -881,10 +881,10 @@ const STORY = [
   lock: [['m', 'Než to zmáčkneme, musíme vědět, co přesně se ve flotile děje. Podívejte se na stav flotily a na zprávu útočníka.']],
   term: { head: 'NOUZOVÝ VYPÍNAČ // FINÁLNÍ AUTORIZACE', prompt: 'Zadejte finální autorizační kód.' },
   done: [
-    ['n', 'Vypínač je aktivní. Backend se odpojil od flotily a příkazy k uzamčení vyprchaly bez potvrzení.'],
+    ['n', 'Zmáčkli jsme vypínač. Flotila se odpojila od backendu a příkazy k převzetí vypršely bez potvrzení.'],
     ['n', 'Body na mapě se jeden po druhém barví zeleně.'],
     ['m', 'Zvládli jste to. Útočník je odříznutý, podvržený firmware neplatný a dongle máme jako důkaz.'],
-    ['m', 'Teď začne forenzní analýza a hledání pana „Dvořáka“. Ale to až ráno. Děkuju, týme.'] ]
+    ['m', 'Teď začne forenzní analýza a hledání pana „Dvořáka“. Ale to až ráno. Dokázali jste to. Děkuji, týme.'] ]
 }];
 
 /* ---------- stav ---------- */
