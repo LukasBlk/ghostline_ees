@@ -162,6 +162,17 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .trow span{font-size:1.9cqw;color:var(--cy);line-height:3.6cqw}
 .tin{flex:1;height:3.6cqw;background:#06231b;border:1px solid #1f5a45;color:#fff;font:600 1.8cqw var(--mono);letter-spacing:.25em;padding:0 1cqw;text-transform:uppercase;outline:none}
 .tin:focus{border-color:var(--cy);box-shadow:0 0 1.2cqw rgba(120,250,174,.3)}
+.tboxes{flex:1;display:flex;gap:1cqw;align-items:center}
+.tboxes[hidden],.tin[hidden]{display:none}
+.tch{width:4.4cqw;height:4.4cqw;background:#06231b;border:1px solid #1f5a45;color:#fff;font:700 2.4cqw var(--mono);text-align:center;text-transform:uppercase;outline:none;padding:0;caret-color:var(--cy);transition:border-color .2s,background .2s,box-shadow .2s}
+.tch:focus{border-color:var(--cy);box-shadow:0 0 1.2cqw rgba(120,250,174,.3)}
+.tch.ok{border-color:var(--gn);background:#0b3a24;color:var(--gn);box-shadow:0 0 1cqw rgba(61,255,154,.35)}
+.tch.bad{border-color:var(--rd);background:#3a0a12;color:#ff8a96;animation:chShake .35s}
+@keyframes chShake{25%{transform:translateX(-.35cqw)}75%{transform:translateX(.35cqw)}}
+.tch:disabled{opacity:.6}
+.tch::selection{background:transparent}
+.tinfo{font-size:1.05cqw;color:var(--am);letter-spacing:.06em;margin:-.4cqw 0 1.2cqw}
+.tinfo[hidden]{display:none}
 .tgo{padding:0 1.8cqw;background:var(--cy);color:#0E3A2F;font:700 1.1cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.2em}
 .tgo:disabled{background:#2a3b48;color:#6b7f8f;cursor:not-allowed}
 .tmsg{min-height:2.2cqw;margin-top:1cqw;font-size:1.15cqw;letter-spacing:.12em}
@@ -668,8 +679,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 <div class="term" id="term"><div class="tbox">
   <div class="thead"><span id="tHead">TERMINÁL</span><span id="tNode">●</span></div>
   <div class="tprompt" id="tPrompt"></div>
+  <div class="tinfo" id="tInfo" hidden></div>
   <div class="pz" id="tPuzzle" hidden></div>
-  <form class="trow" id="tForm" autocomplete="off"><span>&gt;</span><input class="tin" id="tIn" maxlength="40" spellcheck="false" autocapitalize="characters" autocomplete="off"><button class="tgo" id="tGo">OVĚŘIT</button></form>
+  <form class="trow" id="tForm" autocomplete="off"><span>&gt;</span><input class="tin" id="tIn" maxlength="40" spellcheck="false" autocapitalize="characters" autocomplete="off"><div class="tboxes" id="tBoxes" hidden></div><button class="tgo" id="tGo">OVĚŘIT</button></form>
   <div class="tmsg" id="tMsg"></div>
   <div class="tfoot"><span id="tHint"></span><button class="tback" id="tBack" type="button">✕ ZPĚT</button></div>
 </div></div>
@@ -722,7 +734,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 const DEFAULT_CFG = { gameId: 'ghostline-demo', firebase: {}, salt: 'auriga',
   codes: { m1: ['0c154674cd4d9950'], m2: ['89eb0ee2244220e0'], m3: ['d4e1e720607db53f'], m4: ['d4e1e720607db53f'], m5: ['d4e1e720607db53f'] },
   milestones: ['Diagnostika odemčena', 'Infotainment izolován', 'C2 zablokováno', 'Certifikát revokován', 'Flotila zachráněna'],
-  physicalHints: {}, wrongLimit: 3, wrongCooldownSec: 20, remoteStart: true, countdownSec: 10 };
+  physicalHints: {}, charCheck: { m1: ['ca12aa8c7db1cfd0', '531666d134a45d85', '2a8da6e5ea56af3c'] }, wrongLimit: 3, wrongCooldownSec: 20, remoteStart: true, countdownSec: 10 };
 if (!window.GHOSTLINE_CONFIG) console.warn('[GHOSTLINE] config.js se nenačetl — používám výchozí nastavení (kód 1111, lokální režim).');
 const CFG = Object.assign({}, DEFAULT_CFG, window.GHOSTLINE_CONFIG || {});
 const qs = new URLSearchParams(location.search);
@@ -782,7 +794,8 @@ const STORY = [
   },
   req: ['dongle', 'laptop'],
   lock: [['m', 'Než otevřeme stanici, potřebujeme vědět, co hledáme. Prohlédněte si zblízka vůz a podívejte se do notebooku.']],
-  term: { head: 'ŠKODA DIAG-03 // SERVISNÍ ZÁMEK', prompt: 'Zadejte servisní přístupový kód.' },
+  term: { head: 'ŠKODA DIAG-03 // SERVISNÍ ZÁMEK', prompt: 'Zadejte servisní přístupový kód.',
+    boxes: 3, letters: true, info: 'Kód tvoří 3 písmena.' },
   done: [
     ['n', 'Stanice se odemkla. Logy ukazují, že dongle někdo připojil při servisní prohlídce před třemi dny.'],
     ['m', 'Z CAN sběrnice se útočník dostal dál — do infotainmentu. Ten má Bluetooth a Wi-Fi.'],
@@ -1207,15 +1220,51 @@ function openTerm() {
   } else pzEl.innerHTML = '';
   pzEl.hidden = !pz; $('#term .tbox').classList.toggle('wide', !!pz);
   $('#tHint').textContent = (CFG.physicalHints || {})['m' + n] || '';
+  $('#tInfo').textContent = sc.term.info || ''; $('#tInfo').hidden = !sc.term.info;
+  buildBoxes(sc.term.boxes || 0, !!sc.term.letters);
   tMsg.textContent = ''; tMsg.className = 'tmsg'; tIn.value = ''; term.className = 'term on'; termOn = true; hideTip();
-  coolTick(); setTimeout(() => tIn.focus(), 60);
+  coolTick(); setTimeout(focusInput, 60);
 }
-function closeTerm() { term.className = 'term'; termOn = false; tIn.blur(); }
+/* ---- políčka na jednotlivé znaky ---- */
+const tBoxes = $('#tBoxes');
+let boxes = [];
+const cleanCh = (s, letters) => norm(s).replace(letters ? /[^A-Z]/g : /[^A-Z0-9]/g, '');
+function buildBoxes(count, letters) {
+  tBoxes.innerHTML = ''; boxes = [];
+  tBoxes.hidden = !count; tIn.hidden = !!count;
+  for (let i = 0; i < count; i++) {
+    const b = document.createElement('input');
+    b.className = 'tch'; b.maxLength = 2; b.autocomplete = 'off'; b.spellcheck = false;
+    b.setAttribute('autocapitalize', 'characters'); b.setAttribute('aria-label', 'Znak ' + (i + 1));
+    b.addEventListener('input', e => {
+      let v = cleanCh(b.value, letters);
+      if (v.length > 1 && e.inputType === 'insertFromPaste') { spread(i, v, letters); return; }   // vložení celého kódu
+      if (v.length > 1) v = v.slice(-1);                                                          // přepsání znaku
+      b.value = v; b.classList.remove('ok', 'bad');
+      if (v && boxes[i + 1]) boxes[i + 1].focus();
+    });
+    b.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !b.value && boxes[i - 1]) { boxes[i - 1].focus(); boxes[i - 1].value = ''; boxes[i - 1].classList.remove('ok', 'bad'); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' && boxes[i - 1]) { boxes[i - 1].focus(); e.preventDefault(); }
+      else if (e.key === 'ArrowRight' && boxes[i + 1]) { boxes[i + 1].focus(); e.preventDefault(); }
+    });
+    b.addEventListener('focus', () => b.select());
+    tBoxes.appendChild(b); boxes.push(b);
+  }
+}
+function spread(from, v, letters) {
+  for (let k = 0; k < v.length && from + k < boxes.length; k++) { boxes[from + k].value = v[k]; boxes[from + k].classList.remove('ok', 'bad'); }
+  (boxes[Math.min(from + v.length, boxes.length - 1)]).focus();
+}
+const boxMode = () => boxes.length > 0;
+function focusInput() { if (boxMode()) { (boxes.find(b => !b.value || b.classList.contains('bad')) || boxes[0]).focus(); } else tIn.focus(); }
+function setInputsDisabled(d) { tIn.disabled = d; boxes.forEach(b => b.disabled = d); }
+function closeTerm() { term.className = 'term'; termOn = false; tIn.blur(); boxes.forEach(b => b.blur()); }
 function coolTick() {
   clearInterval(coolT);
   const upd = () => { const left = Math.ceil((coolUntil - Date.now()) / 1000);
-    if (left > 0) { tGo.disabled = true; tIn.disabled = true; tMsg.className = 'tmsg bad'; tMsg.textContent = 'TERMINÁL DOČASNĚ ZABLOKOVÁN · ' + left + ' s'; }
-    else { tGo.disabled = false; tIn.disabled = false; clearInterval(coolT); if (/ZABLOKOVÁN/.test(tMsg.textContent)) { tMsg.textContent = ''; tIn.focus(); } } };
+    if (left > 0) { tGo.disabled = true; setInputsDisabled(true); tMsg.className = 'tmsg bad'; tMsg.textContent = 'TERMINÁL DOČASNĚ ZABLOKOVÁN · ' + left + ' s'; }
+    else { tGo.disabled = false; setInputsDisabled(false); clearInterval(coolT); if (/ZABLOKOVÁN/.test(tMsg.textContent)) { tMsg.textContent = ''; focusInput(); } } };
   upd(); if (coolUntil > Date.now()) coolT = setInterval(upd, 250);
 }
 $('#tBack').onclick = () => { if (!term.classList.contains('good')) closeTerm(); };
@@ -1223,17 +1272,30 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && termOn && 
 $('#tForm').addEventListener('submit', async e => {
   e.preventDefault();
   if (!termOn || Date.now() < coolUntil || term.classList.contains('good')) return;
-  const v = tIn.value; if (!norm(v)) return;
+  if (boxMode() && boxes.some(b => !b.value)) {
+    tMsg.className = 'tmsg bad'; tMsg.textContent = 'VYPLŇTE VŠECHNA ' + boxes.length + ' POLÍČKA'; focusInput(); return;
+  }
+  const v = boxMode() ? boxes.map(b => b.value).join('') : tIn.value; if (!norm(v)) return;
   if (REMOTE && (!st.startedAt || CTRL.status === 'ended')) return;
   const n = st.scene + 1, ok = (CFG.codes && CFG.codes['m' + n] || []).includes(codeHash(v));
   if (ok) {
-    wrongRow = 0; term.className = 'term on good'; tMsg.className = 'tmsg good'; tMsg.textContent = 'PŘÍSTUP POVOLEN ✓'; tIn.disabled = true; tGo.disabled = true; sfx.ok();
-    await wait(1400); closeTerm(); tIn.disabled = false; tGo.disabled = false;
+    wrongRow = 0; term.className = 'term on good'; tMsg.className = 'tmsg good'; tMsg.textContent = 'PŘÍSTUP POVOLEN ✓'; boxes.forEach(b => { b.classList.remove('bad'); b.classList.add('ok'); }); setInputsDisabled(true); tGo.disabled = true; sfx.ok();
+    await wait(1400); closeTerm(); setInputsDisabled(false); tGo.disabled = false;
     await milestone(n);
   } else {
     wrongRow++; sfx.err(); term.className = 'term on'; void term.offsetWidth; term.className = 'term on bad';
     tMsg.className = 'tmsg bad'; tMsg.textContent = 'PŘÍSTUP ODEPŘEN · NEPLATNÝ KÓD';
-    tIn.select();
+    const cc = (CFG.charCheck || {})['m' + n];
+    if (boxMode() && cc && cc.length === boxes.length) {
+      let good = 0;
+      boxes.forEach((b, i) => {
+        const okCh = cyrb53((i + 1) + ':' + norm(b.value) + '|' + (CFG.salt || 'auriga')) === cc[i];
+        b.classList.remove('ok', 'bad'); void b.offsetWidth; b.classList.add(okCh ? 'ok' : 'bad'); if (okCh) good++;
+      });
+      tMsg.textContent = 'PŘÍSTUP ODEPŘEN · SPRÁVNĚ ' + good + ' Z ' + boxes.length + ' ZNAKŮ';
+      focusInput();
+    } else if (boxMode()) { boxes.forEach(b => b.classList.add('bad')); focusInput(); }
+    else tIn.select();
     localLog(t => t.wrong = (t.wrong || 0) + 1); fbWrong(n);
     if (wrongRow >= (CFG.wrongLimit || 3)) { wrongRow = 0; coolUntil = Date.now() + (CFG.wrongCooldownSec || 20) * 1000; setTimeout(coolTick, 700); }
   }
