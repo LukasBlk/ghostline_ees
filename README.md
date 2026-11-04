@@ -79,6 +79,7 @@ Indikátor vpravo nahoře ve hře ukazuje stav: `LOKÁLNĚ` (Firebase nenastaven
 - Každý tým otevře hru, zadá **název týmu** a projde úvodní hlášení Dagmar Párové. Pak čeká v **čekací místnosti** (vidí ostatní přihlášené týmy). Čas zatím neběží.
 - Organizátor klikne **▶ SPUSTIT HRU**. Všechny týmy uvidí stejný odpočet (výchozí 10 s, `countdownSec`) a naráz se jim odemkne kapitola 1. Časy se měří od tohoto společného startu.
 - Během odpočtu jde start ještě **zrušit**. Tým, který se připojí po startu, jde rovnou do hry, ale jeho čas běží od společného startu.
+- **Mazání týmů:** přihlášený organizátor má u názvu každého týmu křížek ✕. Smazaný tým zmizí z výsledků a na jeho zařízení se zobrazí „Tým odstraněn“ s tlačítkem Začít znovu. V Nástrojích organizátora je i **Smazat všechny týmy** (potvrzuje se napsáním ID hry). Mazání nejde vrátit.
 - **■ UKONČIT HRU** zastaví měření: týmům, které nedokončily, se zamknou terminály a zobrazí „Hra ukončena“.
 - Bez vzdáleného startu (`remoteStart: false` nebo bez Firebase) začíná každý tým hned po registraci a čas se měří od ní.
 - Kapitola = scéna, ve které tým klikáním zkoumá předměty a poslouchá příběh. Terminál se odemkne až po prozkoumání klíčových míst; pak čeká na kód z fyzické šifry.

@@ -34,6 +34,12 @@ tr.fin td:first-child{border-left-color:var(--gn)}
 tr.p1 td:first-child{border-left-color:#ffd24a}
 .rank{font:600 22px var(--mono);color:var(--dim);width:56px;text-align:center}
 tr.p1 .rank{color:#ffd24a}
+.nm{display:flex;align-items:center;gap:10px}
+.del{flex:none;width:24px;height:24px;display:grid;place-items:center;border:1px solid rgba(255,59,78,.35);background:transparent;color:rgba(255,120,135,.75);font-size:13px;line-height:1;cursor:pointer;padding:0}
+.del:hover{border-color:var(--rd);color:#fff;background:var(--rd)}
+.del:disabled{opacity:.3;cursor:wait}
+.btn.red{background:transparent;border:1px solid var(--rd);color:var(--rd)}
+#wipeBox[hidden]{display:none}
 .name{font-size:20px;font-weight:600;letter-spacing:.04em;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bar{display:flex;gap:4px;margin-top:8px;width:200px}.bar i{flex:1;height:5px;background:#1b2b3b}.bar i.on{background:var(--cy);box-shadow:0 0 6px var(--cy)}
 tr.fin .bar i.on{background:var(--gn);box-shadow:0 0 6px var(--gn)}
@@ -142,6 +148,12 @@ code,.out{font-family:var(--mono);font-size:13px}
         <button class="btn" id="csv">STÁHNOUT CSV</button>
         <p style="margin-top:14px">Jiný běh hry zobrazíte parametrem <code>?game=ID</code> v adrese. Nové kolo = nové <code>gameId</code> v <code>config.js</code>.</p>
       </div>
+      <div id="wipeBox" hidden>
+        <h3>VYČIŠTĚNÍ</h3>
+        <p>Smaže všechny týmy této hry (<code id="wipeGid"></code>) z databáze. Týmům, které hru mají otevřenou, se zobrazí „Tým odstraněn“ a tlačítko Začít znovu. Nejde vrátit — výsledky si případně nejdřív stáhněte jako CSV.</p>
+        <button class="btn red" id="wipe">SMAZAT VŠECHNY TÝMY</button>
+        <p>Jednotlivý tým smažete křížkem ✕ u jeho názvu.</p>
+      </div>
     </div>
   </details>
 </div>
@@ -171,6 +183,8 @@ const REMOTE = CFG.remoteStart !== false;
 const HAS_FB = !!(CFG.firebase && CFG.firebase.apiKey && CFG.firebase.projectId);
 const CTRL_KEY = 'ghostline:ctrl:' + GID;
 let CTRL_API = null;
+let DEL_API = null;
+const canDelete = () => !!DEL_API && (!HAS_FB || isAdmin);
 const CTRL = { status: 'lobby', startMs: null, endMs: null, cd: CFG.countdownSec || 10 };
 let offset = 0;
 const serverNow = () => Date.now() + offset;
@@ -198,9 +212,10 @@ function render() {
       else if (CTRL.status === 'ended') tot = '<td class="tot lob">' + fmt((CTRL.endMs - CTRL.startMs) / 1000) + '<small>UKONČENO</small></td>';
       else tot = '<td class="tot run">' + fmt((serverNow() - CTRL.startMs) / 1000) + '<small>BĚŽÍ</small></td>';
     } else tot = '<td class="tot run">' + fmt(r.start ? (now - r.start) / 1000 : null) + '<small>BĚŽÍ</small></td>';
-    return '<tr class="' + (r.finished ? 'fin ' : '') + (i === 0 && r.done ? 'p1 ' : '') + (flash ? 'flash' : '') + '"><td class="rank">' + (i + 1) + '</td><td><div class="name" title="' + esc(r.name) + '">' + esc(r.name) + '</div><div class="bar">' + MS.map((_, j) => '<i class="' + (j < r.done ? 'on' : '') + '"></i>').join('') + '</div></td>' + cells + tot + '<td class="wr' + (r.wrong >= 5 ? ' hi' : '') + '">' + (r.wrong || 0) + '</td></tr>';
+    return '<tr class="' + (r.finished ? 'fin ' : '') + (i === 0 && r.done ? 'p1 ' : '') + (flash ? 'flash' : '') + '"><td class="rank">' + (i + 1) + '</td><td><div class="nm">' + (canDelete() ? '<button class="del" data-id="' + esc(r.id) + '" title="Smazat tým">✕</button>' : '') + '<div class="name" title="' + esc(r.name) + '">' + esc(r.name) + '</div></div><div class="bar">' + MS.map((_, j) => '<i class="' + (j < r.done ? 'on' : '') + '"></i>').join('') + '</div></td>' + cells + tot + '<td class="wr' + (r.wrong >= 5 ? ' hi' : '') + '">' + (r.wrong || 0) + '</td></tr>';
   }).join('');
   tb.innerHTML = html;
+  $('#wipeBox').hidden = !canDelete();
 }
 setInterval(() => { $('#sClock').textContent = new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); render(); }, 1000);
 
@@ -210,10 +225,15 @@ if (!hasFB) {
   setSync('', 'LOKÁLNÍ REŽIM');
   const n = $('#note'); n.hidden = false;
   n.innerHTML = 'Firebase zatím není nastaven (<code>config.js</code>). Testovací režim: vidíte jen týmy a ovládáte jen hry otevřené <b>v tomto prohlížeči</b> (třeba v dalších záložkách).';
+  DEL_API = {
+    one: async id => { const all = JSON.parse(localStorage.getItem('ghostline:local:' + GID) || '{}'); delete all[id]; localStorage.setItem('ghostline:local:' + GID, JSON.stringify(all)); },
+    all: async () => localStorage.setItem('ghostline:local:' + GID, '{}')
+  };
   const pull = () => { try { const all = JSON.parse(localStorage.getItem('ghostline:local:' + GID) || '{}');
     teams = Object.entries(all).map(([id, t]) => ({ id, name: t.name, start: t.startedAt, ms: t.ms || {}, wrong: t.wrong || 0 })); } catch (e) {} render(); };
   pull(); window.addEventListener('storage', pull); setInterval(pull, 2000);
   if (REMOTE) setupLocalControl();
+  window.__pull = pull;
 } else {
   setSync('wait', 'PŘIPOJUJI');
   (async () => {
@@ -237,7 +257,7 @@ if (!hasFB) {
 }
 
 /* ---------- řízení hry (vzdálený start) ---------- */
-let isAdmin = false;
+var isAdmin = false;
 function paintCtrl() {
   if (!REMOTE) return;
   const pill = $('#cPill'), now = serverNow();
@@ -314,6 +334,10 @@ function setupControl(auth, auM, db, fsM) {
   });
   $('#bOut').onclick = async () => { await auM.signOut(auth); await auM.signInAnonymously(auth); };
   const email = () => auth.currentUser && auth.currentUser.email;
+  DEL_API = {
+    one: id => fsM.deleteDoc(fsM.doc(db, 'games', GID, 'teams', id)),
+    all: async () => { for (const t of teams.slice()) await fsM.deleteDoc(fsM.doc(db, 'games', GID, 'teams', t.id)); }
+  };
   CTRL_API = {
     start: async () => {
       const t0 = Date.now();
@@ -326,6 +350,30 @@ function setupControl(auth, auM, db, fsM) {
   };
   bindControl();
 }
+
+/* ---------- mazání týmů ---------- */
+$('#wipeGid').textContent = GID;
+$('#rows').addEventListener('click', async e => {
+  const b = e.target.closest('.del'); if (!b || !canDelete()) return;
+  const t = teams.find(x => x.id === b.dataset.id); if (!t) return;
+  const done = Object.keys(t.ms).length;
+  if (!confirm('Smazat tým „' + t.name + '“?\n\nPostup: ' + done + '/' + N + ' milníků, chyb: ' + (t.wrong || 0) + '\nTým zmizí z výsledků a na jeho zařízení se zobrazí „Tým odstraněn“.\n\nNejde vrátit.')) return;
+  b.disabled = true;
+  try { await DEL_API.one(t.id); teams = teams.filter(x => x.id !== t.id); render(); window.__pull && window.__pull(); }
+  catch (err) { b.disabled = false; alert('Smazání se nepovedlo: ' + (err.code || err.message) + '\nZkontrolujte, že jste přihlášen jako organizátor.'); }
+});
+$('#wipe').onclick = async e => {
+  if (!canDelete()) return;
+  const n = teams.length;
+  if (!n) { alert('Žádné týmy ke smazání.'); return; }
+  const typed = prompt('Smazat VŠECH ' + n + ' týmů hry „' + GID + '“?\nNejde vrátit.\n\nPro potvrzení napište ID hry:');
+  if (typed == null) return;
+  if (typed.trim() !== GID) { alert('ID hry nesouhlasí, nic nebylo smazáno.'); return; }
+  const btn = e.currentTarget; btn.disabled = true;
+  try { await DEL_API.all(); teams = []; render(); window.__pull && window.__pull(); }
+  catch (err) { alert('Mazání se nepovedlo: ' + (err.code || err.message)); }
+  btn.disabled = false;
+};
 
 /* ---------- nástroje ---------- */
 $('#hGo').onclick = () => { const v = $('#hIn').value; if (!norm(v)) return; $('#hOut').textContent = '"' + codeHash(v) + '"   ← normalizováno jako: ' + norm(v); };

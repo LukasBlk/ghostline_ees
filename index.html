@@ -219,6 +219,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .lobby{position:absolute;inset:0;z-index:19;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(3,16,12,.8);backdrop-filter:blur(5px);opacity:0;visibility:hidden;transition:opacity .6s,visibility 0s .6s}
 .lobby.on{opacity:1;visibility:visible;transition:opacity .6s}
 .lobby.ended{z-index:55;background:rgba(3,16,12,.94)}
+.lobby.deleted{z-index:80}
+.lobby .btn{margin-top:2.2cqw}
 .lb-tag{font-size:1.1cqw;letter-spacing:.5em;color:var(--cy)}
 .lb-team{font-size:4.2cqw;font-weight:700;letter-spacing:.1em;margin:.8cqw 0 .6cqw;max-width:80cqw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lb-state{font-size:1.5cqw;color:#c9d6e2;letter-spacing:.05em;max-width:60cqw;line-height:1.5}
@@ -634,6 +636,12 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <div class="lb-note" id="lbNote">Úvodní hlášení si můžete znovu přečíst v ZÁZNAMU nahoře.</div>
   <div class="lb-note" id="lbLocal" hidden>Testovací režim bez Firebase: hru spusťte v administraci (<b>leaderboard.html</b> / <b>/admin</b>) v tomto prohlížeči, nebo <button class="lnk" id="lbSelf">spustit hned</button>.</div>
 </section>
+<section class="lobby ended deleted" id="deleted">
+  <div class="lb-tag">TÝM ODSTRANĚN</div>
+  <div class="lb-team" id="delTeam"></div>
+  <div class="lb-state">Organizátor váš tým smazal z výsledků. Pokud chcete hrát dál, začněte znovu a zadejte název týmu.</div>
+  <button class="btn" id="delRestart">↺ ZAČÍT ZNOVU</button>
+</section>
 <section class="lobby ended" id="ended">
   <div class="lb-tag">KONEC HRY</div>
   <div class="lb-team">HRA UKONČENA</div>
@@ -892,7 +900,7 @@ const seen = id => (st.seen[STORY[st.scene].id] || []).includes(id);
 function markSeen(id) { const k = STORY[st.scene].id; (st.seen[k] = st.seen[k] || []); if (!st.seen[k].includes(id)) st.seen[k].push(id); save(); paintSeen(); }
 
 /* lokální kopie výsledků (žebříček v lokálním režimu, test bez Firebase) */
-function localLog(fn) { try { const all = JSON.parse(localStorage.getItem(LOCAL_KEY) || '{}'); const t = all[st.teamId] || { name: st.name, startedAt: st.startedAt, ms: {}, wrong: 0 }; fn(t); all[st.teamId] = t; localStorage.setItem(LOCAL_KEY, JSON.stringify(all)); } catch (e) {} }
+function localLog(fn) { if (deleted) return; try { const all = JSON.parse(localStorage.getItem(LOCAL_KEY) || '{}'); const t = all[st.teamId] || { name: st.name, startedAt: st.startedAt, ms: {}, wrong: 0 }; fn(t); all[st.teamId] = t; localStorage.setItem(LOCAL_KEY, JSON.stringify(all)); } catch (e) {} }
 
 /* ---------- zvuk ---------- */
 const sfx = (() => {
@@ -949,11 +957,40 @@ if (hasFB) FB.ready = (async function connect() {
     } catch (e) { console.warn('[GHOSTLINE] Firebase:', e); setSync('error'); await wait(Math.min(30000, 4000 * (attempt + 1))); }
   }
 })();
+/* ---------- smazání týmu organizátorem ---------- */
+let deleted = false;
+function markDeleted() {
+  if (deleted || !st) return;
+  deleted = true;
+  if (termOn) closeTerm();
+  $('#delTeam').textContent = st.name.toUpperCase();
+  $('#deleted').classList.add('on'); hideTip();
+}
+let teamWatched = false;
+function watchTeam() {
+  if (!hasFB || teamWatched || !st || !st.created) return;
+  teamWatched = true;
+  const id = st.teamId;
+  FB.ready.then(() => {
+    const A = FB.api;
+    A.onSnapshot(A.doc(A.db, 'games', GID, 'teams', id), snap => {
+      if (snap.metadata && snap.metadata.fromCache) return;   // rozhoduje jen odpověď serveru
+      if (!snap.exists() && st && st.teamId === id) markDeleted();
+    }, e => console.warn('[GHOSTLINE] sledování týmu:', e));
+  });
+}
+function watchLocalDelete() {
+  setInterval(() => {
+    if (!st || deleted) return;
+    try { const all = JSON.parse(localStorage.getItem(LOCAL_KEY) || '{}'); if (!all[st.teamId]) markDeleted(); } catch (e) {}
+  }, 500);
+}
 function fbTask(fn) {
-  if (!hasFB) return;
+  if (!hasFB || deleted) return;
   FB.chain = FB.chain.then(async () => {
     await FB.ready;
     for (let i = 0; i < 6; i++) {
+      if (deleted) return;
       try { setSync('wait'); await fn(FB.api); setSync('online'); return; }
       catch (e) { console.warn('[GHOSTLINE] zápis:', e); setSync('error'); if (e && e.code === 'permission-denied') return; await wait(3000 * (i + 1)); }
     }
@@ -965,8 +1002,9 @@ function flush() {
   if (!st.created) fbTask(async A => {
     if (st.created) return;
     await A.setDoc(teamRef(A), { name: st.name, uid: FB.uid, startedAt: A.serverTimestamp(), clientStart: st.startedAt, milestones: {}, wrong: {}, current: 1 });
-    st.created = true; save();
+    st.created = true; save(); watchTeam();
   });
+  watchTeam();
   if (REMOTE) measureOffset();
   for (let n = 1; n <= 5; n++) {
     const k = 'm' + n;
@@ -1379,6 +1417,8 @@ $('#eNew').onclick = () => {
   location.href = location.pathname;
 };
 $('#logX').onclick = () => $('#logp').classList.remove('on');
+$('#delRestart').onclick = () => { try { localStorage.removeItem(KEY); } catch (e) {} location.href = location.pathname; };
+if (!hasFB) watchLocalDelete();
 
 /* ---------- init ---------- */
 if (st && st.finished) { startEl.classList.add('off'); activate(4); restoreSolved(); onSolved(5); showEnd(); flush(); }
