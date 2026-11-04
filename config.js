@@ -27,7 +27,7 @@ window.GHOSTLINE_CONFIG = {
      Zadání se normalizuje: velká/malá písmena, diakritika, mezery a interpunkce nehrají roli. */
   codes: {
     m1: ["0c154674cd4d9950", "d4e1e720607db53f"],   // SOS (z blikání světel vozu) + testovací 1111 — před akcí 1111 smažte
-    m2: ["89eb0ee2244220e0", "d4e1e720607db53f"],   // PIN 6547 z logických operací (zadání je přímo v terminálu) + testovací 1111
+    m2: ["89eb0ee2244220e0"],   // PIN 6547 z logických operací (zadání je přímo v terminálu)
     m3: ["d4e1e720607db53f"],
     m4: ["d4e1e720607db53f"],
     m5: ["d4e1e720607db53f"]
