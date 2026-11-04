@@ -861,6 +861,7 @@ const STORY = [
        Zatím jsou pro testování správné všechny odpovědi (ok: [0, 1, 2, 3]). */
     quiz: {
       limitSec: 40,
+      count: 10,          // kolik otázek se v každém pokusu náhodně vybere ze všech níže
       questions: [
         { q: 'Jaké je typické napětí v palubní síti vozů Škoda?', a: ['24V', '12V', '5V', '48V'], ok: [1] },
         { q: 'Jak vypadá Ohmův zákon?', a: ['U = R x I', 'I = C / U', 'R = P x I', 'U = R / C'], ok: [0] },
@@ -871,11 +872,11 @@ const STORY = [
         { q: 'Co je to SBOM', a: ['Software Basis Of Maping', 'Software Bill Of Material', 'Software By Own Maker', 'Sample Build Over Manufacturer'], ok: [1] },
         { q: 'Jaké je napětí v klasické domácí 1-fázové zásuvce v ČR?', a: ['220V', '400V', '120V', '230V'], ok: [3] },
         { q: 'Jaká je základní jednotka výkonu?', a: ['Pascal', 'Joule', 'Watt', 'kCal'], ok: [2] },
-        { q: 'Jaký olej se používá v motorech vozů Škoda?', a: ['5W40', '10W40', '10W30', '0W30'], ok: [0, 1, 2, 3] }
-        { q: 'Jaká jednotka za nabídky NENÍ cybersecurity relevantní?', a: ['Motorová jednotka', 'Airbag', 'AFS', 'Infotainment'], ok: [2] }
-        { q: 'Kolik šroubů má kolo vozidla Škoda CityGo', a: ['5', '4', '6', '3'], ok: [1] }
-        { q: 'Co znamená zkratka AES?', a: ['Alpha End System', 'Advanced Encryption Standard', 'Automatic Encryption System', 'Alphabetic Evaluation Score'], ok: [1] }
-        { q: 'Co NEPATŘÍ mezi externí rozhraní?', a: ['Wi-Fi', 'Bluetooth', 'OBD-II', 'HSM'], ok: [3] }
+        { q: 'Jaký olej se používá v motorech vozů Škoda?', a: ['5W40', '10W40', '10W30', '0W30'], ok: [0, 1, 2, 3] },
+        { q: 'Jaká jednotka za nabídky NENÍ cybersecurity relevantní?', a: ['Motorová jednotka', 'Airbag', 'AFS', 'Infotainment'], ok: [2] },
+        { q: 'Kolik šroubů má kolo vozidla Škoda CityGo', a: ['5', '4', '6', '3'], ok: [1] },
+        { q: 'Co znamená zkratka AES?', a: ['Alpha End System', 'Advanced Encryption Standard', 'Automatic Encryption System', 'Alphabetic Evaluation Score'], ok: [1] },
+        { q: 'Co NEPATŘÍ mezi externí rozhraní?', a: ['Wi-Fi', 'Bluetooth', 'OBD-II', 'HSM'], ok: [3] },
         { q: 'Kolik plně elektrických modelů nabízí Škoda v Evropě?', a: ['3', '4', '7', '10'], ok: [1] }
       ]
     } },
@@ -1292,9 +1293,10 @@ let quiz = null, qRun = null, qTimer = null;
 const tQuiz = $('#tQuiz');
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const qLimit = () => quiz.limitSec || 40;
+const qCount = () => Math.min(quiz.count || quiz.questions.length, quiz.questions.length);
 function quizReady() {
   stopQuiz();
-  tQuiz.innerHTML = '<div class="qz-ready"><div class="qz-rules"><div><b>' + quiz.questions.length + '</b><span>OTÁZEK</span></div><div><b>' + qLimit() + ' s</b><span>ČASOVÝ LIMIT</span></div><div><b>4</b><span>MOŽNOSTI</span></div></div>' +
+  tQuiz.innerHTML = '<div class="qz-ready"><div class="qz-rules"><div><b>' + qCount() + '</b><span>OTÁZEK</span></div><div><b>' + qLimit() + ' s</b><span>ČASOVÝ LIMIT</span></div><div><b>4</b><span>MOŽNOSTI</span></div></div>' +
     '<div class="qz-note">Odpovězte správně na všechny otázky. Jedna chyba nebo vypršení času znamená neúspěch a zámek terminálu na ' + (CFG.quizLockSec || 20) + ' s.</div>' +
     '<button class="qz-start" id="qStart" type="button">▶ START</button></div>';
   $('#qStart').onclick = quizStart;
@@ -1305,7 +1307,7 @@ function quizStart() {
   if (REMOTE && (!st.startedAt || CTRL.status === 'ended')) return;
   const n = st.scene + 1, lk = lockState(n);
   lk.quizRun = Date.now(); save();                       // obnovení stránky během kvízu = neúspěch
-  qRun = { n, i: 0, end: Date.now() + qLimit() * 1000, order: shuffle(quiz.questions.map((_, k) => k)) };
+  qRun = { n, i: 0, end: Date.now() + qLimit() * 1000, order: shuffle(quiz.questions.map((_, k) => k)).slice(0, qCount()) };
   $('#tBack').hidden = true; tMsg.textContent = ''; sfx.click();
   quizQuestion();
   qTimer = setInterval(quizTick, 100); quizTick();
@@ -1320,7 +1322,7 @@ function quizTick() {
 }
 function quizQuestion() {
   const q = quiz.questions[qRun.order[qRun.i]], opts = shuffle(q.a.map((t, k) => k));
-  tQuiz.innerHTML = '<div class="qz-top"><span class="qz-n">OTÁZKA <b>' + (qRun.i + 1) + '</b> / ' + quiz.questions.length + '</span><span class="qz-time" id="qTime"></span></div>' +
+  tQuiz.innerHTML = '<div class="qz-top"><span class="qz-n">OTÁZKA <b>' + (qRun.i + 1) + '</b> / ' + qCount() + '</span><span class="qz-time" id="qTime"></span></div>' +
     '<div class="qz-bar"><i id="qBar"></i></div><div class="qz-q"></div><div class="qz-a"></div>';
   tQuiz.querySelector('.qz-q').textContent = q.q;
   const box = tQuiz.querySelector('.qz-a');
@@ -1339,7 +1341,7 @@ function quizAnswer(btn, q, k) {
   tQuiz.querySelectorAll('.qz-a button').forEach(b => b.disabled = true);
   if (okSet.includes(k)) {
     btn.classList.add('ok'); sfx.click();
-    setTimeout(() => { if (!qRun) return; qRun.lock = false; qRun.i++; if (qRun.i >= quiz.questions.length) quizWin(); else quizQuestion(); }, 280);
+    setTimeout(() => { if (!qRun) return; qRun.lock = false; qRun.i++; if (qRun.i >= qRun.order.length) quizWin(); else quizQuestion(); }, 280);
   } else {
     btn.classList.add('bad');
     setTimeout(() => quizFail('ŠPATNÁ ODPOVĚĎ'), 700);
@@ -1349,7 +1351,7 @@ function stopQuiz() { clearInterval(qTimer); qTimer = null; qRun = null; $('#tBa
 async function quizWin() {
   const n = st.scene + 1;
   stopQuiz(); if (st.locks) delete st.locks['m' + n];
-  tQuiz.innerHTML = '<div class="qz-done" style="color:var(--gn)">VŠECH ' + quiz.questions.length + ' ODPOVĚDÍ SPRÁVNĚ</div>';
+  tQuiz.innerHTML = '<div class="qz-done" style="color:var(--gn)">VŠECH ' + qCount() + ' ODPOVĚDÍ SPRÁVNĚ</div>';
   term.className = 'term on good'; tMsg.className = 'tmsg good'; tMsg.textContent = 'PŘÍSTUP POVOLEN ✓'; sfx.ok();
   await wait(1400); closeTerm();
   await milestone(n);
