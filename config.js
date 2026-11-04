@@ -36,7 +36,8 @@ window.GHOSTLINE_CONFIG = {
   /* Kontrola po znacích (políčka na jednotlivé znaky): otisk každého znaku na jeho pozici.
      Hráč po odeslání vidí, které znaky má správně (zeleně) a které ne (červeně). */
   charCheck: {
-    m1: ["ca12aa8c7db1cfd0", "531666d134a45d85", "2a8da6e5ea56af3c"]   // S · O · S
+    m1: ["ca12aa8c7db1cfd0", "531666d134a45d85", "2a8da6e5ea56af3c"],   // S · O · S
+    m2: ["9197764072d69fd7", "5bf7133f45fb3d32", "52d6b1f7d0786bcc", "bb3fea1e9725af90"]   // 6 · 5 · 4 · 7
   },
 
   /* Názvy milníků (zobrazují se ve hře i na žebříčku). */
