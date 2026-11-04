@@ -860,7 +860,7 @@ const STORY = [
     /* Rychlokvíz: všech 10 otázek správně do limitu. ok = index správné odpovědi (0 = první) nebo pole indexů.
        Zatím jsou pro testování správné všechny odpovědi (ok: [0, 1, 2, 3]). */
     quiz: {
-      limitSec: 40,
+      limitSec: 120,
       count: 10,          // kolik otázek se v každém pokusu náhodně vybere ze všech níže
       questions: [
         { q: 'Jaké je typické napětí v palubní síti vozů Škoda?', a: ['24V', '12V', '5V', '48V'], ok: [1] },
@@ -1293,10 +1293,11 @@ let quiz = null, qRun = null, qTimer = null;
 const tQuiz = $('#tQuiz');
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const qLimit = () => quiz.limitSec || 40;
+const fmtSec = s => s >= 60 && s % 60 === 0 ? s / 60 + ' min' : s >= 60 ? Math.floor(s / 60) + ' min ' + (s % 60) + ' s' : s + ' s';
 const qCount = () => Math.min(quiz.count || quiz.questions.length, quiz.questions.length);
 function quizReady() {
   stopQuiz();
-  tQuiz.innerHTML = '<div class="qz-ready"><div class="qz-rules"><div><b>' + qCount() + '</b><span>OTÁZEK</span></div><div><b>' + qLimit() + ' s</b><span>ČASOVÝ LIMIT</span></div><div><b>4</b><span>MOŽNOSTI</span></div></div>' +
+  tQuiz.innerHTML = '<div class="qz-ready"><div class="qz-rules"><div><b>' + qCount() + '</b><span>OTÁZEK</span></div><div><b>' + fmtSec(qLimit()) + '</b><span>ČASOVÝ LIMIT</span></div><div><b>4</b><span>MOŽNOSTI</span></div></div>' +
     '<div class="qz-note">Odpovězte správně na všechny otázky. Jedna chyba nebo vypršení času znamená neúspěch a zámek terminálu na ' + (CFG.quizLockSec || 20) + ' s.</div>' +
     '<button class="qz-start" id="qStart" type="button">▶ START</button></div>';
   $('#qStart').onclick = quizStart;
@@ -1316,7 +1317,7 @@ function quizTick() {
   if (!qRun) return;
   const left = Math.max(0, qRun.end - Date.now()), frac = left / (qLimit() * 1000);
   const tEl = $('#qTime'), bar = $('#qBar');
-  if (tEl) { tEl.textContent = (left / 1000).toFixed(1) + ' s'; tEl.classList.toggle('low', left < 10000); }
+  if (tEl) { tEl.textContent = left >= 60000 ? Math.floor(left / 60000) + ':' + String(Math.floor(left / 1000) % 60).padStart(2, '0') : (left / 1000).toFixed(1) + ' s'; tEl.classList.toggle('low', left < 10000); }
   if (bar) { bar.style.transform = 'scaleX(' + frac + ')'; bar.classList.toggle('low', left < 10000); }
   if (left <= 0) quizFail('ČAS VYPRŠEL');
 }

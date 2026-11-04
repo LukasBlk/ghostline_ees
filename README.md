@@ -17,7 +17,7 @@ Webová adventura s motivem kybernetické bezpečnosti ve Škoda Auto. Týmy v r
 | Milník | Kapitola | Kód |
 |---|---|---|
 | m1 | Servisní hala — diagnostická stanice | `SOS` — nevychází ze šifry, hráči ho musí vyčíst z blikání světel vozu |
-| m2 | Kokpit — servisní menu infotainmentu | bez kódu: **rychlokvíz** 10 otázek za 40 s, všechny správně (otázky v `index.html` → `STORY` → `cockpit` → `quiz`) |
+| m2 | Kokpit — servisní menu infotainmentu | bez kódu: **rychlokvíz** 10 náhodných otázek za 2 min, všechny správně (otázky v `index.html` → `STORY` → `cockpit` → `quiz`) |
 | m3 | Dohledové centrum — blokace C2 | `1111` |
 | m4 | Laboratoř podpisů — revokace certifikátu | `1111` |
 | m5 | Velín — nouzový vypínač | `6547` — logické operace XOR/NOT/AND/OR, zadání je přímo v terminálu |
