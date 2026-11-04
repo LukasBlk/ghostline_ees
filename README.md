@@ -16,7 +16,7 @@ Webová adventura s motivem kybernetické bezpečnosti ve Škoda Auto. Týmy v r
 
 | Milník | Kapitola | Kód |
 |---|---|---|
-| m1 | Servisní hala — diagnostická stanice | `SOS` — nevychází ze šifry, hráči ho musí vyčíst z blikání světel vozu (zatím platí i testovací `1111`) |
+| m1 | Servisní hala — diagnostická stanice | `SOS` — nevychází ze šifry, hráči ho musí vyčíst z blikání světel vozu |
 | m2 | Kokpit — servisní menu infotainmentu | `6547` — logické operace XOR/NOT/AND/OR, zadání je přímo v terminálu |
 | m3 | Dohledové centrum — blokace C2 | `1111` |
 | m4 | Laboratoř podpisů — revokace certifikátu | `1111` |
