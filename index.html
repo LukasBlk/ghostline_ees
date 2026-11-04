@@ -1172,7 +1172,7 @@ async function onHotspot(id) {
   const sc = STORY[st.scene], h = sc.hs[id]; if (!h) return;
   sfx.click();
   if (h.term) {
-    if (st.ms['m' + (st.scene + 1)] != null) return;
+    if (st.ms['m' + (st.scene + 1)] != null) { toast('TERMINÁL UŽ JE ODEMČENÝ'); return; }
     if (sc.req.some(x => !seen(x))) { await say(sc.lock); return; }
     markSeen(id); openTerm(); return;
   }
@@ -1423,7 +1423,16 @@ $('#bCont').onclick = () => { flush(); begin(); };
 $('#bNew').onclick = () => { $('#cont').hidden = true; $('#iTeam').focus(); };
 async function begin() {
   sfx.click(); startEl.classList.add('off'); $('#hud').classList.add('on'); paintHud(); restoreSolved();
-  await wait(500); await goScene(st.scene);
+  await wait(500);
+  const n = st.scene + 1;
+  if (st.ms['m' + n] != null) {
+    // stránka se obnovila po zadání správného kódu, ale před přechodem do další kapitoly:
+    // dokončit závěrečný dialog kapitoly a pokračovat dál (jinak by tým uvízl u vyřešeného terminálu)
+    activate(st.scene); onSolved(n);
+    await wait(600); await say(STORY[st.scene].done);
+    if (n === 5) { st.finished = true; save(); await wait(600); showEnd(); return; }
+    await goScene(n);
+  } else await goScene(st.scene);
   await lobbyGate();
 }
 function showEnd() {
