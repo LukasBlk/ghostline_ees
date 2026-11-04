@@ -946,7 +946,7 @@ if (hasFB) FB.ready = (async function connect() {
     try {
       const base = 'https://www.gstatic.com/firebasejs/' + FBV + '/';
       const [appM, fsM, auM] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-firestore.js'), import(base + 'firebase-auth.js')]);
-      const app = appM.initializeApp(CFG.firebase);
+      const app = appM.initializeApp(CFG.firebase, 'ghostline-game');
       const auth = auM.getAuth(app);
       const cred = await auM.signInAnonymously(auth);
       FB.uid = cred.user.uid;
@@ -993,7 +993,13 @@ function fbTask(fn) {
     for (let i = 0; i < 6; i++) {
       if (deleted) return;
       try { setSync('wait'); await fn(FB.api); setSync('online'); return; }
-      catch (e) { console.warn('[GHOSTLINE] zápis:', e); setSync('error'); if (e && e.code === 'permission-denied') return; await wait(3000 * (i + 1)); }
+      catch (e) {
+        console.warn('[GHOSTLINE] zápis:', e); setSync('error');
+        syncEl.title = 'Zápis do databáze selhal (' + (e && e.code || e && e.message || 'neznámá chyba') + ').' +
+          (e && e.code === 'permission-denied' ? ' Databáze zápis odmítla — tým patří jinému přihlášení. Začněte hru znovu (adresa ?reset).' : ' Zkouším znovu, hra běží dál.');
+        if (e && e.code === 'permission-denied') return;
+        await wait(3000 * (i + 1));
+      }
     }
   });
 }

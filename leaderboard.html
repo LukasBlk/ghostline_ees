@@ -240,7 +240,8 @@ if (!hasFB) {
     try {
       const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
       const [appM, fsM, auM] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-firestore.js'), import(base + 'firebase-auth.js')]);
-      const app = appM.initializeApp(CFG.firebase);
+      // vlastní instance = vlastní přihlášení; přihlášení organizátora tak neovlivní hru otevřenou ve stejném prohlížeči
+      const app = appM.initializeApp(CFG.firebase, 'ghostline-admin');
       const auth = auM.getAuth(app);
       await new Promise(r => { const off = auM.onAuthStateChanged(auth, () => { off(); r(); }); });
       if (!auth.currentUser) await auM.signInAnonymously(auth);
