@@ -58,8 +58,11 @@ window.GHOSTLINE_CONFIG = {
     m5: "Kód získáte rozluštěním šifry č. 5."
   },
 
-  /* Ochrana proti hádání: po N chybných pokusech za sebou se terminál na X sekund zamkne. */
-  wrongLimit: 3,
+  /* Ochrana proti hádání (platí pro každý terminál zvlášť):
+     od wrongLimit-tého chybného pokusu se terminál zamkne; první zámek trvá wrongCooldownSec
+     a každý další chybný pokus ho zdvojnásobí: 20 s → 40 s → 80 s → 160 s → …
+     Počítadlo se po obnovení stránky nenuluje a vynuluje se až po odemčení terminálu. */
+  wrongLimit: 2,
   wrongCooldownSec: 20,
 
   /* VZDÁLENÝ START (funguje jen s Firebase).

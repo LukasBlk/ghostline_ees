@@ -734,7 +734,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 const DEFAULT_CFG = { gameId: 'ghostline-demo', firebase: {}, salt: 'auriga',
   codes: { m1: ['0c154674cd4d9950'], m2: ['89eb0ee2244220e0'], m3: ['d4e1e720607db53f'], m4: ['d4e1e720607db53f'], m5: ['d4e1e720607db53f'] },
   milestones: ['Diagnostika odemčena', 'Infotainment izolován', 'C2 zablokováno', 'Certifikát revokován', 'Flotila zachráněna'],
-  physicalHints: {}, charCheck: { m1: ['ca12aa8c7db1cfd0', '531666d134a45d85', '2a8da6e5ea56af3c'], m2: ['9197764072d69fd7', '5bf7133f45fb3d32', '52d6b1f7d0786bcc', 'bb3fea1e9725af90'] }, wrongLimit: 3, wrongCooldownSec: 20, remoteStart: true, countdownSec: 10 };
+  physicalHints: {}, charCheck: { m1: ['ca12aa8c7db1cfd0', '531666d134a45d85', '2a8da6e5ea56af3c'], m2: ['9197764072d69fd7', '5bf7133f45fb3d32', '52d6b1f7d0786bcc', 'bb3fea1e9725af90'] }, wrongLimit: 2, wrongCooldownSec: 20, remoteStart: true, countdownSec: 10 };
 if (!window.GHOSTLINE_CONFIG) console.warn('[GHOSTLINE] config.js se nenačetl — používám výchozí nastavení (kód 1111, lokální režim).');
 const CFG = Object.assign({}, DEFAULT_CFG, window.GHOSTLINE_CONFIG || {});
 const qs = new URLSearchParams(location.search);
@@ -1208,7 +1208,10 @@ function paintSeen() {
 
 /* ---------- terminál ---------- */
 const term = $('#term'), tIn = $('#tIn'), tMsg = $('#tMsg'), tGo = $('#tGo');
-let wrongRow = 0, coolUntil = 0, coolT = null;
+let coolUntil = 0, coolT = null;
+/* počet chybných pokusů a konec zámku pro každý terminál; ukládá se, aby zámek nešel obejít obnovením stránky */
+function lockState(n) { st.locks = st.locks || {}; return st.locks['m' + n] = st.locks['m' + n] || { wrong: 0, until: 0 }; }
+const fmtLock = s => s >= 60 ? Math.floor(s / 60) + ' min ' + String(s % 60).padStart(2, '0') + ' s' : s + ' s';
 function openTerm() {
   const sc = STORY[st.scene], n = st.scene + 1;
   $('#tHead').textContent = sc.term.head; $('#tPrompt').textContent = sc.term.prompt;
@@ -1220,6 +1223,7 @@ function openTerm() {
   } else pzEl.innerHTML = '';
   pzEl.hidden = !pz; $('#term .tbox').classList.toggle('wide', !!pz);
   $('#tHint').textContent = (CFG.physicalHints || {})['m' + n] || '';
+  coolUntil = lockState(n).until || 0;
   $('#tInfo').textContent = sc.term.info || ''; $('#tInfo').hidden = !sc.term.info;
   buildBoxes(sc.term.boxes || 0, sc.term.letters ? 'letters' : sc.term.digits ? 'digits' : 'any');
   tMsg.textContent = ''; tMsg.className = 'tmsg'; tIn.value = ''; term.className = 'term on'; termOn = true; hideTip();
@@ -1264,7 +1268,7 @@ function closeTerm() { term.className = 'term'; termOn = false; tIn.blur(); boxe
 function coolTick() {
   clearInterval(coolT);
   const upd = () => { const left = Math.ceil((coolUntil - Date.now()) / 1000);
-    if (left > 0) { tGo.disabled = true; setInputsDisabled(true); tMsg.className = 'tmsg bad'; tMsg.textContent = 'TERMINÁL DOČASNĚ ZABLOKOVÁN · ' + left + ' s'; }
+    if (left > 0) { tGo.disabled = true; setInputsDisabled(true); tMsg.className = 'tmsg bad'; tMsg.textContent = 'TERMINÁL DOČASNĚ ZABLOKOVÁN · ' + fmtLock(left); }
     else { tGo.disabled = false; setInputsDisabled(false); clearInterval(coolT); if (/ZABLOKOVÁN/.test(tMsg.textContent)) { tMsg.textContent = ''; focusInput(); } } };
   upd(); if (coolUntil > Date.now()) coolT = setInterval(upd, 250);
 }
@@ -1280,11 +1284,12 @@ $('#tForm').addEventListener('submit', async e => {
   if (REMOTE && (!st.startedAt || CTRL.status === 'ended')) return;
   const n = st.scene + 1, ok = (CFG.codes && CFG.codes['m' + n] || []).includes(codeHash(v));
   if (ok) {
-    wrongRow = 0; term.className = 'term on good'; tMsg.className = 'tmsg good'; tMsg.textContent = 'PŘÍSTUP POVOLEN ✓'; boxes.forEach(b => { b.classList.remove('bad'); b.classList.add('ok'); }); setInputsDisabled(true); tGo.disabled = true; sfx.ok();
+    if (st.locks) delete st.locks['m' + n];
+    term.className = 'term on good'; tMsg.className = 'tmsg good'; tMsg.textContent = 'PŘÍSTUP POVOLEN ✓'; boxes.forEach(b => { b.classList.remove('bad'); b.classList.add('ok'); }); setInputsDisabled(true); tGo.disabled = true; sfx.ok();
     await wait(1400); closeTerm(); setInputsDisabled(false); tGo.disabled = false;
     await milestone(n);
   } else {
-    wrongRow++; sfx.err(); term.className = 'term on'; void term.offsetWidth; term.className = 'term on bad';
+    const lk = lockState(n); lk.wrong++; sfx.err(); term.className = 'term on'; void term.offsetWidth; term.className = 'term on bad';
     tMsg.className = 'tmsg bad'; tMsg.textContent = 'PŘÍSTUP ODEPŘEN · NEPLATNÝ KÓD';
     const cc = (CFG.charCheck || {})['m' + n];
     if (boxMode() && cc && cc.length === boxes.length) {
@@ -1298,7 +1303,13 @@ $('#tForm').addEventListener('submit', async e => {
     } else if (boxMode()) { boxes.forEach(b => b.classList.add('bad')); focusInput(); }
     else tIn.select();
     localLog(t => t.wrong = (t.wrong || 0) + 1); fbWrong(n);
-    if (wrongRow >= (CFG.wrongLimit || 3)) { wrongRow = 0; coolUntil = Date.now() + (CFG.wrongCooldownSec || 20) * 1000; setTimeout(coolTick, 700); }
+    const lim = CFG.wrongLimit || 2;
+    if (lk.wrong >= lim) {
+      const sec = (CFG.wrongCooldownSec || 20) * Math.pow(2, lk.wrong - lim);   // 20, 40, 80, 160 …
+      coolUntil = lk.until = Date.now() + sec * 1000;
+      setTimeout(coolTick, 700);
+    }
+    save();
   }
 });
 

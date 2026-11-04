@@ -85,7 +85,7 @@ Indikátor vpravo nahoře ve hře ukazuje stav: `LOKÁLNĚ` (Firebase nenastaven
 - Kapitola = scéna, ve které tým klikáním zkoumá předměty a poslouchá příběh. Terminál se odemkne až po prozkoumání klíčových míst; pak čeká na kód z fyzické šifry.
 - Zadání správného kódu = **milník**: zapíše se čas od startu týmu do Firestore a začne další kapitola.
 - Organizátor má otevřený `leaderboard.html` (ideálně na projektoru): pořadí, mezičasy, běžící čas, počet chybných pokusů.
-- Po 3 chybných pokusech za sebou se terminál na 20 s zamkne (nastavitelné v `config.js`).
+- Ochrana proti hádání: po 2. chybném pokusu se terminál zamkne na 20 s a každý další chybný pokus zámek zdvojnásobí (40 s, 80 s, 160 s…). Platí pro každý terminál zvlášť, obnovení stránky zámek neruší (nastavitelné v `config.js`: `wrongLimit`, `wrongCooldownSec`).
 
 ### Užitečné
 - **Nový běh hry:** změňte `gameId` v `config.js` (např. `skoleni-2026-11-05`). Výsledky se nemíchají; starší běh zobrazíte přes `leaderboard.html?game=STARE_ID`.
