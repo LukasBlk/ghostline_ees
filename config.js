@@ -26,7 +26,7 @@ window.GHOSTLINE_CONFIG = {
      Ke každému milníku můžete zadat více platných otisků (např. varianty odpovědi).
      Zadání se normalizuje: velká/malá písmena, diakritika, mezery a interpunkce nehrají roli. */
   codes: {
-    m1: ["d4e1e720607db53f"],   // výchozí kód 1111
+    m1: ["0c154674cd4d9950", "d4e1e720607db53f"],   // SOS (z blikání světel vozu) + testovací 1111 — před akcí 1111 smažte
     m2: ["d4e1e720607db53f"],
     m3: ["d4e1e720607db53f"],
     m4: ["d4e1e720607db53f"],
@@ -44,7 +44,7 @@ window.GHOSTLINE_CONFIG = {
 
   /* Text pod terminálem — odkaz na fyzickou šifru, kterou má tým v realitě luštit. */
   physicalHints: {
-    m1: "Kód získáte rozluštěním šifry č. 1.",
+    m1: "Tento kód nenajdete v žádné šifře. Odpověď se skrývá přímo tady v hale — dívejte se pozorně.",
     m2: "Kód získáte rozluštěním šifry č. 2.",
     m3: "Kód získáte rozluštěním šifry č. 3.",
     m4: "Kód získáte rozluštěním šifry č. 4.",
