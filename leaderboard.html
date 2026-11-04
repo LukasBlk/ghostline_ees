@@ -168,7 +168,7 @@ code,.out{font-family:var(--mono);font-size:13px}
 <script>
 (() => {
 'use strict';
-const CFG = Object.assign({ gameId: 'ghostline-demo', salt: 'auriga', codes: { m1: ['0c154674cd4d9950'], m2: ['89eb0ee2244220e0'], m3: ['d4e1e720607db53f'], m4: ['d4e1e720607db53f'], m5: ['d4e1e720607db53f'] }, milestones: ['Diagnostika odemčena', 'Infotainment izolován', 'C2 zablokováno', 'Certifikát revokován', 'Flotila zachráněna'] }, window.GHOSTLINE_CONFIG || {});
+const CFG = Object.assign({ gameId: 'ghostline-demo', salt: 'auriga', codes: { m1: ['0c154674cd4d9950'], m2: [], m3: ['d4e1e720607db53f'], m4: ['d4e1e720607db53f'], m5: ['89eb0ee2244220e0'] }, milestones: ['Diagnostika odemčena', 'Infotainment izolován', 'C2 zablokováno', 'Certifikát revokován', 'Flotila zachráněna'] }, window.GHOSTLINE_CONFIG || {});
 const GID = new URLSearchParams(location.search).get('game') || CFG.gameId || 'ghostline';
 const MS = CFG.milestones || ['M1', 'M2', 'M3', 'M4', 'M5'];
 const N = MS.length;

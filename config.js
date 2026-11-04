@@ -27,17 +27,17 @@ window.GHOSTLINE_CONFIG = {
      Zadání se normalizuje: velká/malá písmena, diakritika, mezery a interpunkce nehrají roli. */
   codes: {
     m1: ["0c154674cd4d9950"],   // SOS (z blikání světel vozu)
-    m2: ["89eb0ee2244220e0"],   // PIN 6547 z logických operací (zadání je přímo v terminálu)
+    m2: [],                     // kokpit: rychlokvíz (bez kódu, otázky jsou v index.html → STORY → cockpit → quiz)
     m3: ["d4e1e720607db53f"],
     m4: ["d4e1e720607db53f"],
-    m5: ["d4e1e720607db53f"]
+    m5: ["89eb0ee2244220e0"]    // PIN 6547 z logických operací (zadání je přímo v terminálu nouzového vypínače)
   },
 
   /* Kontrola po znacích (políčka na jednotlivé znaky): otisk každého znaku na jeho pozici.
      Hráč po odeslání vidí, které znaky má správně (zeleně) a které ne (červeně). */
   charCheck: {
     m1: ["ca12aa8c7db1cfd0", "531666d134a45d85", "2a8da6e5ea56af3c"],   // S · O · S
-    m2: ["9197764072d69fd7", "5bf7133f45fb3d32", "52d6b1f7d0786bcc", "bb3fea1e9725af90"]   // 6 · 5 · 4 · 7
+    m5: ["9197764072d69fd7", "5bf7133f45fb3d32", "52d6b1f7d0786bcc", "bb3fea1e9725af90"]   // 6 · 5 · 4 · 7
   },
 
   /* Názvy milníků (zobrazují se ve hře i na žebříčku). */
@@ -52,10 +52,10 @@ window.GHOSTLINE_CONFIG = {
   /* Text pod terminálem — odkaz na fyzickou šifru, kterou má tým v realitě luštit. */
   physicalHints: {
     m1: "Tento kód nenajdete v žádné šifře. Odpověď se skrývá přímo tady v hale — dívejte se pozorně.",
-    m2: "Šifru máte přímo před sebou — vyřešte operace A–D a zadejte čtyřmístný PIN.",
+    m2: "Odpovězte správně na všech 10 otázek dřív, než vyprší čas.",
     m3: "Kód získáte rozluštěním šifry č. 3.",
     m4: "Kód získáte rozluštěním šifry č. 4.",
-    m5: "Kód získáte rozluštěním šifry č. 5."
+    m5: "Šifru máte přímo před sebou — vyřešte operace A–D a zadejte čtyřmístný PIN."
   },
 
   /* Ochrana proti hádání (platí pro každý terminál zvlášť):
@@ -64,6 +64,9 @@ window.GHOSTLINE_CONFIG = {
      Počítadlo se po obnovení stránky nenuluje a vynuluje se až po odemčení terminálu. */
   wrongLimit: 2,
   wrongCooldownSec: 20,
+
+  /* Rychlokvíz (kokpit): po vypršení času nebo chybné odpovědi se terminál zamkne na tuto dobu. */
+  quizLockSec: 20,
 
   /* VZDÁLENÝ START (funguje jen s Firebase).
      true  = týmy po registraci a úvodním příběhu čekají v lobby, hru spouští organizátor v administraci;

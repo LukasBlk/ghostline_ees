@@ -173,6 +173,37 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .tch::selection{background:transparent}
 .tinfo{font-size:1.05cqw;color:var(--am);letter-spacing:.06em;margin:-.4cqw 0 1.2cqw}
 .tinfo[hidden]{display:none}
+/* ---------- rychlokvíz ---------- */
+.trow[hidden],.qz[hidden]{display:none}
+.qz{margin-bottom:.4cqw}
+.qz-ready{text-align:center;padding:1cqw 0 .6cqw}
+.qz-rules{display:flex;justify-content:center;gap:3cqw;margin-bottom:1.6cqw}
+.qz-rules div{text-align:center}
+.qz-rules b{display:block;font:700 3.2cqw var(--mono);color:var(--cy);line-height:1}
+.qz-rules span{font-size:.85cqw;letter-spacing:.25em;color:var(--dim)}
+.qz-note{font-size:1.05cqw;color:#a9bccd;margin-bottom:1.6cqw;line-height:1.5}
+.qz-start{padding:1cqw 3cqw;background:var(--cy);color:#0E3A2F;font:700 1.3cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.25em;clip-path:polygon(1.2cqw 0,calc(100% - 1.2cqw) 0,100% 50%,calc(100% - 1.2cqw) 100%,1.2cqw 100%,0 50%)}
+.qz-start:hover{background:#a6ffcc}
+.qz-start:disabled{background:#2a3b48;color:#6b7f8f;cursor:not-allowed}
+.qz-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.6cqw}
+.qz-n{font-size:.95cqw;letter-spacing:.3em;color:var(--dim)}
+.qz-n b{color:var(--cy);font-weight:700}
+.qz-time{font:700 2cqw var(--mono);color:#fff}
+.qz-time.low{color:var(--rd);animation:pulse .6s infinite}
+.qz-bar{height:.4cqw;background:#0b2a20;margin-bottom:1.4cqw;overflow:hidden}
+.qz-bar i{display:block;height:100%;background:var(--cy);box-shadow:0 0 1cqw var(--cy);transform-origin:left;transition:background .3s}
+.qz-bar i.low{background:var(--rd);box-shadow:0 0 1cqw var(--rd)}
+.qz-q{font:600 1.55cqw 'Chakra Petch',system-ui,sans-serif;color:#fff;text-align:center;padding:1.1cqw 2.2cqw;margin:0 1.4cqw 1.4cqw;border:1px solid #2c6b55;background:linear-gradient(90deg,transparent,#0a2e23 15%,#0a2e23 85%,transparent);clip-path:polygon(2cqw 0,calc(100% - 2cqw) 0,100% 50%,calc(100% - 2cqw) 100%,2cqw 100%,0 50%);min-height:4.6cqw;display:flex;align-items:center;justify-content:center;line-height:1.35}
+.qz-a{display:grid;grid-template-columns:1fr 1fr;gap:.9cqw 1.4cqw}
+.qz-a button{display:flex;align-items:center;gap:.8cqw;text-align:left;padding:.9cqw 2cqw;font:500 1.2cqw 'Chakra Petch',system-ui,sans-serif;color:#e9f6ff;background:#06231b;border:1px solid #1f5a45;clip-path:polygon(1.4cqw 0,calc(100% - 1.4cqw) 0,100% 50%,calc(100% - 1.4cqw) 100%,1.4cqw 100%,0 50%);transition:background .15s,border-color .15s}
+.qz-a button b{color:var(--am);font-weight:700}
+.qz-a button:hover:not(:disabled){background:#0b3a2c;border-color:var(--cy)}
+.qz-a button.ok{background:#1e9e5c;color:#fff}
+.qz-a button.ok b{color:#fff}
+.qz-a button.bad{background:#a01426;color:#fff}
+.qz-a button.bad b{color:#fff}
+.qz-a button:disabled{cursor:default}
+.qz-done{text-align:center;font:600 1.4cqw var(--mono);letter-spacing:.15em;padding:1.4cqw 0}
 .tgo{padding:0 1.8cqw;background:var(--cy);color:#0E3A2F;font:700 1.1cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.2em}
 .tgo:disabled{background:#2a3b48;color:#6b7f8f;cursor:not-allowed}
 .tmsg{min-height:2.2cqw;margin-top:1cqw;font-size:1.15cqw;letter-spacing:.12em}
@@ -682,6 +713,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <div class="tinfo" id="tInfo" hidden></div>
   <div class="pz" id="tPuzzle" hidden></div>
   <form class="trow" id="tForm" autocomplete="off"><span>&gt;</span><input class="tin" id="tIn" maxlength="40" spellcheck="false" autocapitalize="characters" autocomplete="off"><div class="tboxes" id="tBoxes" hidden></div><button class="tgo" id="tGo">OVĚŘIT</button></form>
+  <div class="qz" id="tQuiz" hidden></div>
   <div class="tmsg" id="tMsg"></div>
   <div class="tfoot"><span id="tHint"></span><button class="tback" id="tBack" type="button">✕ ZPĚT</button></div>
 </div></div>
@@ -732,9 +764,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 (() => {
 'use strict';
 const DEFAULT_CFG = { gameId: 'ghostline-demo', firebase: {}, salt: 'auriga',
-  codes: { m1: ['0c154674cd4d9950'], m2: ['89eb0ee2244220e0'], m3: ['d4e1e720607db53f'], m4: ['d4e1e720607db53f'], m5: ['d4e1e720607db53f'] },
+  codes: { m1: ['0c154674cd4d9950'], m2: [], m3: ['d4e1e720607db53f'], m4: ['d4e1e720607db53f'], m5: ['89eb0ee2244220e0'] },
   milestones: ['Diagnostika odemčena', 'Infotainment izolován', 'C2 zablokováno', 'Certifikát revokován', 'Flotila zachráněna'],
-  physicalHints: {}, charCheck: { m1: ['ca12aa8c7db1cfd0', '531666d134a45d85', '2a8da6e5ea56af3c'], m2: ['9197764072d69fd7', '5bf7133f45fb3d32', '52d6b1f7d0786bcc', 'bb3fea1e9725af90'] }, wrongLimit: 2, wrongCooldownSec: 20, remoteStart: true, countdownSec: 10 };
+  physicalHints: {}, charCheck: { m1: ['ca12aa8c7db1cfd0', '531666d134a45d85', '2a8da6e5ea56af3c'], m5: ['9197764072d69fd7', '5bf7133f45fb3d32', '52d6b1f7d0786bcc', 'bb3fea1e9725af90'] }, wrongLimit: 2, wrongCooldownSec: 20, quizLockSec: 20, remoteStart: true, countdownSec: 10 };
 if (!window.GHOSTLINE_CONFIG) console.warn('[GHOSTLINE] config.js se nenačetl — používám výchozí nastavení (kód 1111, lokální režim).');
 const CFG = Object.assign({}, DEFAULT_CFG, window.GHOSTLINE_CONFIG || {});
 const qs = new URLSearchParams(location.search);
@@ -824,16 +856,23 @@ const STORY = [
   },
   req: ['cluster', 'canbay'],
   lock: [['m', 'Do servisního menu se dosatnete jen s kódem. Nejdřív zjistěte, jak se útok šíří vozem — podívejte se na přístrojovou desku a pod palubní desku.']],
-  term: { head: 'INFOTAINMENT // SERVISNÍ MENU', prompt: 'Zadejte kód pro odpojení externích rozhraní infotainmentu.',
-    boxes: 4, digits: true, info: 'PIN tvoří 4 číslice.',
-    puzzle: {
-      cards: [
-        ['A', '1010 XOR 1100'],
-        ['B', 'NOT 1010'],
-        ['C', '1101 AND 0110'],
-        ['D', '0010 OR 0101']
-      ],
-      note: 'Výsledek každé operace převeďte z dvojkové soustavy do desítkové. Čísla v pořadí A–B–C–D tvoří PIN.'
+  term: { head: 'INFOTAINMENT // SERVISNÍ MENU', prompt: 'Pro odpojení externích rozhraní infotainmentu projděte bezpečnostním ověřením.',
+    /* Rychlokvíz: všech 10 otázek správně do limitu. ok = index správné odpovědi (0 = první) nebo pole indexů.
+       Zatím jsou pro testování správné všechny odpovědi (ok: [0, 1, 2, 3]). */
+    quiz: {
+      limitSec: 40,
+      questions: [
+        { q: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit?', a: ['Lorem ipsum', 'Dolor sit amet', 'Consectetur', 'Adipiscing elit'], ok: [0, 1, 2, 3] },
+        { q: 'Sed do eiusmod tempor incididunt ut labore et dolore magna?', a: ['Lorem ipsum', 'Dolor sit amet', 'Consectetur', 'Adipiscing elit'], ok: [0, 1, 2, 3] },
+        { q: 'Ut enim ad minim veniam, quis nostrud exercitation?', a: ['Lorem ipsum', 'Dolor sit amet', 'Consectetur', 'Adipiscing elit'], ok: [0, 1, 2, 3] },
+        { q: 'Duis aute irure dolor in reprehenderit in voluptate?', a: ['Lorem ipsum', 'Dolor sit amet', 'Consectetur', 'Adipiscing elit'], ok: [0, 1, 2, 3] },
+        { q: 'Excepteur sint occaecat cupidatat non proident?', a: ['Lorem ipsum', 'Dolor sit amet', 'Consectetur', 'Adipiscing elit'], ok: [0, 1, 2, 3] },
+        { q: 'Sunt in culpa qui officia deserunt mollit anim?', a: ['Lorem ipsum', 'Dolor sit amet', 'Consectetur', 'Adipiscing elit'], ok: [0, 1, 2, 3] },
+        { q: 'Nemo enim ipsam voluptatem quia voluptas sit aspernatur?', a: ['Lorem ipsum', 'Dolor sit amet', 'Consectetur', 'Adipiscing elit'], ok: [0, 1, 2, 3] },
+        { q: 'Neque porro quisquam est, qui dolorem ipsum quia dolor?', a: ['Lorem ipsum', 'Dolor sit amet', 'Consectetur', 'Adipiscing elit'], ok: [0, 1, 2, 3] },
+        { q: 'Quis autem vel eum iure reprehenderit qui in ea voluptate?', a: ['Lorem ipsum', 'Dolor sit amet', 'Consectetur', 'Adipiscing elit'], ok: [0, 1, 2, 3] },
+        { q: 'At vero eos et accusamus et iusto odio dignissimos?', a: ['Lorem ipsum', 'Dolor sit amet', 'Consectetur', 'Adipiscing elit'], ok: [0, 1, 2, 3] }
+      ]
     } },
   done: [
     ['n', 'Infotainment je izolován: Bluetooth a Wi-Fi jsou odpojené.'],
@@ -914,7 +953,17 @@ const STORY = [
   },
   req: ['ransom', 'fleet'],
   lock: [['m', 'Než to zmáčkneme, musíme vědět, co přesně se ve flotile děje. Podívejte se na stav flotily a na zprávu útočníka.']],
-  term: { head: 'NOUZOVÝ VYPÍNAČ // FINÁLNÍ AUTORIZACE', prompt: 'Zadejte finální autorizační kód.' },
+  term: { head: 'NOUZOVÝ VYPÍNAČ // FINÁLNÍ AUTORIZACE', prompt: 'Zadejte finální autorizační kód.',
+    boxes: 4, digits: true, info: 'PIN tvoří 4 číslice.',
+    puzzle: {
+      cards: [
+        ['A', '1010 XOR 1100'],
+        ['B', 'NOT 1010'],
+        ['C', '1101 AND 0110'],
+        ['D', '0010 OR 0101']
+      ],
+      note: 'Výsledek každé operace převeďte z dvojkové soustavy do desítkové. Čísla v pořadí A–B–C–D tvoří PIN.'
+    } },
   done: [
     ['n', 'Zmáčkli jsme vypínač. Flotila se odpojila od backendu a příkazy k převzetí vypršely bez potvrzení.'],
     ['n', 'Body na mapě se jeden po druhém barví zeleně.'],
@@ -1227,7 +1276,88 @@ function openTerm() {
   $('#tInfo').textContent = sc.term.info || ''; $('#tInfo').hidden = !sc.term.info;
   buildBoxes(sc.term.boxes || 0, sc.term.letters ? 'letters' : sc.term.digits ? 'digits' : 'any');
   tMsg.textContent = ''; tMsg.className = 'tmsg'; tIn.value = ''; term.className = 'term on'; termOn = true; hideTip();
-  coolTick(); setTimeout(focusInput, 60);
+  quiz = sc.term.quiz || null;
+  $('#tForm').hidden = !!quiz; $('#tQuiz').hidden = !quiz;
+  if (quiz) { $('#term .tbox').classList.add('wide'); if (lockState(n).quizRun) quizFail('PŘERUŠENO'); else quizReady(); }
+  coolTick(); if (!quiz) setTimeout(focusInput, 60);
+}
+
+/* ---------- rychlokvíz ---------- */
+let quiz = null, qRun = null, qTimer = null;
+const tQuiz = $('#tQuiz');
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const qLimit = () => quiz.limitSec || 40;
+function quizReady() {
+  stopQuiz();
+  tQuiz.innerHTML = '<div class="qz-ready"><div class="qz-rules"><div><b>' + quiz.questions.length + '</b><span>OTÁZEK</span></div><div><b>' + qLimit() + ' s</b><span>ČASOVÝ LIMIT</span></div><div><b>4</b><span>MOŽNOSTI</span></div></div>' +
+    '<div class="qz-note">Odpovězte správně na všechny otázky. Jedna chyba nebo vypršení času znamená neúspěch a zámek terminálu na ' + (CFG.quizLockSec || 20) + ' s.</div>' +
+    '<button class="qz-start" id="qStart" type="button">▶ START</button></div>';
+  $('#qStart').onclick = quizStart;
+  $('#qStart').disabled = Date.now() < coolUntil;
+}
+function quizStart() {
+  if (!termOn || Date.now() < coolUntil) return;
+  if (REMOTE && (!st.startedAt || CTRL.status === 'ended')) return;
+  const n = st.scene + 1, lk = lockState(n);
+  lk.quizRun = Date.now(); save();                       // obnovení stránky během kvízu = neúspěch
+  qRun = { n, i: 0, end: Date.now() + qLimit() * 1000, order: shuffle(quiz.questions.map((_, k) => k)) };
+  $('#tBack').hidden = true; tMsg.textContent = ''; sfx.click();
+  quizQuestion();
+  qTimer = setInterval(quizTick, 100); quizTick();
+}
+function quizTick() {
+  if (!qRun) return;
+  const left = Math.max(0, qRun.end - Date.now()), frac = left / (qLimit() * 1000);
+  const tEl = $('#qTime'), bar = $('#qBar');
+  if (tEl) { tEl.textContent = (left / 1000).toFixed(1) + ' s'; tEl.classList.toggle('low', left < 10000); }
+  if (bar) { bar.style.transform = 'scaleX(' + frac + ')'; bar.classList.toggle('low', left < 10000); }
+  if (left <= 0) quizFail('ČAS VYPRŠEL');
+}
+function quizQuestion() {
+  const q = quiz.questions[qRun.order[qRun.i]], opts = shuffle(q.a.map((t, k) => k));
+  tQuiz.innerHTML = '<div class="qz-top"><span class="qz-n">OTÁZKA <b>' + (qRun.i + 1) + '</b> / ' + quiz.questions.length + '</span><span class="qz-time" id="qTime"></span></div>' +
+    '<div class="qz-bar"><i id="qBar"></i></div><div class="qz-q"></div><div class="qz-a"></div>';
+  tQuiz.querySelector('.qz-q').textContent = q.q;
+  const box = tQuiz.querySelector('.qz-a');
+  opts.forEach((k, pos) => {
+    const b = document.createElement('button'); b.type = 'button';
+    b.innerHTML = '<b>' + 'ABCD'[pos] + ':</b><span></span>'; b.querySelector('span').textContent = q.a[k];
+    b.onclick = () => quizAnswer(b, q, k);
+    box.appendChild(b);
+  });
+  quizTick();
+}
+function quizAnswer(btn, q, k) {
+  if (!qRun || qRun.lock) return;
+  const okSet = Array.isArray(q.ok) ? q.ok : [q.ok];
+  qRun.lock = true;
+  tQuiz.querySelectorAll('.qz-a button').forEach(b => b.disabled = true);
+  if (okSet.includes(k)) {
+    btn.classList.add('ok'); sfx.click();
+    setTimeout(() => { if (!qRun) return; qRun.lock = false; qRun.i++; if (qRun.i >= quiz.questions.length) quizWin(); else quizQuestion(); }, 280);
+  } else {
+    btn.classList.add('bad');
+    setTimeout(() => quizFail('ŠPATNÁ ODPOVĚĎ'), 700);
+  }
+}
+function stopQuiz() { clearInterval(qTimer); qTimer = null; qRun = null; $('#tBack').hidden = false; }
+async function quizWin() {
+  const n = st.scene + 1;
+  stopQuiz(); if (st.locks) delete st.locks['m' + n];
+  tQuiz.innerHTML = '<div class="qz-done" style="color:var(--gn)">VŠECH ' + quiz.questions.length + ' ODPOVĚDÍ SPRÁVNĚ</div>';
+  term.className = 'term on good'; tMsg.className = 'tmsg good'; tMsg.textContent = 'PŘÍSTUP POVOLEN ✓'; sfx.ok();
+  await wait(1400); closeTerm();
+  await milestone(n);
+}
+function quizFail(why) {
+  const n = st.scene + 1, lk = lockState(n);
+  stopQuiz(); delete lk.quizRun;
+  lk.wrong++; coolUntil = lk.until = Date.now() + (CFG.quizLockSec || 20) * 1000; save();
+  localLog(t => t.wrong = (t.wrong || 0) + 1); fbWrong(n);
+  sfx.err(); term.className = 'term on'; void term.offsetWidth; term.className = 'term on bad';
+  quizReady();
+  tMsg.className = 'tmsg bad'; tMsg.textContent = why;
+  setTimeout(coolTick, 900);
 }
 /* ---- políčka na jednotlivé znaky ---- */
 const tBoxes = $('#tBoxes');
@@ -1264,16 +1394,17 @@ function spread(from, v, letters) {
 const boxMode = () => boxes.length > 0;
 function focusInput() { if (boxMode()) { (boxes.find(b => !b.value || b.classList.contains('bad')) || boxes[0]).focus(); } else tIn.focus(); }
 function setInputsDisabled(d) { tIn.disabled = d; boxes.forEach(b => b.disabled = d); }
-function closeTerm() { term.className = 'term'; termOn = false; tIn.blur(); boxes.forEach(b => b.blur()); }
+function closeTerm() { if (qRun) { const lk = lockState(qRun.n); delete lk.quizRun; save(); } stopQuiz(); term.className = 'term'; termOn = false; tIn.blur(); boxes.forEach(b => b.blur()); }
 function coolTick() {
   clearInterval(coolT);
   const upd = () => { const left = Math.ceil((coolUntil - Date.now()) / 1000);
     if (left > 0) { tGo.disabled = true; setInputsDisabled(true); tMsg.className = 'tmsg bad'; tMsg.textContent = 'TERMINÁL DOČASNĚ ZABLOKOVÁN · ' + fmtLock(left); }
-    else { tGo.disabled = false; setInputsDisabled(false); clearInterval(coolT); if (/ZABLOKOVÁN/.test(tMsg.textContent)) { tMsg.textContent = ''; focusInput(); } } };
+    else { tGo.disabled = false; setInputsDisabled(false); clearInterval(coolT); if (/ZABLOKOVÁN/.test(tMsg.textContent)) { tMsg.textContent = ''; if (!quiz) focusInput(); } }
+    const qs = $('#qStart'); if (qs) qs.disabled = left > 0; };
   upd(); if (coolUntil > Date.now()) coolT = setInterval(upd, 250);
 }
-$('#tBack').onclick = () => { if (!term.classList.contains('good')) closeTerm(); };
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && termOn && !term.classList.contains('good')) closeTerm(); });
+$('#tBack').onclick = () => { if (!qRun && !term.classList.contains('good')) closeTerm(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && termOn && !qRun && !term.classList.contains('good')) closeTerm(); });
 $('#tForm').addEventListener('submit', async e => {
   e.preventDefault();
   if (!termOn || Date.now() < coolUntil || term.classList.contains('good')) return;
