@@ -27,7 +27,7 @@ window.GHOSTLINE_CONFIG = {
      Zadání se normalizuje: velká/malá písmena, diakritika, mezery a interpunkce nehrají roli. */
   codes: {
     m1: ["0c154674cd4d9950"],   // SOS (z blikání světel vozu)
-    m2: ["525a7f3264359078"],   // ODPOJIT — Caesarova šifra SHTSNMX, posun 4 (počet blikajících kontrolek v kokpitu)
+    m2: ["525a7f3264359078"],   // ODPOJIT — Caesarova šifra SHTSNMX, posun 4 doleva (rychlost 4 km/h + levý blinkr na přístrojové desce)
     m3: [],                     // dohledové centrum: rychlokvíz (bez kódu, otázky jsou v index.html → STORY → soc → quiz)
     m4: ["d4e1e720607db53f"],
     m5: ["89eb0ee2244220e0"]    // PIN 6547 z logických operací (zadání je přímo v terminálu nouzového vypínače)
