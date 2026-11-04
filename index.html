@@ -764,7 +764,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 (() => {
 'use strict';
 const DEFAULT_CFG = { gameId: 'ghostline-demo', firebase: {}, salt: 'auriga',
-  codes: { m1: ['0c154674cd4d9950'], m2: [], m3: ['d4e1e720607db53f'], m4: ['d4e1e720607db53f'], m5: ['89eb0ee2244220e0'] },
+  codes: { m1: ['0c154674cd4d9950'], m2: ['d4e1e720607db53f'], m3: [], m4: ['d4e1e720607db53f'], m5: ['89eb0ee2244220e0'] },
   milestones: ['Diagnostika odemčena', 'Infotainment izolován', 'C2 zablokováno', 'Certifikát revokován', 'Flotila zachráněna'],
   physicalHints: {}, charCheck: { m1: ['ca12aa8c7db1cfd0', '531666d134a45d85', '2a8da6e5ea56af3c'], m5: ['9197764072d69fd7', '5bf7133f45fb3d32', '52d6b1f7d0786bcc', 'bb3fea1e9725af90'] }, wrongLimit: 2, wrongCooldownSec: 20, quizLockSec: 20, remoteStart: true, countdownSec: 10 };
 if (!window.GHOSTLINE_CONFIG) console.warn('[GHOSTLINE] config.js se nenačetl — používám výchozí nastavení (kód 1111, lokální režim).');
@@ -856,30 +856,7 @@ const STORY = [
   },
   req: ['cluster', 'canbay'],
   lock: [['m', 'Do servisního menu se dosatnete jen s kódem. Nejdřív zjistěte, jak se útok šíří vozem — podívejte se na přístrojovou desku a pod palubní desku.']],
-  term: { head: 'INFOTAINMENT // SERVISNÍ MENU', prompt: 'Pro odpojení externích rozhraní infotainmentu projděte bezpečnostním ověřením.',
-    /* Rychlokvíz: všech 10 otázek správně do limitu. ok = index správné odpovědi (0 = první) nebo pole indexů.
-       Zatím jsou pro testování správné všechny odpovědi (ok: [0, 1, 2, 3]). */
-    quiz: {
-      limitSec: 120,
-      count: 10,          // kolik otázek se v každém pokusu náhodně vybere ze všech níže
-      questions: [
-        { q: 'Jaké je typické napětí v palubní síti vozů Škoda?', a: ['24V', '12V', '5V', '48V'], ok: [1] },
-        { q: 'Jak vypadá Ohmův zákon?', a: ['U = R x I', 'I = C / U', 'R = P x I', 'U = R / C'], ok: [0] },
-        { q: 'Kdo vydává stanovisko za Cybersecuirty v K-Freigabe a FuRe-Freigabe?', a: ['BTV', 'Security Owner', 'Security Expert', 'Security Advisor'], ok: [3] },
-        { q: 'Na koho může BTV delegovat téma cybersecurity?', a: ['Security Manager', 'Security Owner', 'Security Expert', 'Security Advisor'], ok: [1] },
-        { q: 'Jaké nařízení ukládá povinnost zajištění cybersecurity?', a: ['UNECE R157', 'UNECE R155', 'UNECE R152', 'UNECE R111'], ok: [1] },
-        { q: 'Jaká je velikost klíče pro povolení šroubů kol vozidel Škoda?', a: ['13', '15', '17', '21'], ok: [2] },
-        { q: 'Co je to SBOM', a: ['Software Basis Of Maping', 'Software Bill Of Material', 'Software By Own Maker', 'Sample Build Over Manufacturer'], ok: [1] },
-        { q: 'Jaké je napětí v klasické domácí 1-fázové zásuvce v ČR?', a: ['220V', '400V', '120V', '230V'], ok: [3] },
-        { q: 'Jaká je základní jednotka výkonu?', a: ['Pascal', 'Joule', 'Watt', 'kCal'], ok: [2] },
-        { q: 'Jaký olej se používá v motorech vozů Škoda?', a: ['5W40', '10W40', '10W30', '0W30'], ok: [0, 1, 2, 3] },
-        { q: 'Jaká jednotka za nabídky NENÍ cybersecurity relevantní?', a: ['Motorová jednotka', 'Airbag', 'AFS', 'Infotainment'], ok: [2] },
-        { q: 'Kolik šroubů má kolo vozidla Škoda CityGo', a: ['5', '4', '6', '3'], ok: [1] },
-        { q: 'Co znamená zkratka AES?', a: ['Alpha End System', 'Advanced Encryption Standard', 'Automatic Encryption System', 'Alphabetic Evaluation Score'], ok: [1] },
-        { q: 'Co NEPATŘÍ mezi externí rozhraní?', a: ['Wi-Fi', 'Bluetooth', 'OBD-II', 'HSM'], ok: [3] },
-        { q: 'Kolik plně elektrických modelů nabízí Škoda v Evropě?', a: ['3', '4', '7', '10'], ok: [1] }
-      ]
-    } },
+  term: { head: 'INFOTAINMENT // SERVISNÍ MENU', prompt: 'Zadejte kód pro odpojení externích rozhraní infotainmentu.' },
   done: [
     ['n', 'Infotainment je izolován: Bluetooth a Wi-Fi jsou odpojené.'],
     ['n', 'V paměti jednotky zůstala adresa, se kterou komunikovala: telemetry-skoda.backend.vw.wob Náš vlastní backend.'],
@@ -906,7 +883,30 @@ const STORY = [
   },
   req: ['map', 'racks'],
   lock: [['m', 'Nejdřív musíme vědět, co blokujeme. Podívejte se na mapu flotily a na servery.']],
-  term: { head: 'SOC // FIREWALL · BLOKACE C2', prompt: 'Zadejte autorizační kód pro přesměrování provozu.' },
+  term: { head: 'SOC // FIREWALL · BLOKACE C2', prompt: 'Pro přesměrování provozu projděte bezpečnostním ověřením.',
+    /* Rychlokvíz: všech 10 otázek správně do limitu. ok = index správné odpovědi (0 = první) nebo pole indexů.
+       Zatím jsou pro testování správné všechny odpovědi (ok: [0, 1, 2, 3]). */
+    quiz: {
+      limitSec: 120,
+      count: 10,          // kolik otázek se v každém pokusu náhodně vybere ze všech níže
+      questions: [
+        { q: 'Jaké je typické napětí v palubní síti vozů Škoda?', a: ['24V', '12V', '5V', '48V'], ok: [1] },
+        { q: 'Jak vypadá Ohmův zákon?', a: ['U = R x I', 'I = C / U', 'R = P x I', 'U = R / C'], ok: [0] },
+        { q: 'Kdo vydává stanovisko za Cybersecuirty v K-Freigabe a FuRe-Freigabe?', a: ['BTV', 'Security Owner', 'Security Expert', 'Security Advisor'], ok: [3] },
+        { q: 'Na koho může BTV delegovat téma cybersecurity?', a: ['Security Manager', 'Security Owner', 'Security Expert', 'Security Advisor'], ok: [1] },
+        { q: 'Jaké nařízení ukládá povinnost zajištění cybersecurity?', a: ['UNECE R157', 'UNECE R155', 'UNECE R152', 'UNECE R111'], ok: [1] },
+        { q: 'Jaká je velikost klíče pro povolení šroubů kol vozidel Škoda?', a: ['13', '15', '17', '21'], ok: [2] },
+        { q: 'Co je to SBOM', a: ['Software Basis Of Maping', 'Software Bill Of Material', 'Software By Own Maker', 'Sample Build Over Manufacturer'], ok: [1] },
+        { q: 'Jaké je napětí v klasické domácí 1-fázové zásuvce v ČR?', a: ['220V', '400V', '120V', '230V'], ok: [3] },
+        { q: 'Jaká je základní jednotka výkonu?', a: ['Pascal', 'Joule', 'Watt', 'kCal'], ok: [2] },
+        { q: 'Jaký olej se používá v motorech vozů Škoda?', a: ['5W40', '10W40', '10W30', '0W30'], ok: [0, 1, 2, 3] },
+        { q: 'Jaká jednotka za nabídky NENÍ cybersecurity relevantní?', a: ['Motorová jednotka', 'Airbag', 'AFS', 'Infotainment'], ok: [2] },
+        { q: 'Kolik šroubů má kolo vozidla Škoda CityGo', a: ['5', '4', '6', '3'], ok: [1] },
+        { q: 'Co znamená zkratka AES?', a: ['Alpha End System', 'Advanced Encryption Standard', 'Automatic Encryption System', 'Alphabetic Evaluation Score'], ok: [1] },
+        { q: 'Co NEPATŘÍ mezi externí rozhraní?', a: ['Wi-Fi', 'Bluetooth', 'OBD-II', 'HSM'], ok: [3] },
+        { q: 'Kolik plně elektrických modelů nabízí Škoda v Evropě?', a: ['3', '4', '7', '10'], ok: [1] }
+      ]
+    } },
   done: [
     ['n', 'Provoz přesměrován. Spojení se serverem C2 je přerušeno a červené body na mapě zhasínají.'],
     ['g', 'POZDĚ BYCHA HONIT!'],

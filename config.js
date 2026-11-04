@@ -27,8 +27,8 @@ window.GHOSTLINE_CONFIG = {
      Zadání se normalizuje: velká/malá písmena, diakritika, mezery a interpunkce nehrají roli. */
   codes: {
     m1: ["0c154674cd4d9950"],   // SOS (z blikání světel vozu)
-    m2: [],                     // kokpit: rychlokvíz (bez kódu, otázky jsou v index.html → STORY → cockpit → quiz)
-    m3: ["d4e1e720607db53f"],
+    m2: ["d4e1e720607db53f"],   // zástupný 1111 — připravuje se Caesarova šifra
+    m3: [],                     // dohledové centrum: rychlokvíz (bez kódu, otázky jsou v index.html → STORY → soc → quiz)
     m4: ["d4e1e720607db53f"],
     m5: ["89eb0ee2244220e0"]    // PIN 6547 z logických operací (zadání je přímo v terminálu nouzového vypínače)
   },
@@ -52,8 +52,8 @@ window.GHOSTLINE_CONFIG = {
   /* Text pod terminálem — odkaz na fyzickou šifru, kterou má tým v realitě luštit. */
   physicalHints: {
     m1: "Tento kód nenajdete v žádné šifře. Odpověď se skrývá přímo tady v hale — dívejte se pozorně.",
-    m2: "Odpovězte správně na všech 10 otázek dřív, než vyprší čas.",
-    m3: "Kód získáte rozluštěním šifry č. 3.",
+    m2: "Kód získáte rozluštěním šifry č. 2.",
+    m3: "Odpovězte správně na všech 10 otázek dřív, než vyprší čas.",
     m4: "Kód získáte rozluštěním šifry č. 4.",
     m5: "Šifru máte přímo před sebou — vyřešte operace A–D a zadejte čtyřmístný PIN."
   },
@@ -65,7 +65,7 @@ window.GHOSTLINE_CONFIG = {
   wrongLimit: 2,
   wrongCooldownSec: 20,
 
-  /* Rychlokvíz (kokpit): po vypršení času nebo chybné odpovědi se terminál zamkne na tuto dobu. */
+  /* Rychlokvíz (dohledové centrum): po vypršení času nebo chybné odpovědi se terminál zamkne na tuto dobu. */
   quizLockSec: 20,
 
   /* VZDÁLENÝ START (funguje jen s Firebase).
