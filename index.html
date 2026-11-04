@@ -209,6 +209,33 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .qz-a button.bad{background:#a01426;color:#fff}
 .qz-a button.bad b{color:#fff}
 .qz-a button:disabled{cursor:default}
+.tbox.xwide{width:74cqw}
+.ce[hidden]{display:none}
+.ce-clue{border:1px solid #2c6b55;background:#06231b;padding:.9cqw 1.2cqw;margin-bottom:1cqw}
+.ce-clue b{display:block;font:700 .85cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.28em;color:var(--am);margin-bottom:.35cqw}
+.ce-clue p{font-size:1.1cqw;line-height:1.45;color:#e9f6ff}
+.ce-g{display:grid;grid-template-columns:repeat(3,1fr);gap:.7cqw}
+.ce-c{position:relative;text-align:left;padding:.65cqw .85cqw;background:#04170f;border:1px solid #1f5a45;cursor:pointer;transition:border-color .2s,background .2s,opacity .5s,transform .5s;font-family:var(--mono);overflow:hidden}
+.ce-c:hover{border-color:var(--cy)}
+.ce-c h5{font:700 .95cqw 'Chakra Petch',system-ui,sans-serif;color:#fff;margin-bottom:.35cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.03em}
+.ce-c dl{display:grid;grid-template-columns:auto 1fr;gap:.12cqw .6cqw;font-size:.78cqw;line-height:1.3}
+.ce-c dt{color:#5f8a78}
+.ce-c dd{color:#cfe6f7;white-space:nowrap}
+.ce-c.sel{border-color:var(--cy);background:#0b3a2c;box-shadow:inset 0 0 1.2cqw rgba(120,250,174,.25)}
+.ce-c.sel::after{content:"✓";position:absolute;top:.35cqw;right:.55cqw;font:700 1.1cqw 'Chakra Petch',system-ui,sans-serif;color:var(--cy)}
+.ce-c.out{cursor:default;opacity:.28;transform:scale(.97);border-style:dashed}
+.ce-c.out:hover{border-color:#1f5a45}
+.ce-c .stamp{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-12deg);padding:.2cqw .8cqw;border:2px solid currentColor;font:700 1.15cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.2em;white-space:nowrap;pointer-events:none}
+.ce-c.out .stamp{color:#9aa9b5}
+.ce-c.rev{opacity:1;border-color:var(--rd);background:#2a0a10}
+.ce-c.rev .stamp{color:var(--rd);background:rgba(20,0,4,.6);animation:stampIn .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes stampIn{from{transform:translate(-50%,-50%) rotate(-12deg) scale(2.2);opacity:0}}
+.ce-act{display:flex;justify-content:space-between;align-items:center;margin-top:1cqw}
+.ce-r{font-size:.9cqw;letter-spacing:.25em;color:var(--dim)}
+.ce-r b{color:var(--cy)}
+.ce-go{padding:.75cqw 2.2cqw;background:var(--cy);color:#0E3A2F;font:700 1.05cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.2em}
+.ce-go.red{background:var(--rd);color:#fff}
+.ce-go:disabled{background:#2a3b48;color:#6b7f8f;cursor:not-allowed}
 .qz-done{text-align:center;font:600 1.4cqw var(--mono);letter-spacing:.15em;padding:1.4cqw 0}
 .tgo{padding:0 1.8cqw;background:var(--cy);color:#0E3A2F;font:700 1.1cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.2em}
 .tgo:disabled{background:#2a3b48;color:#6b7f8f;cursor:not-allowed}
@@ -724,6 +751,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <div class="pz" id="tPuzzle" hidden></div>
   <form class="trow" id="tForm" autocomplete="off"><span>&gt;</span><input class="tin" id="tIn" maxlength="40" spellcheck="false" autocapitalize="characters" autocomplete="off"><div class="tboxes" id="tBoxes" hidden></div><button class="tgo" id="tGo">OVĚŘIT</button></form>
   <div class="qz" id="tQuiz" hidden></div>
+  <div class="ce" id="tCert" hidden></div>
   <div class="tmsg" id="tMsg"></div>
   <div class="tfoot"><span id="tHint"></span><button class="tback" id="tBack" type="button">✕ ZPĚT</button></div>
 </div></div>
@@ -774,7 +802,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 (() => {
 'use strict';
 const DEFAULT_CFG = { gameId: 'ghostline-demo', firebase: {}, salt: 'auriga',
-  codes: { m1: ['0c154674cd4d9950'], m2: ['525a7f3264359078'], m3: [], m4: ['d4e1e720607db53f'], m5: ['89eb0ee2244220e0'] },
+  codes: { m1: ['0c154674cd4d9950'], m2: ['525a7f3264359078'], m3: [], m4: [], m5: ['89eb0ee2244220e0'] },
   milestones: ['Diagnostika odemčena', 'Infotainment izolován', 'C2 zablokováno', 'Certifikát revokován', 'Flotila zachráněna'],
   physicalHints: {}, charCheck: { m1: ['ca12aa8c7db1cfd0', '531666d134a45d85', '2a8da6e5ea56af3c'], m2: ['757c08d8da11435d', 'c9715068d5f77305', '3b1c44ee8b93a192', '5f50164597dee7f0', '7b612471f8210675', 'ed5e1e8e633a2460', '0e778a87e5c5c410'], m5: ['9197764072d69fd7', '5bf7133f45fb3d32', '52d6b1f7d0786bcc', 'bb3fea1e9725af90'] }, wrongLimit: 2, wrongCooldownSec: 20, quizLockSec: 20, remoteStart: true, countdownSec: 10 };
 if (!window.GHOSTLINE_CONFIG) console.warn('[GHOSTLINE] config.js se nenačetl — používám výchozí nastavení (kód 1111, lokální režim).');
@@ -951,7 +979,28 @@ const STORY = [
   },
   req: ['hsm', 'fw'],
   lock: [['m', 'Než cokoli revokujeme, potřebuju jistotu. Zkontrolujte HSM a samotný balíček firmwaru.']],
-  term: { head: 'PKI // REVOKACE CERTIFIKÁTU', prompt: 'Zadejte kód pro revokaci certifikátu OTA-SIGNING-2026.' },
+  term: { head: 'PKI // REVOKACE CERTIFIKÁTU', prompt: 'Najděte certifikát, kterým byl podepsán podvržený balíček, a revokujte ho.',
+    /* Minihra: 3 kola vyřazování 9 → 5 → 3 → 1. keep = karty, které v daném kole mají zůstat (id).
+       Chyba v kterémkoli kole = zámek terminálu na lockSec sekund. */
+    cert: {
+      lockSec: 20,
+      cards: [
+        { id: 'f', cn: 'Skoda OTA Signing 2026 (TEST)', iss: 'Škoda Test CA',   from: '01.01.2026', to: '31.12.2029', use: 'Code Signing', fp: '7A:3F:91:C4:58:2E:B8' },
+        { id: 'c', cn: 'Skoda ECU Signing 2025',        iss: 'Škoda OEM CA',    from: '01.03.2025', to: '28.02.2028', use: 'Code Signing', fp: '7A:3F:91:C4:5B:2E:B8' },
+        { id: 'h', cn: 'Škoda OEM CA',                  iss: 'Škoda Root CA',   from: '01.01.2020', to: '31.12.2040', use: 'CA',           fp: 'D1:07:4A:9E:33:F0:6C' },
+        { id: 'a', cn: 'Skoda OTA Signing 2026',        iss: 'Škoda OEM CA',    from: '01.01.2026', to: '31.12.2029', use: 'Code Signing', fp: '7A:3F:91:C4:58:2E:B8' },
+        { id: 'd', cn: 'Skoda Telematics TLS',          iss: 'Škoda OEM CA',    from: '15.02.2026', to: '14.02.2028', use: 'TLS Server',   fp: '3C:88:E2:17:9A:41:0D' },
+        { id: 'i', cn: 'Skoda OTA Signing 2027',        iss: 'Škoda 0EM CA',    from: '01.01.2026', to: '31.12.2029', use: 'Code Signing', fp: '7A:3F:19:C4:58:2E:B8' },
+        { id: 'b', cn: 'Skoda OTA Signing 2026',        iss: 'Škoda OEM CA',    from: '01.01.2026', to: '31.12.2029', use: 'Code Signing', fp: '7A:3E:91:C4:58:2E:B8' },
+        { id: 'e', cn: 'Skoda OTA Signing 2023',        iss: 'Škoda OEM CA',    from: '01.01.2023', to: '31.12.2025', use: 'Code Signing', fp: '5F:12:B0:7D:E6:93:A4' },
+        { id: 'g', cn: 'Dealer Diagnostics',            iss: 'Škoda Dealer CA', from: '01.06.2026', to: '31.05.2027', use: 'Client Auth',  fp: '90:2B:5E:C1:0F:77:D8' }
+      ],
+      rounds: [
+        { title: 'ŘETĚZEC DŮVĚRY', clue: 'Podvržený balíček ověřila řídicí jednotka ve voze. Vozy důvěřují jen certifikátům, které vydala Škoda OEM CA. Označte všechny certifikáty, které připadají v úvahu.', keep: ['a', 'b', 'c', 'd', 'e'] },
+        { title: 'PLATNOST A ÚČEL', clue: 'Log HSM-02: balíček byl podepsán v sobotu 31. 10. 2026, účel klíče Code Signing. Označte certifikáty, které v ten den platily a slouží k podepisování kódu.', keep: ['a', 'b', 'c'] },
+        { title: 'OTISK PODPISU', clue: 'Podpis balíčku FW 6.7.420 obsahuje otisk certifikátu 7A:3F:91:C4:58:2E:B8. Vyberte certifikát s přesně tímto otiskem a revokujte ho.', keep: ['a'], final: true }
+      ]
+    } },
   done: [
     ['n', 'Certifikát je revokovaný. Podvržený firmware je pro vozy neplatný a distribuce se zastavila.'],
     ['g', 'CHYTRÉ. ALE VŽDYCKY MÁM PLÁN B.'],
@@ -1306,10 +1355,78 @@ function openTerm() {
   $('#tInfo').textContent = sc.term.info || ''; $('#tInfo').hidden = !sc.term.info;
   buildBoxes(sc.term.boxes || 0, sc.term.letters ? 'letters' : sc.term.digits ? 'digits' : 'any');
   tMsg.textContent = ''; tMsg.className = 'tmsg'; tIn.value = ''; term.className = 'term on'; termOn = true; hideTip();
-  quiz = sc.term.quiz || null;
-  $('#tForm').hidden = !!quiz; $('#tQuiz').hidden = !quiz;
+  quiz = sc.term.quiz || null; cert = sc.term.cert || null;
+  $('#tForm').hidden = !!(quiz || cert); $('#tQuiz').hidden = !quiz; $('#tCert').hidden = !cert;
+  $('#term .tbox').classList.toggle('xwide', !!cert);
+  if (cert) { certSel = new Set(); certRender(); }
   if (quiz) { $('#term .tbox').classList.add('wide'); if (lockState(n).quizRun) quizFail('PŘERUŠENO'); else quizReady(); }
-  coolTick(); if (!quiz) setTimeout(focusInput, 60);
+  coolTick(); if (!quiz && !cert) setTimeout(focusInput, 60);
+}
+
+/* ---------- minihra: revokace certifikátu ---------- */
+let cert = null, certSel = new Set();
+const tCert = $('#tCert');
+const certRound = () => lockState(st.scene + 1).certRound || 0;
+function certAlive(r) { return r === 0 ? cert.cards.map(c => c.id) : cert.rounds[r - 1].keep; }
+function certRender(fresh) {
+  const r = certRound(), rd = cert.rounds[r], alive = certAlive(r);
+  tCert.innerHTML = '<div class="ce-clue"><b>KOLO ' + (r + 1) + ' / ' + cert.rounds.length + ' · ' + rd.title + '</b><p></p></div><div class="ce-g"></div>' +
+    '<div class="ce-act"><span class="ce-r">VYBRÁNO <b id="ceN">0</b>' + (rd.final ? ' · VYBERTE JEDEN' : '') + '</span>' +
+    '<button class="ce-go' + (rd.final ? ' red' : '') + '" id="ceGo" type="button">' + (rd.final ? 'REVOKOVAT' : 'POTVRDIT VÝBĚR') + '</button></div>';
+  tCert.querySelector('.ce-clue p').textContent = rd.clue;
+  const g = tCert.querySelector('.ce-g');
+  cert.cards.forEach(c => {
+    const el = document.createElement('button'); el.type = 'button'; el.className = 'ce-c'; el.dataset.id = c.id;
+    el.innerHTML = '<h5></h5><dl><dt>Vydal</dt><dd></dd><dt>Platnost</dt><dd></dd><dt>Účel</dt><dd></dd><dt>Otisk</dt><dd></dd></dl>';
+    el.querySelector('h5').textContent = c.cn;
+    const dd = el.querySelectorAll('dd'); dd[0].textContent = c.iss; dd[1].textContent = c.from + ' – ' + c.to; dd[2].textContent = c.use; dd[3].textContent = c.fp;
+    if (!alive.includes(c.id)) { el.classList.add('out'); el.disabled = true; el.insertAdjacentHTML('beforeend', '<span class="stamp">VYŘAZENO</span>'); }
+    if (certSel.has(c.id)) el.classList.add('sel');
+    el.onclick = () => certToggle(c.id, el);
+    g.appendChild(el);
+  });
+  $('#ceGo').onclick = certConfirm;
+  $('#ceGo').disabled = Date.now() < coolUntil;
+  $('#ceN').textContent = certSel.size;
+}
+function certToggle(id, el) {
+  if (Date.now() < coolUntil || term.classList.contains('good')) return;
+  const rd = cert.rounds[certRound()];
+  if (rd.final) { certSel.clear(); tCert.querySelectorAll('.ce-c.sel').forEach(e => e.classList.remove('sel')); certSel.add(id); el.classList.add('sel'); }
+  else if (certSel.has(id)) { certSel.delete(id); el.classList.remove('sel'); }
+  else { certSel.add(id); el.classList.add('sel'); }
+  $('#ceN').textContent = certSel.size; sfx.click();
+  if (tMsg.className === 'tmsg bad' && !/ZABLOKOVÁN/.test(tMsg.textContent)) tMsg.textContent = '';
+}
+async function certConfirm() {
+  if (!termOn || Date.now() < coolUntil || term.classList.contains('good')) return;
+  if (REMOTE && (!st.startedAt || CTRL.status === 'ended')) return;
+  const n = st.scene + 1, lk = lockState(n), r = certRound(), rd = cert.rounds[r];
+  if (!certSel.size) { tMsg.className = 'tmsg bad'; tMsg.textContent = rd.final ? 'VYBERTE CERTIFIKÁT K REVOKACI' : 'OZNAČTE CERTIFIKÁTY, KTERÉ VYHOVUJÍ STOPĚ'; return; }
+  const keep = new Set(rd.keep), extra = [...certSel].filter(id => !keep.has(id)).length, missing = rd.keep.filter(id => !certSel.has(id)).length;
+  if (!extra && !missing) {
+    if (rd.final) {
+      const el = tCert.querySelector('.ce-c[data-id="' + rd.keep[0] + '"]');
+      el.classList.remove('sel'); el.classList.add('rev'); el.insertAdjacentHTML('beforeend', '<span class="stamp">REVOKOVÁNO</span>');
+      $('#ceGo').disabled = true;
+      if (st.locks) delete st.locks['m' + n];
+      term.className = 'term on good'; tMsg.className = 'tmsg good'; tMsg.textContent = 'CERTIFIKÁT REVOKOVÁN ✓'; sfx.ok();
+      await wait(1800); closeTerm(); await milestone(n);
+      return;
+    }
+    lk.certRound = r + 1; save(); certSel = new Set(); sfx.ok();
+    tMsg.className = 'tmsg good'; tMsg.textContent = 'STOPA POTVRZENA · ZBÝVÁ ' + cert.rounds[r].keep.length + ' CERTIFIKÁTŮ';
+    certRender();
+    return;
+  }
+  // chyba: zámek na lockSec, výběr zůstává, aby ho tým mohl opravit
+  lk.wrong++; coolUntil = lk.until = Date.now() + (cert.lockSec || 20) * 1000; save();
+  localLog(t => t.wrong = (t.wrong || 0) + 1); fbWrong(n);
+  sfx.err(); term.className = 'term on'; void term.offsetWidth; term.className = 'term on bad';
+  tMsg.className = 'tmsg bad';
+  tMsg.textContent = rd.final ? 'TENTO CERTIFIKÁT NEODPOVÍDÁ PODPISU' : 'VÝBĚR NESEDÍ' + (extra ? ' · NAVÍC ' + extra : '') + (missing ? ' · CHYBÍ ' + missing : '');
+  $('#ceGo').disabled = true;
+  setTimeout(coolTick, 1600);
 }
 
 /* ---------- rychlokvíz ---------- */
@@ -1432,7 +1549,8 @@ function coolTick() {
   const upd = () => { const left = Math.ceil((coolUntil - Date.now()) / 1000);
     if (left > 0) { tGo.disabled = true; setInputsDisabled(true); tMsg.className = 'tmsg bad'; tMsg.textContent = 'TERMINÁL DOČASNĚ ZABLOKOVÁN · ' + fmtLock(left); }
     else { tGo.disabled = false; setInputsDisabled(false); clearInterval(coolT); if (/ZABLOKOVÁN/.test(tMsg.textContent)) { tMsg.textContent = ''; if (!quiz) focusInput(); } }
-    const qs = $('#qStart'); if (qs) qs.disabled = left > 0; };
+    const qs = $('#qStart'); if (qs) qs.disabled = left > 0;
+    const cg = $('#ceGo'); if (cg && !term.classList.contains('good')) cg.disabled = left > 0; };
   upd(); if (coolUntil > Date.now()) coolT = setInterval(upd, 250);
 }
 $('#tBack').onclick = () => { if (!qRun && !term.classList.contains('good')) closeTerm(); };

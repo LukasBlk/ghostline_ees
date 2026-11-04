@@ -29,7 +29,7 @@ window.GHOSTLINE_CONFIG = {
     m1: ["0c154674cd4d9950"],   // SOS (z blikání světel vozu)
     m2: ["525a7f3264359078"],   // ODPOJIT — Caesarova šifra SHTSNMX, posun 4 doleva (rychlost 4 km/h + levý blinkr na přístrojové desce)
     m3: [],                     // dohledové centrum: rychlokvíz (bez kódu, otázky jsou v index.html → STORY → soc → quiz)
-    m4: ["d4e1e720607db53f"],
+    m4: [],                     // ORU laboratoř: minihra revokace certifikátu (data v index.html → STORY → lab → cert)
     m5: ["89eb0ee2244220e0"]    // PIN 6547 z logických operací (zadání je přímo v terminálu nouzového vypínače)
   },
 
@@ -55,7 +55,7 @@ window.GHOSTLINE_CONFIG = {
     m1: "Tento kód nenajdete v žádné šifře. Odpověď se skrývá přímo tady v hale — dívejte se pozorně.",
     m2: "Klíč k posunu najdete na přístrojové desce.",
     m3: "Odpovězte správně na všech 10 otázek dřív, než vyprší čas.",
-    m4: "Kód získáte rozluštěním šifry č. 4.",
+    m4: "Vyřazujte certifikáty podle stop, dokud nezbude jediný.",
     m5: "Šifru máte přímo před sebou — vyřešte operace A–D a zadejte čtyřmístný PIN."
   },
 

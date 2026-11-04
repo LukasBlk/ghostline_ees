@@ -19,7 +19,7 @@ Webová adventura s motivem kybernetické bezpečnosti ve Škoda Auto. Týmy v r
 | m1 | Servisní hala — diagnostická stanice | `SOS` — nevychází ze šifry, hráči ho musí vyčíst z blikání světel vozu |
 | m2 | Kokpit — servisní menu infotainmentu | `ODPOJIT` — Caesarova šifra `SHTSNMX` v terminálu, posun o 4 doleva = rychlost 4 km/h a levý blinkr na přístrojové desce |
 | m3 | Dohledové centrum — blokace C2 | bez kódu: **rychlokvíz** 10 náhodných otázek za 2 min, všechny správně (otázky v `index.html` → `STORY` → `soc` → `quiz`) |
-| m4 | Laboratoř podpisů — revokace certifikátu | `1111` |
+| m4 | ORU laboratoř — revokace certifikátu | bez kódu: **minihra** 3 kola vyřazování certifikátů 9 → 5 → 3 → 1 (vydavatel, platnost a účel, otisk); každá chyba = zámek 20 s |
 | m5 | Velín — nouzový vypínač | `6547` — logické operace XOR/NOT/AND/OR, zadání je přímo v terminálu |
 
 Zatím je všude testovací kód `1111`. Zadání je tolerantní: nezáleží na velikosti písmen, diakritice, mezerách ani interpunkci.
