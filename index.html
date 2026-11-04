@@ -535,18 +535,18 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
       <polygon points="1030,250 1110,290 1030,330 950,290" fill="#78FAAE" fill-opacity=".28" stroke="#78FAAE" stroke-width="2"/>
       <polygon points="950,290 1030,330 1030,420 950,380" fill="#78FAAE" fill-opacity=".16" stroke="#78FAAE" stroke-width="2"/>
       <polygon points="1030,330 1110,290 1110,380 1030,420" fill="#78FAAE" fill-opacity=".1" stroke="#78FAAE" stroke-width="2"/>
-      <text x="1070" y="362" text-anchor="middle" class="m" font-size="13" fill="#bff6ff" transform="rotate(-27 1070 362)">FW 7.4.1</text>
+      <text x="1070" y="362" text-anchor="middle" class="m" font-size="13" fill="#bff6ff" transform="rotate(-27 1070 362)">FW 6.7.420</text>
     </g>
-    <g class="blink"><rect x="1112" y="226" width="96" height="28" fill="#2a0a10" stroke="#ff3b4e" stroke-width="2"/><text x="1160" y="245" text-anchor="middle" class="m" font-size="14" fill="#ff8a96">+2,3 MB</text></g>
+    <g class="blink"><rect x="1112" y="226" width="96" height="28" fill="#2a0a10" stroke="#ff3b4e" stroke-width="2"/><text x="1160" y="245" text-anchor="middle" class="m" font-size="14" fill="#ff8a96">+6,9 MB</text></g>
   </g><rect class="hit" x="880" y="215" width="335" height="410"/></g>
   <!-- certifikát -->
   <g class="hs" data-hs="cert"><g class="art">
     <rect x="1250" y="130" width="310" height="220" fill="#020a10" stroke="#1d3044" stroke-width="4"/>
     <rect x="1268" y="148" width="274" height="184" fill="#0b1824" stroke="#2c4a64" stroke-width="2"/>
     <text x="1284" y="176" class="t" font-size="15" font-weight="700" fill="#cfe9f8" letter-spacing="2">CERTIFIKÁT X.509</text>
-    <text x="1284" y="206" class="m" font-size="11" fill="#8fb3cc">CN=Skoda OTA Signing 2031</text>
+    <text x="1284" y="206" class="m" font-size="11" fill="#8fb3cc">CN=Skoda OTA Signing 2026</text>
     <text x="1284" y="226" class="m" font-size="11" fill="#5f8299">Vydal: Škoda OEM CA</text>
-    <text x="1284" y="246" class="m" font-size="11" fill="#5f8299">Platnost: 2031 → 2033</text>
+    <text x="1284" y="246" class="m" font-size="11" fill="#5f8299">Platnost: 2026 → 2029</text>
     <rect x="1284" y="270" width="92" height="28" fill="#0b3a24" id="certBadge"/><text x="1330" y="289" text-anchor="middle" class="t" font-size="14" font-weight="700" fill="#3dff9a" id="certTxt">PLATNÝ</text>
     <g class="spin slow"><circle cx="1490" cy="282" r="30" fill="none" stroke="#ffb020" stroke-width="3" stroke-dasharray="6 5"/></g>
     <circle cx="1490" cy="282" r="18" fill="#ffb020" opacity=".25"/>
@@ -556,7 +556,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <g class="hs" data-hs="pki"><g class="art">
     <rect x="1200" y="470" width="320" height="180" fill="#020c14" stroke="#78FAAE" stroke-opacity=".6" stroke-width="3" class="pulse"/>
     <text x="1220" y="504" class="m" font-size="15" fill="#78FAAE">PKI // REVOKACE</text>
-    <text x="1220" y="546" class="t" font-size="22" font-weight="700" fill="#e9f6ff">OTA-SIGNING-2031</text>
+    <text x="1220" y="546" class="t" font-size="22" font-weight="700" fill="#e9f6ff">OTA-SIGNING-2026</text>
     <text x="1220" y="584" class="m blink" font-size="13" fill="#ffb020" id="pkiTxt">ČEKÁ NA AUTORIZACI</text>
     <g fill="#0e2a3a"><rect x="1220" y="604" width="60" height="26"/><rect x="1290" y="604" width="60" height="26"/><rect x="1360" y="604" width="140" height="26"/></g>
     <polygon points="1250,650 1470,650 1490,660 1230,660" fill="#111a24"/>
@@ -738,7 +738,7 @@ const ITEMS = {
   dongle:   { n: 'OBD dongle',        d: 'Neznámé zařízení se SIM kartou, odpojené z diagnostického portu vozu ENYAQ.', i: '<rect x="5" y="8" width="14" height="9" rx="2"/><path d="M9 8V5h6v3M8 12h2"/><circle cx="16" cy="12.5" r="1"/>' },
   protokol: { n: 'Servisní protokol', d: 'Protokol z prohlídky vozu ENYAQ. Externí technik „J. Dvořák“. Podpis chybí.', i: '<path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 13h6M9 17h3"/>' },
   proces:   { n: 'Otisk procesu',     d: 'Hash a výpis procesu „sysupdated“ ze serveru TEL-GW-03 — pro forenzní analýzu.', i: '<path d="M8 5L3 12l5 7M16 5l5 7-5 7M14 4l-4 16"/>' },
-  cert:     { n: 'Certifikát OTA',    d: 'Údaje podpisového certifikátu „Škoda OTA Signing 2031“.', i: '<rect x="3" y="5" width="18" height="12" rx="1"/><circle cx="16" cy="17" r="3"/><path d="M15 20l-1 2M17 20l1 2M6 9h8M6 12h5"/>' }
+  cert:     { n: 'Certifikát OTA',    d: 'Údaje podpisového certifikátu „Škoda OTA Signing 2026“.', i: '<rect x="3" y="5" width="18" height="12" rx="1"/><circle cx="16" cy="17" r="3"/><path d="M15 20l-1 2M17 20l1 2M6 9h8M6 12h5"/>' }
 };
 
 const STORY = [
@@ -848,12 +848,12 @@ const STORY = [
       ['n', 'Řetězec důvěry: Root CA → OEM CA → podpisový certifikát OTA → řídicí jednotky ve voze.'],
       ['m', 'Když podpisový certifikát revokujeme, vozy odmítnou všechno, co jím bylo podepsáno. Včetně podvrhu.'] ] },
     cert:  { n: 'Podpisový certifikát', item: 'cert', l: [
-      ['n', 'Certifikát „Škoda OTA Signing 2031“. Platný. A právě proto nebezpečný.'] ] },
+      ['n', 'Certifikát „Škoda OTA Signing 2026“. Platný. A právě proto nebezpečný.'] ] },
     pki:   { n: 'PKI konzole', term: true }
   },
   req: ['hsm', 'fw'],
   lock: [['m', 'Než cokoli revokujeme, potřebuju jistotu. Zkontrolujte HSM a samotný balíček firmwaru.']],
-  term: { head: 'PKI // REVOKACE CERTIFIKÁTU', prompt: 'Zadejte kód pro revokaci certifikátu OTA-SIGNING-2031.' },
+  term: { head: 'PKI // REVOKACE CERTIFIKÁTU', prompt: 'Zadejte kód pro revokaci certifikátu OTA-SIGNING-2026.' },
   done: [
     ['n', 'Certifikát je revokovaný. Podvržený firmware je pro vozy neplatný a distribuce se zastavila.'],
     ['g', 'CHYTRÉ. ALE VŽDYCKY MÁM PLÁN B.'],
