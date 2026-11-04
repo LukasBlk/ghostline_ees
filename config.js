@@ -27,7 +27,7 @@ window.GHOSTLINE_CONFIG = {
      Zadání se normalizuje: velká/malá písmena, diakritika, mezery a interpunkce nehrají roli. */
   codes: {
     m1: ["0c154674cd4d9950"],   // SOS (z blikání světel vozu)
-    m2: ["d4e1e720607db53f"],   // zástupný 1111 — připravuje se Caesarova šifra
+    m2: ["525a7f3264359078"],   // ODPOJIT — Caesarova šifra SHTSNMX, posun 4 (počet blikajících kontrolek v kokpitu)
     m3: [],                     // dohledové centrum: rychlokvíz (bez kódu, otázky jsou v index.html → STORY → soc → quiz)
     m4: ["d4e1e720607db53f"],
     m5: ["89eb0ee2244220e0"]    // PIN 6547 z logických operací (zadání je přímo v terminálu nouzového vypínače)
@@ -37,6 +37,7 @@ window.GHOSTLINE_CONFIG = {
      Hráč po odeslání vidí, které znaky má správně (zeleně) a které ne (červeně). */
   charCheck: {
     m1: ["ca12aa8c7db1cfd0", "531666d134a45d85", "2a8da6e5ea56af3c"],   // S · O · S
+    m2: ["757c08d8da11435d", "c9715068d5f77305", "3b1c44ee8b93a192", "5f50164597dee7f0", "7b612471f8210675", "ed5e1e8e633a2460", "0e778a87e5c5c410"],   // O · D · P · O · J · I · T
     m5: ["9197764072d69fd7", "5bf7133f45fb3d32", "52d6b1f7d0786bcc", "bb3fea1e9725af90"]   // 6 · 5 · 4 · 7
   },
 
@@ -52,7 +53,7 @@ window.GHOSTLINE_CONFIG = {
   /* Text pod terminálem — odkaz na fyzickou šifru, kterou má tým v realitě luštit. */
   physicalHints: {
     m1: "Tento kód nenajdete v žádné šifře. Odpověď se skrývá přímo tady v hale — dívejte se pozorně.",
-    m2: "Kód získáte rozluštěním šifry č. 2.",
+    m2: "Klíč k posunu najdete na přístrojové desce.",
     m3: "Odpovězte správně na všech 10 otázek dřív, než vyprší čas.",
     m4: "Kód získáte rozluštěním šifry č. 4.",
     m5: "Šifru máte přímo před sebou — vyřešte operace A–D a zadejte čtyřmístný PIN."

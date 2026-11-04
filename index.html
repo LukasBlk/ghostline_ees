@@ -158,6 +158,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .pz-c i{display:block;font:500 1.05cqw var(--mono);font-style:normal;color:#5f8a78;margin-top:.45cqw;white-space:nowrap}
 .pz-n{margin-top:.9cqw;font-size:.95cqw;color:#a9bccd;line-height:1.5}
 .pz-n q{color:#d9e8f5}
+.cz-msg{display:flex;justify-content:center;gap:.9cqw;margin:.4cqw 0 1.2cqw}
+.cz-msg span{width:3.4cqw;height:4cqw;display:grid;place-items:center;font:700 2.4cqw var(--mono);color:#ff8a96;background:#1a0a0e;border:1px solid rgba(255,59,78,.45);text-shadow:0 0 .8cqw rgba(255,59,78,.6)}
+.cz-abc{display:flex;flex-wrap:wrap;justify-content:center;gap:.3cqw;padding:.6cqw .8cqw;border:1px dashed #1f5a45;background:#04170f}
+.cz-abc span{min-width:1.7cqw;text-align:center;font:600 1cqw var(--mono);color:#9fd8bd;padding:.15cqw .2cqw}
 .trow{display:flex;gap:1cqw}
 .trow span{font-size:1.9cqw;color:var(--cy);line-height:3.6cqw}
 .tin{flex:1;height:3.6cqw;background:#06231b;border:1px solid #1f5a45;color:#fff;font:600 1.8cqw var(--mono);letter-spacing:.25em;padding:0 1cqw;text-transform:uppercase;outline:none}
@@ -764,9 +768,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 (() => {
 'use strict';
 const DEFAULT_CFG = { gameId: 'ghostline-demo', firebase: {}, salt: 'auriga',
-  codes: { m1: ['0c154674cd4d9950'], m2: ['d4e1e720607db53f'], m3: [], m4: ['d4e1e720607db53f'], m5: ['89eb0ee2244220e0'] },
+  codes: { m1: ['0c154674cd4d9950'], m2: ['525a7f3264359078'], m3: [], m4: ['d4e1e720607db53f'], m5: ['89eb0ee2244220e0'] },
   milestones: ['Diagnostika odemčena', 'Infotainment izolován', 'C2 zablokováno', 'Certifikát revokován', 'Flotila zachráněna'],
-  physicalHints: {}, charCheck: { m1: ['ca12aa8c7db1cfd0', '531666d134a45d85', '2a8da6e5ea56af3c'], m5: ['9197764072d69fd7', '5bf7133f45fb3d32', '52d6b1f7d0786bcc', 'bb3fea1e9725af90'] }, wrongLimit: 2, wrongCooldownSec: 20, quizLockSec: 20, remoteStart: true, countdownSec: 10 };
+  physicalHints: {}, charCheck: { m1: ['ca12aa8c7db1cfd0', '531666d134a45d85', '2a8da6e5ea56af3c'], m2: ['757c08d8da11435d', 'c9715068d5f77305', '3b1c44ee8b93a192', '5f50164597dee7f0', '7b612471f8210675', 'ed5e1e8e633a2460', '0e778a87e5c5c410'], m5: ['9197764072d69fd7', '5bf7133f45fb3d32', '52d6b1f7d0786bcc', 'bb3fea1e9725af90'] }, wrongLimit: 2, wrongCooldownSec: 20, quizLockSec: 20, remoteStart: true, countdownSec: 10 };
 if (!window.GHOSTLINE_CONFIG) console.warn('[GHOSTLINE] config.js se nenačetl — používám výchozí nastavení (kód 1111, lokální režim).');
 const CFG = Object.assign({}, DEFAULT_CFG, window.GHOSTLINE_CONFIG || {});
 const qs = new URLSearchParams(location.search);
@@ -856,7 +860,15 @@ const STORY = [
   },
   req: ['cluster', 'canbay'],
   lock: [['m', 'Do servisního menu se dosatnete jen s kódem. Nejdřív zjistěte, jak se útok šíří vozem — podívejte se na přístrojovou desku a pod palubní desku.']],
-  term: { head: 'INFOTAINMENT // SERVISNÍ MENU', prompt: 'Zadejte kód pro odpojení externích rozhraní infotainmentu.' },
+  term: { head: 'INFOTAINMENT // SERVISNÍ MENU', prompt: 'Zadejte kód pro odpojení externích rozhraní infotainmentu.',
+    boxes: 7, letters: true, info: 'Heslo tvoří 7 písmen.',
+    /* Caesarova šifra: ODPOJIT posunuté o 4 (= počet blikajících kontrolek na přístrojové desce) */
+    cipher: {
+      label: 'ZPRÁVA ZANECHANÁ V SERVISNÍM MENU',
+      text: 'SHTSNMX',
+      alphabet: 'A B C D E F G H CH I J K L M N O P Q R S T U V W X Y Z',
+      note: 'Každé písmeno zprávy je v abecedě posunuté o stejný počet míst.'
+    } },
   done: [
     ['n', 'Infotainment je izolován: Bluetooth a Wi-Fi jsou odpojené.'],
     ['n', 'V paměti jednotky zůstala adresa, se kterou komunikovala: telemetry-skoda.backend.vw.wob Náš vlastní backend.'],
@@ -1276,7 +1288,13 @@ function openTerm() {
       pz.cards.map(([h, e]) => '<div class="pz-c"><b>' + h + '</b><code>' + e + '</code><i>→ ???? → ?</i></div>').join('') +
       '</div>' + (pz.note ? '<div class="pz-n">' + pz.note + '</div>' : '');
   } else pzEl.innerHTML = '';
-  pzEl.hidden = !pz; $('#term .tbox').classList.toggle('wide', !!pz);
+  const cp = sc.term.cipher;
+  if (cp) {
+    pzEl.innerHTML = '<div class="pz-t">' + cp.label + '</div><div class="cz-msg">' + cp.text.split('').map(ch => '<span>' + ch + '</span>').join('') + '</div>' +
+      '<div class="cz-abc">' + cp.alphabet.split(' ').map(ch => '<span>' + ch + '</span>').join('') + '</div>' +
+      (cp.note ? '<div class="pz-n">' + cp.note + '</div>' : '');
+  }
+  pzEl.hidden = !(pz || cp); $('#term .tbox').classList.toggle('wide', !!(pz || cp));
   $('#tHint').textContent = (CFG.physicalHints || {})['m' + n] || '';
   coolUntil = lockState(n).until || 0;
   $('#tInfo').textContent = sc.term.info || ''; $('#tInfo').hidden = !sc.term.info;

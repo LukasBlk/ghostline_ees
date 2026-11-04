@@ -17,7 +17,7 @@ Webová adventura s motivem kybernetické bezpečnosti ve Škoda Auto. Týmy v r
 | Milník | Kapitola | Kód |
 |---|---|---|
 | m1 | Servisní hala — diagnostická stanice | `SOS` — nevychází ze šifry, hráči ho musí vyčíst z blikání světel vozu |
-| m2 | Kokpit — servisní menu infotainmentu | `1111` (připravuje se Caesarova šifra) |
+| m2 | Kokpit — servisní menu infotainmentu | `ODPOJIT` — Caesarova šifra `SHTSNMX` v terminálu, posun 4 = počet blikajících kontrolek na přístrojové desce |
 | m3 | Dohledové centrum — blokace C2 | bez kódu: **rychlokvíz** 10 náhodných otázek za 2 min, všechny správně (otázky v `index.html` → `STORY` → `soc` → `quiz`) |
 | m4 | Laboratoř podpisů — revokace certifikátu | `1111` |
 | m5 | Velín — nouzový vypínač | `6547` — logické operace XOR/NOT/AND/OR, zadání je přímo v terminálu |
