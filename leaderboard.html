@@ -51,6 +51,13 @@ tr.fin .bar i.on{background:var(--gn);box-shadow:0 0 6px var(--gn)}
 .tot small{display:block;font:500 10px 'Chakra Petch',system-ui,sans-serif;letter-spacing:.2em;color:var(--dim)}
 .wr{font:500 15px var(--mono);text-align:center;color:var(--dim)}
 .wr.hi{color:var(--rd)}
+tbody tr{position:relative}
+tr.up{z-index:2}
+tr.up td{background:rgba(10,48,36,.95);border-top-color:rgba(120,250,174,.55);border-bottom-color:rgba(120,250,174,.55)}
+tr.up td:first-child{border-left-color:var(--cy);box-shadow:-6px 0 18px -4px rgba(120,250,174,.6)}
+.mv{display:block;font:700 11px var(--mono);color:var(--cy);letter-spacing:.05em;margin-top:2px;animation:mvIn .5s ease-out}
+@keyframes mvIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){tbody tr{transition:none!important;transform:none!important}}
 @keyframes flash{0%{background:rgba(61,255,154,.35)}100%{background:rgba(6,16,26,.82)}}
 tr.flash td{animation:flash 2.5s ease-out}
 .empty{text-align:center;padding:60px 0;color:var(--dim);letter-spacing:.15em}
@@ -177,6 +184,7 @@ $('#thead').innerHTML = '<th>#</th><th>TÝM</th>' + MS.map((m, i) => '<th class=
 
 let teams = [];       // {id,name,start(ms),ms:{m1:sec},wrong,finished}
 const lastSeen = {};  // id -> počet milníků (kvůli zvýraznění)
+const lastRank = {}, upUntil = {}, upBy = {};   // animace předbíhání
 function setSync(s, t) { const el = $('#sync'); el.className = 'sync ' + s; el.textContent = t; }
 
 const REMOTE = CFG.remoteStart !== false;
@@ -199,9 +207,16 @@ function render() {
   $('#sTeams').textContent = rows.length;
   $('#sFin').textContent = rows.filter(r => r.finished).length;
   $('#empty').hidden = rows.length > 0;
-  const tb = $('#rows'); const html = rows.map((r, i) => {
+  const tb = $('#rows');
+  // FLIP: zapamatovat si, kde řádky byly před překreslením
+  const before = {};
+  tb.querySelectorAll('tr[data-id]').forEach(tr => { before[tr.dataset.id] = tr.getBoundingClientRect().top; });
+  const html = rows.map((r, i) => {
     const flash = lastSeen[r.id] != null && lastSeen[r.id] < r.done;
     lastSeen[r.id] = r.done;
+    if (lastRank[r.id] != null && i < lastRank[r.id]) { upUntil[r.id] = now + 4500; upBy[r.id] = lastRank[r.id] - i; }
+    lastRank[r.id] = i;
+    const up = upUntil[r.id] > now;
     const cells = MS.map((m, j) => { const v = r.ms['m' + (j + 1)], p = j ? r.ms['m' + j] : 0;
       return v != null ? '<td class="t">' + fmt(v) + (j && p != null ? '<small>+' + fmt(v - p) + '</small>' : '') + '</td>' : '<td class="t no">—</td>'; }).join('');
     let tot;
@@ -212,9 +227,18 @@ function render() {
       else if (CTRL.status === 'ended') tot = '<td class="tot lob">' + fmt((CTRL.endMs - CTRL.startMs) / 1000) + '<small>UKONČENO</small></td>';
       else tot = '<td class="tot run">' + fmt((serverNow() - CTRL.startMs) / 1000) + '<small>BĚŽÍ</small></td>';
     } else tot = '<td class="tot run">' + fmt(r.start ? (now - r.start) / 1000 : null) + '<small>BĚŽÍ</small></td>';
-    return '<tr class="' + (r.finished ? 'fin ' : '') + (i === 0 && r.done ? 'p1 ' : '') + (flash ? 'flash' : '') + '"><td class="rank">' + (i + 1) + '</td><td><div class="nm">' + (canDelete() ? '<button class="del" data-id="' + esc(r.id) + '" title="Smazat tým">✕</button>' : '') + '<div class="name" title="' + esc(r.name) + '">' + esc(r.name) + '</div></div><div class="bar">' + MS.map((_, j) => '<i class="' + (j < r.done ? 'on' : '') + '"></i>').join('') + '</div></td>' + cells + tot + '<td class="wr' + (r.wrong >= 5 ? ' hi' : '') + '">' + (r.wrong || 0) + '</td></tr>';
+    return '<tr data-id="' + esc(r.id) + '" class="' + (r.finished ? 'fin ' : '') + (i === 0 && r.done ? 'p1 ' : '') + (up ? 'up ' : '') + (flash ? 'flash' : '') + '"><td class="rank">' + (i + 1) + (up ? '<small class="mv">▲' + upBy[r.id] + '</small>' : '') + '</td><td><div class="nm">' + (canDelete() ? '<button class="del" data-id="' + esc(r.id) + '" title="Smazat tým">✕</button>' : '') + '<div class="name" title="' + esc(r.name) + '">' + esc(r.name) + '</div></div><div class="bar">' + MS.map((_, j) => '<i class="' + (j < r.done ? 'on' : '') + '"></i>').join('') + '</div></td>' + cells + tot + '<td class="wr' + (r.wrong >= 5 ? ' hi' : '') + '">' + (r.wrong || 0) + '</td></tr>';
   }).join('');
   tb.innerHTML = html;
+  // FLIP: posunout řádky zpět na staré místo a plynule je nechat dojet na nové
+  tb.querySelectorAll('tr[data-id]').forEach(tr => {
+    const old = before[tr.dataset.id]; if (old == null) return;
+    const dy = old - tr.getBoundingClientRect().top; if (Math.abs(dy) < 1) return;
+    tr.style.transition = 'none'; tr.style.transform = 'translateY(' + dy + 'px)';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      tr.style.transition = 'transform 1.1s cubic-bezier(.22,.9,.25,1)'; tr.style.transform = '';
+    }));
+  });
   $('#wipeBox').hidden = !canDelete();
 }
 setInterval(() => { $('#sClock').textContent = new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); render(); }, 1000);
