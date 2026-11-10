@@ -141,7 +141,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .hs.off{pointer-events:none}
 #stage.reveal .hs.off .hit{fill:none;stroke:none;animation:none}
 .prog.teach{outline:2px solid var(--am);outline-offset:.6cqw;box-shadow:0 0 2cqw rgba(255,176,32,.45)}
-.dlg.teach .nx{font-size:1.1cqw;color:var(--am);letter-spacing:.15em}
+.dlg.teach .nx{font-size:1.15cqw;font-weight:700;color:var(--am);letter-spacing:.15em;animation:teachNx 1.2s ease-in-out infinite}
+@keyframes teachNx{50%{opacity:.6;transform:translateX(.4cqw)}}
 .tip{position:absolute;z-index:22;pointer-events:none;padding:.35cqw .8cqw;font-size:1cqw;letter-spacing:.1em;background:rgba(3,10,16,.9);border:1px solid var(--cy);color:var(--cy);white-space:nowrap;transform:translate(-50%,-160%);opacity:0;transition:opacity .15s}
 .tip.on{opacity:1}
 .tip.lk{border-color:var(--am);color:var(--am)}
@@ -1339,7 +1340,7 @@ let toastT;
 function toast(t, cls = '') { const el = $('#toast'); el.textContent = t; el.className = 'toast on ' + cls; clearTimeout(toastT); toastT = setTimeout(() => el.className = 'toast ' + cls, 2600); }
 
 /* ---------- dialog ---------- */
-let busy = false;
+let busy = false, dlgTeach = false;
 const dlg = $('#dlg'), dWho = $('#dWho'), dTxt = $('#dTxt'), catcher = $('#catch');
 function say(lines, record = true) {
   return new Promise(res => {
@@ -1347,7 +1348,7 @@ function say(lines, record = true) {
     catcher.classList.add('on'); hideTip();
     const show = () => {
       const [w, t] = lines[i];
-      dlg.className = 'dlg on w-' + w; dWho.textContent = WHO[w]; full = t; pos = 0; dTxt.textContent = '';
+      dlg.className = 'dlg on w-' + w + (dlgTeach ? ' teach' : ''); dWho.textContent = WHO[w]; full = t; pos = 0; dTxt.textContent = '';
       if (record) { st.log.push([w, t]); save(); }
       clearInterval(typer);
       typer = setInterval(() => { pos += 1; dTxt.textContent = full.slice(0, pos); if (pos % 3 === 0) sfx.tick(w); if (pos >= full.length) { clearInterval(typer); typer = null; } }, w === 'g' ? 34 : 17);
@@ -1852,6 +1853,7 @@ const BRIEF = {
   term: { head: 'TRÉNINKOVÝ TERMINÁL // NANEČISTO', prompt: 'Zadejte heslo z tabule.', boxes: 4, letters: true },
   answer: 'KAVA',
   intro: [
+    ['s', 'Vítejte. Dialogy posouváte kliknutím kamkoli na obrazovku nebo mezerníkem. Zkuste to teď.'],
     ['n', 'Neděle, 02:05. Zasedačka bezpečnostního týmu, Technologické centrum Škoda Auto.'],
     ['m', 'Tady Dáša Párová, CPSO. Díky, že jste dorazili tak rychle.'],
     ['m', 'Testovací vůz ENYAQ se před hodinou sám nastartoval. Nikdo u něj nebyl a klíček je zamčený v trezoru.'],
@@ -1909,10 +1911,10 @@ async function runBriefing() {
   showBrief(); briefActive([]);
   await chapterCard({ ch: '00', label: 'VÝCVIK NANEČISTO', title: 'BRÍFINK', sub: 'NEDĚLE 02:05 · ZASEDAČKA BEZPEČNOSTNÍHO TÝMU' });
   await wait(700);
-  dlg.classList.add('teach'); $('#dlg .nx').textContent = 'KLIKNĚTE NEBO STISKNĚTE MEZERNÍK ▸';
-  await say(BRIEF.intro.slice(0, 1));
-  dlg.classList.remove('teach'); $('#dlg .nx').textContent = 'KLIKNI ▸';
-  await say(BRIEF.intro.slice(1));
+  dlgTeach = true; $('#dlg .nx').textContent = 'KLIKNĚTE KAMKOLI NEBO STISKNĚTE MEZERNÍK ▸';
+  await say(BRIEF.intro.slice(0, 2));
+  dlgTeach = false; $('#dlg .nx').textContent = 'KLIKNI ▸';
+  await say(BRIEF.intro.slice(2));
   // 1) obrazovka
   briefActive(['screen']); coachAt('#sc-brief [data-hs=screen] .hit', 'KLIKNĚTE SEM');
   await briefWait('screen');
