@@ -131,6 +131,17 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .dlg .nx{position:absolute;right:1.8cqw;bottom:1cqw;font-size:.85cqw;letter-spacing:.2em;color:var(--dim);animation:pulse 1.4s infinite}
 
 /* ---------- tooltip, toast ---------- */
+.coach{position:absolute;z-index:27;pointer-events:none;display:none;flex-direction:column;align-items:center;transform:translate(-50%,-100%);animation:coachBob 1s ease-in-out infinite}
+.coach.on{display:flex}
+.coach span{padding:.45cqw 1cqw;background:var(--am);color:#1a1000;font:700 1cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.2em;white-space:nowrap;box-shadow:0 0 1.5cqw rgba(255,176,32,.5)}
+.coach i{width:0;height:0;border-left:.9cqw solid transparent;border-right:.9cqw solid transparent;border-top:1.1cqw solid var(--am)}
+.coach.below{flex-direction:column-reverse;transform:translate(-50%,0)}
+.coach.below i{border-top:0;border-bottom:1.1cqw solid var(--am)}
+@keyframes coachBob{50%{margin-top:-.7cqw}}
+.hs.off{pointer-events:none}
+#stage.reveal .hs.off .hit{fill:none;stroke:none;animation:none}
+.prog.teach{outline:2px solid var(--am);outline-offset:.6cqw;box-shadow:0 0 2cqw rgba(255,176,32,.45)}
+.dlg.teach .nx{font-size:1.1cqw;color:var(--am);letter-spacing:.15em}
 .tip{position:absolute;z-index:22;pointer-events:none;padding:.35cqw .8cqw;font-size:1cqw;letter-spacing:.1em;background:rgba(3,10,16,.9);border:1px solid var(--cy);color:var(--cy);white-space:nowrap;transform:translate(-50%,-160%);opacity:0;transition:opacity .15s}
 .tip.on{opacity:1}
 .tip.lk{border-color:var(--am);color:var(--am)}
@@ -357,6 +368,81 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 </defs></svg>
 
 <div id="app"><div id="stage">
+
+<!-- ================= BRÍFINK: ZASEDAČKA (výcvik nanečisto) ================= -->
+<div class="scene" id="sc-brief"><svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <rect width="1600" height="660" fill="url(#gWall)"/><rect width="1600" height="660" fill="url(#pGrid)"/>
+  <polygon points="0,660 1600,660 1600,900 0,900" fill="url(#gFloor)"/>
+  <rect x="560" y="22" width="480" height="8" rx="4" fill="#cfefff" opacity=".35" filter="url(#fGlow)"/>
+  <!-- okno s nočním městem -->
+  <g class="nohit">
+    <rect x="70" y="120" width="320" height="400" fill="#020806"/>
+    <circle cx="320" cy="190" r="26" fill="#d9f7ea" opacity=".75"/><circle cx="330" cy="184" r="24" fill="#020806"/>
+    <g fill="#071712">
+      <rect x="80" y="360" width="60" height="160"/><rect x="146" y="320" width="48" height="200"/><rect x="200" y="390" width="70" height="130"/><rect x="276" y="340" width="54" height="180"/><rect x="334" y="400" width="50" height="120"/>
+    </g>
+    <g fill="#ffd27a" opacity=".75">
+      <rect x="92" y="380" width="6" height="8"/><rect x="118" y="410" width="6" height="8" class="blink d2"/><rect x="158" y="340" width="6" height="8"/><rect x="176" y="372" width="6" height="8"/><rect x="214" y="410" width="6" height="8"/><rect x="246" y="440" width="6" height="8" class="blink d1"/><rect x="288" y="360" width="6" height="8"/><rect x="306" y="400" width="6" height="8"/><rect x="348" y="420" width="6" height="8"/>
+    </g>
+    <rect x="70" y="120" width="320" height="400" fill="none" stroke="#1d4a3c" stroke-width="8"/>
+    <path d="M230 120V520M70 320H390" stroke="#1d4a3c" stroke-width="5"/>
+  </g>
+  <!-- velká obrazovka -->
+  <g class="hs" data-hs="screen"><g class="art">
+    <rect x="500" y="96" width="600" height="344" rx="8" fill="#020c0a" stroke="#2c6b55" stroke-width="5"/>
+    <g id="brIdle">
+      <text x="800" y="190" text-anchor="middle" class="t" font-size="40" font-weight="700" letter-spacing="10" fill="#78FAAE">ŠKODA</text>
+      <text x="800" y="240" text-anchor="middle" class="m" font-size="20" letter-spacing="6" fill="#ff3b4e">INCIDENT · GHOSTLINE</text>
+      <g class="bars" fill="#78FAAE" opacity=".8"><rect x="742" y="300" width="14" height="50"/><rect x="766" y="300" width="14" height="50"/><rect x="790" y="300" width="14" height="50"/><rect x="814" y="300" width="14" height="50"/><rect x="838" y="300" width="14" height="50"/></g>
+      <circle cx="652" cy="395" r="6" fill="#3dff9a" class="pulse"/>
+      <text x="668" y="401" class="t" font-size="16" letter-spacing="3" fill="#9fd8bd">HOVOR · D. PÁROVÁ · CPSO</text>
+    </g>
+    <g id="brMap" style="display:none">
+      <text x="800" y="150" text-anchor="middle" class="t" font-size="22" font-weight="700" letter-spacing="8" fill="#ffb020">PLÁN ZÁSAHU</text>
+      <path d="M580 280H1020" stroke="#78FAAE" stroke-opacity=".5" stroke-width="3" class="dash slow" fill="none"/>
+      <g class="t" font-size="15" font-weight="600" letter-spacing="2" text-anchor="middle" fill="#d9e8f5">
+        <g><rect x="565" y="265" width="30" height="30" transform="rotate(45 580 280)" fill="#04170f" stroke="#78FAAE" stroke-width="3"/><text x="580" y="286" fill="#78FAAE">1</text><text x="580" y="335">DÍLNA</text></g>
+        <g><rect x="675" y="265" width="30" height="30" transform="rotate(45 690 280)" fill="#04170f" stroke="#78FAAE" stroke-width="3"/><text x="690" y="286" fill="#78FAAE">2</text><text x="690" y="335">KOKPIT</text></g>
+        <g><rect x="785" y="265" width="30" height="30" transform="rotate(45 800 280)" fill="#04170f" stroke="#78FAAE" stroke-width="3"/><text x="800" y="286" fill="#78FAAE">3</text><text x="800" y="335">SOC</text></g>
+        <g><rect x="895" y="265" width="30" height="30" transform="rotate(45 910 280)" fill="#04170f" stroke="#78FAAE" stroke-width="3"/><text x="910" y="286" fill="#78FAAE">4</text><text x="910" y="335">ORU LAB</text></g>
+        <g><rect x="1005" y="265" width="30" height="30" transform="rotate(45 1020 280)" fill="#04170f" stroke="#ff3b4e" stroke-width="3"/><text x="1020" y="286" fill="#ff3b4e">5</text><text x="1020" y="335">VELÍN</text></g>
+      </g>
+      <text x="800" y="400" text-anchor="middle" class="m" font-size="15" letter-spacing="3" fill="#9fd8bd">5 TERMINÁLŮ · 5 MILNÍKŮ</text>
+    </g>
+  </g><rect class="hit" x="494" y="90" width="612" height="356"/></g>
+  <!-- tabule -->
+  <g class="hs" data-hs="board"><g class="art">
+    <rect x="1190" y="150" width="330" height="250" fill="#c3cdd3" stroke="#55636f" stroke-width="8"/>
+    <g fill="none" stroke="#1f4e8a" stroke-width="3" stroke-linecap="round">
+      <path d="M1220 190h120M1220 214h90M1220 238h140"/>
+      <path d="M1400 190l40 30-40 30"/><circle cx="1470" cy="250" r="22"/>
+    </g>
+    <path d="M1360 300c30-10 60 10 90 0" stroke="#c4202f" stroke-width="3" fill="none"/>
+    <text x="1222" y="352" class="t" font-size="13" font-weight="700" fill="#1f4e8a" transform="rotate(-3 1222 352)">Wi-Fi zasedačky: KAVA</text>
+    <rect x="1240" y="400" width="230" height="10" fill="#55636f"/>
+    <rect x="1270" y="394" width="40" height="7" rx="3" fill="#1f4e8a"/><rect x="1320" y="394" width="40" height="7" rx="3" fill="#c4202f"/>
+  </g><rect class="hit" x="1182" y="142" width="346" height="272"/></g>
+  <!-- židle a stůl -->
+  <g class="nohit">
+    <g fill="#0a1612" stroke="#1d3a2e" stroke-width="2">
+      <rect x="440" y="490" width="90" height="90" rx="14"/><rect x="620" y="480" width="90" height="100" rx="14"/><rect x="890" y="480" width="90" height="100" rx="14"/><rect x="1070" y="490" width="90" height="90" rx="14"/>
+    </g>
+    <polygon points="380,560 1220,560 1380,760 220,760" fill="#0c1a15" stroke="#1d3a2e" stroke-width="3"/>
+    <polygon points="220,760 1380,760 1380,780 220,780" fill="#06100c"/>
+    <path d="M760 640l40-24 40 24-40 10z" fill="#141f1b" stroke="#2c6b55" stroke-width="2"/><circle cx="800" cy="634" r="4" fill="#3dff9a" class="pulse"/>
+    <g fill="#e3eaf0"><rect x="520" y="620" width="30" height="34" rx="4"/><rect x="1180" y="680" width="30" height="34" rx="4"/></g>
+    <g fill="#d9e2e8" opacity=".85"><rect x="600" y="680" width="90" height="60" transform="rotate(-8 645 710)"/><rect x="700" y="690" width="80" height="55" transform="rotate(6 740 717)"/></g>
+  </g>
+  <!-- tréninkový terminál -->
+  <g class="hs" data-hs="tterm"><g class="art">
+    <rect x="930" y="516" width="190" height="124" rx="6" fill="#0d151d" stroke="#2b3d4d" stroke-width="2"/>
+    <rect x="940" y="526" width="170" height="104" fill="#02121a"/>
+    <text x="1025" y="562" text-anchor="middle" class="m" font-size="14" letter-spacing="2" fill="#78FAAE">TRÉNINK</text>
+    <g id="brLock"><rect x="1015" y="576" width="20" height="16" rx="2" fill="#ffb020"/><path d="M1019 576v-6a6 6 0 0 1 12 0v6" stroke="#ffb020" stroke-width="3" fill="none"/></g>
+    <text x="1025" y="616" text-anchor="middle" class="m blink" font-size="12" fill="#ffb020" id="brTermTxt">ZAMČENO</text>
+    <polygon points="918,640 1132,640 1158,656 892,656" fill="#1b2733"/>
+  </g><rect class="hit" x="886" y="506" width="278" height="158"/></g>
+</svg></div>
 
 <!-- ================= SCÉNA 1: SERVISNÍ HALA ================= -->
 <div class="scene" id="sc-garage"><svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
@@ -724,7 +810,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <div class="lb-state" id="lbState">Čekáme na start organizátora<i></i></div>
   <div class="lb-count" id="lbCount"></div>
   <div class="lb-list" id="lbList"></div>
-  <div class="lb-note" id="lbNote">Úvodní hlášení si můžete znovu přečíst v ZÁZNAMU nahoře.</div>
+  <div class="lb-note" id="lbNote">Brífink si můžete znovu přečíst v ZÁZNAMU nahoře.</div>
   <div class="lb-note" id="lbLocal" hidden>Testovací režim bez Firebase: hru spusťte v administraci (<b>leaderboard.html</b> / <b>/admin</b>) v tomto prohlížeči, nebo <button class="lnk" id="lbSelf">spustit hned</button>.</div>
 </section>
 <section class="lobby ended deleted" id="deleted">
@@ -738,6 +824,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <div class="lb-team">HRA UKONČENA</div>
   <div class="lb-state" id="endInfo"></div>
 </section>
+<div class="coach" id="coach"><span></span><i></i></div>
 <div class="tip" id="tip"></div>
 <div class="toast" id="toast"></div>
 <div class="catch" id="catch"></div>
@@ -780,7 +867,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <form class="form" id="fStart" autocomplete="off"><input id="iTeam" maxlength="40" placeholder="Název týmu" aria-label="Název týmu"><button class="btn">ZAHÁJIT ZÁSAH</button></form>
   <div class="err" id="sErr"></div>
   <div class="cont" id="cont" hidden><span id="contTxt"></span><button class="btn ghost" id="bCont">POKRAČOVAT</button><button class="link" id="bNew">nový tým</button></div>
-  <div class="fine">KLIKÁNÍM PROZKOUMÁVÁTE SCÉNU · KÓDY ZÍSKÁTE Z FYZICKÝCH ŠIFER</div>
+  <div class="fine">KLIKÁNÍM PROZKOUMÁVÁTE SCÉNU · ŘEŠENÍ NAJDETE VE HŘE</div>
 </section>
 
 <!-- konec -->
@@ -838,12 +925,8 @@ const ITEMS = {
 const STORY = [
 { id: 'garage', el: 'sc-garage', ch: '01', title: 'EES DÍLNA', sub: 'NEDĚLE 02:13 · TECHNOLOGICKÉ CENTRUM ŠKODA AUTO',
   intro: [
-    ['n', 'Neděle, 02:13. Technologické centrum Škoda Auto. Hala je prázdná, jen zářivky tiše bzučí.'],
-    ['m', 'Tady Dáša Párová, CPSO. Díky, že jste dorazili tak rychle.'],
-    ['m', 'Testovací vůz ENYAQ se před hodinou sám nastartoval. Nikdo u něj nebyl a klíček je zamčený v trezoru.'],
-    ['m', 'V 06:00 spouštíme ORU kampaň pro 412 000 vozů. Jestli se tu děje něco víc, musíme to vědět dřív.'],
-    ['m', 'Rozhlédněte se. Na co kliknete, to prozkoumáte. Jsem s vámi ve spojení.'],
-    ['s', 'Tip: místa, která lze prozkoumat, jsou zvýrazněná přerušovaným rámečkem. Zvýraznění vypnete tlačítkem ◎ MÍSTA nahoře (nebo klávesou H).']
+    ['n', 'Neděle, 02:13. EES dílna. Hala je prázdná, jen zářivky tiše bzučí a testovací ENYAQ stojí na zvedáku.'],
+    ['m', 'Jste na místě. Rozhlédněte se a zjistěte, co se s vozem děje. Jsem s vámi ve spojení.']
   ],
   hs: {
     car:     { n: 'Testovací vůz ENYAQ', l: [
@@ -1051,7 +1134,7 @@ function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); return 
 function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
 function newState(name) {
   const slug = norm(name).toLowerCase().slice(0, 20) || 'tym';
-  return { teamId: slug + '-' + Math.random().toString(36).slice(2, 7), name, startedAt: REMOTE ? null : Date.now(), scene: 0,
+  return { teamId: slug + '-' + Math.random().toString(36).slice(2, 7), name, startedAt: null, scene: 0,
     seen: {}, items: [], ms: {}, synced: {}, created: false, intro: {}, finished: false, log: [] };
 }
 const seen = id => (st.seen[STORY[st.scene].id] || []).includes(id);
@@ -1291,6 +1374,7 @@ function hideTip() { tip.classList.remove('on'); }
 stage.addEventListener('pointermove', e => {
   const g = e.target.closest && e.target.closest('.scene.on .hs');
   if (!g || busy || termOn || !st) { hideTip(); return; }
+  if (tut) { const bh = BRIEF.hs[g.dataset.hs]; if (!bh) return hideTip(); const r = stage.getBoundingClientRect(); tip.style.left = (e.clientX - r.left) + 'px'; tip.style.top = (e.clientY - r.top) + 'px'; tip.textContent = (bh.term ? '⌨ ' : '') + bh.n; tip.className = 'tip on'; return; }
   const sc = STORY[st.scene], h = sc.hs[g.dataset.hs]; if (!h) return hideTip();
   const r = stage.getBoundingClientRect();
   tip.style.left = (e.clientX - r.left) + 'px'; tip.style.top = (e.clientY - r.top) + 'px';
@@ -1301,7 +1385,7 @@ stage.addEventListener('pointermove', e => {
 stage.addEventListener('pointerleave', hideTip);
 stage.addEventListener('click', e => {
   const g = e.target.closest && e.target.closest('.scene.on .hs');
-  if (g && st && !busy && !termOn) onHotspot(g.dataset.hs);
+  if (g && st && !busy && !termOn) { if (tut) briefClick(g.dataset.hs); else onHotspot(g.dataset.hs); }
 });
 async function onHotspot(id) {
   const sc = STORY[st.scene], h = sc.hs[id]; if (!h) return;
@@ -1335,7 +1419,7 @@ let coolUntil = 0, coolT = null;
 function lockState(n) { st.locks = st.locks || {}; return st.locks['m' + n] = st.locks['m' + n] || { wrong: 0, until: 0 }; }
 const fmtLock = s => s >= 60 ? Math.floor(s / 60) + ' min ' + String(s % 60).padStart(2, '0') + ' s' : s + ' s';
 function openTerm() {
-  const sc = STORY[st.scene], n = st.scene + 1;
+  const sc = tut ? { term: BRIEF.term } : STORY[st.scene], n = st.scene + 1;
   $('#tHead').textContent = sc.term.head; $('#tPrompt').textContent = sc.term.prompt;
   const pz = sc.term.puzzle, pzEl = $('#tPuzzle');
   if (pz) {
@@ -1350,8 +1434,8 @@ function openTerm() {
       (cp.note ? '<div class="pz-n">' + cp.note + '</div>' : '');
   }
   pzEl.hidden = !(pz || cp); $('#term .tbox').classList.toggle('wide', !!(pz || cp));
-  $('#tHint').textContent = (CFG.physicalHints || {})['m' + n] || '';
-  coolUntil = lockState(n).until || 0;
+  $('#tHint').textContent = tut ? 'Výcvik nanečisto: nepočítá se do času ani do chyb.' : (CFG.physicalHints || {})['m' + n] || '';
+  coolUntil = tut ? 0 : lockState(n).until || 0;
   $('#tInfo').textContent = sc.term.info || ''; $('#tInfo').hidden = !sc.term.info;
   buildBoxes(sc.term.boxes || 0, sc.term.letters ? 'letters' : sc.term.digits ? 'digits' : 'any');
   tMsg.textContent = ''; tMsg.className = 'tmsg'; tIn.value = ''; term.className = 'term on'; termOn = true; hideTip();
@@ -1562,6 +1646,7 @@ $('#tForm').addEventListener('submit', async e => {
     tMsg.className = 'tmsg bad'; tMsg.textContent = 'VYPLŇTE VŠECHNA ' + boxes.length + ' POLÍČKA'; focusInput(); return;
   }
   const v = boxMode() ? boxes.map(b => b.value).join('') : tIn.value; if (!norm(v)) return;
+  if (tut) return briefSubmit(v);
   if (REMOTE && (!st.startedAt || CTRL.status === 'ended')) return;
   const n = st.scene + 1, ok = (CFG.codes && CFG.codes['m' + n] || []).includes(codeHash(v));
   if (ok) {
@@ -1624,7 +1709,7 @@ function activate(i) {
 function chapterCard(sc) {
   return new Promise(res => {
     const c = $('#card');
-    $('#cN').textContent = 'KAPITOLA ' + sc.ch; $('#cT').textContent = sc.title; $('#cT').dataset.t = sc.title; $('#cS').textContent = sc.sub;
+    $('#cN').textContent = sc.label || 'KAPITOLA ' + sc.ch; $('#cT').textContent = sc.title; $('#cT').dataset.t = sc.title; $('#cS').textContent = sc.sub;
     c.classList.add('on'); sfx.whoosh();
     let done = false; const fin = () => { if (done) return; done = true; c.removeEventListener('click', fin); c.classList.remove('on'); setTimeout(res, 200); };
     c.addEventListener('click', fin); setTimeout(fin, 3400);
@@ -1761,6 +1846,125 @@ function onControl() {
 $('#lbSelf').onclick = () => { try { localStorage.setItem(CTRL_KEY, JSON.stringify({ status: 'running', startAt: Date.now(), countdownSec: 3 })); } catch (e) {} };
 if (REMOTE && !hasFB) watchLocal();
 
+/* ---------- brífink: výcvik nanečisto v zasedačce ---------- */
+const BRIEF = {
+  hs: { screen: { n: 'Velká obrazovka' }, board: { n: 'Tabule' }, tterm: { n: 'Tréninkový terminál', term: true } },
+  term: { head: 'TRÉNINKOVÝ TERMINÁL // NANEČISTO', prompt: 'Zadejte heslo z tabule.', boxes: 4, letters: true },
+  answer: 'KAVA',
+  intro: [
+    ['n', 'Neděle, 02:05. Zasedačka bezpečnostního týmu, Technologické centrum Škoda Auto.'],
+    ['m', 'Tady Dáša Párová, CPSO. Díky, že jste dorazili tak rychle.'],
+    ['m', 'Testovací vůz ENYAQ se před hodinou sám nastartoval. Nikdo u něj nebyl a klíček je zamčený v trezoru.'],
+    ['m', 'V 06:00 spouštíme ORU kampaň pro 412 000 vozů. Jestli se tu děje něco víc, musíme to vědět dřív.'],
+    ['m', 'Než vyrazíte do dílny, ukážu vám, jak budeme pracovat. Klikněte na velkou obrazovku na zdi.']
+  ],
+  screen: [
+    ['n', 'Na obrazovce se objeví plán zásahu: pět míst, kudy útok prošel.'],
+    ['m', 'Dílna, kokpit vozu, dohledové centrum, ORU laboratoř a velín. Na každém místě je terminál, který musíte odemknout.'],
+    ['m', 'Každý odemčený terminál je jeden milník. Postup uvidíte nahoře v liště, vedle běží váš čas.'],
+    ['m', 'Zkusíme si to nanečisto. Na stole je tréninkový terminál.']
+  ],
+  locked: [
+    ['m', 'Zamčeno. Terminál se odemkne, až prozkoumáte okolí. Řešení bývá ukryté přímo ve scéně.'],
+    ['m', 'Podívejte se na tabuli.']
+  ],
+  board: [
+    ['n', 'Na tabuli někdo fixou napsal: „Wi-Fi zasedačky: KAVA“.'],
+    ['m', 'To je ono. Teď už vás terminál pustí.']
+  ],
+  done: [
+    ['m', 'Výborně. Přesně takhle to bude fungovat: prozkoumat okolí, najít řešení, odemknout terminál.'],
+    ['m', 'Jen pozor: v ostré hře se terminál po chybných pokusech na chvíli zamkne a každá další chyba zámek prodlouží.'],
+    ['s', 'Výcvik dokončen. Místa, která lze prozkoumat, jsou zvýrazněná přerušovaným rámečkem; zvýraznění vypnete tlačítkem ◎ MÍSTA nahoře (nebo klávesou H). Přečtené dialogy najdete v ZÁZNAMU.'],
+    ['m', 'Čas začne běžet, jakmile organizátor spustí zásah. Uvidíme se v dílně.']
+  ]
+};
+let tut = null;           // { want, res, termOk }
+const coach = $('#coach');
+function coachAt(target, text, below) {
+  const el = typeof target === 'string' ? document.querySelector(target) : target; if (!el) return;
+  const r = el.getBoundingClientRect(), sr = stage.getBoundingClientRect();
+  coach.querySelector('span').textContent = text;
+  coach.classList.toggle('below', !!below);
+  coach.style.left = (r.left + r.width / 2 - sr.left) + 'px';
+  coach.style.top = ((below ? r.bottom : r.top) - sr.top) + 'px';
+  coach.classList.add('on');
+}
+function coachOff() { coach.classList.remove('on'); }
+function briefActive(ids) {
+  document.querySelectorAll('#sc-brief .hs').forEach(g => g.classList.toggle('off', !ids.includes(g.dataset.hs)));
+}
+function showBrief() {
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('on'));
+  $('#sc-brief').classList.add('on');
+}
+function briefWait(id) { return new Promise(res => { tut.want = id; tut.res = res; }); }
+function briefClick(id) {
+  if (!tut || id !== tut.want) return;
+  sfx.click(); coachOff();
+  const r = tut.res; tut.want = null; tut.res = null; r && r();
+}
+async function runBriefing() {
+  tut = {};
+  showBrief(); briefActive([]);
+  await chapterCard({ ch: '00', label: 'VÝCVIK NANEČISTO', title: 'BRÍFINK', sub: 'NEDĚLE 02:05 · ZASEDAČKA BEZPEČNOSTNÍHO TÝMU' });
+  await wait(700);
+  dlg.classList.add('teach'); $('#dlg .nx').textContent = 'KLIKNĚTE NEBO STISKNĚTE MEZERNÍK ▸';
+  await say(BRIEF.intro.slice(0, 1));
+  dlg.classList.remove('teach'); $('#dlg .nx').textContent = 'KLIKNI ▸';
+  await say(BRIEF.intro.slice(1));
+  // 1) obrazovka
+  briefActive(['screen']); coachAt('#sc-brief [data-hs=screen] .hit', 'KLIKNĚTE SEM');
+  await briefWait('screen');
+  $('#brIdle').style.display = 'none'; $('#brMap').style.display = ''; sfx.whoosh();
+  briefActive([]);
+  await say(BRIEF.screen.slice(0, 2));
+  prog.classList.add('teach'); coachAt('#prog', 'POSTUP · 5 MILNÍKŮ', true);
+  await say(BRIEF.screen.slice(2, 3));
+  prog.classList.remove('teach'); coachOff();
+  await say(BRIEF.screen.slice(3));
+  // 2) zamčený terminál
+  briefActive(['tterm']); coachAt('#sc-brief [data-hs=tterm] .hit', 'TRÉNINKOVÝ TERMINÁL');
+  await briefWait('tterm');
+  briefActive([]); sfx.err();
+  await say(BRIEF.locked);
+  // 3) tabule
+  briefActive(['board']); coachAt('#sc-brief [data-hs=board] .hit', 'PROZKOUMEJTE TABULI');
+  await briefWait('board');
+  briefActive([]);
+  await say(BRIEF.board);
+  $('#brLock').style.display = 'none'; $('#brTermTxt').textContent = 'ODEMČENO'; $('#brTermTxt').setAttribute('fill', '#78FAAE');
+  // 4) terminál nanečisto
+  briefActive(['tterm']); coachAt('#sc-brief [data-hs=tterm] .hit', 'OTEVŘETE TERMINÁL');
+  await new Promise(res => {
+    tut.termOk = res;
+    const again = () => { tut.want = 'tterm'; tut.res = () => { openTerm(); again(); }; };
+    again();
+  });
+  tut.want = null; tut.res = null; briefActive([]);
+  $('#brTermTxt').textContent = 'HOTOVO'; $('#brTermTxt').classList.remove('blink');
+  await say(BRIEF.done);
+  tut = null;
+  document.querySelectorAll('#sc-brief .hs').forEach(g => g.classList.remove('off'));
+  st.tutDone = true; save();
+}
+async function briefSubmit(v) {
+  const want = BRIEF.answer, val = norm(v);
+  if (val === want) {
+    boxes.forEach(b => { b.classList.remove('bad'); b.classList.add('ok'); }); setInputsDisabled(true); tGo.disabled = true;
+    term.className = 'term on good'; tMsg.className = 'tmsg good'; tMsg.textContent = 'PŘÍSTUP POVOLEN ✓'; sfx.ok();
+    await wait(1300); closeTerm(); setInputsDisabled(false); tGo.disabled = false;
+    const r = tut && tut.termOk; if (tut) tut.termOk = null; r && r();
+    return;
+  }
+  let good = 0;
+  boxes.forEach((b, i) => { const ok = norm(b.value) === want[i]; b.classList.remove('ok', 'bad'); void b.offsetWidth; b.classList.add(ok ? 'ok' : 'bad'); if (ok) good++; });
+  sfx.err(); term.className = 'term on'; void term.offsetWidth; term.className = 'term on bad';
+  tMsg.className = 'tmsg bad'; tMsg.textContent = 'PŘÍSTUP ODEPŘEN · SPRÁVNĚ ' + good + ' ZE ' + boxes.length + ' PÍSMEN';
+  $('#tHint').textContent = 'Zelená = správné písmeno na správném místě, červená = špatně. V ostré hře se terminál po chybách na chvíli zamkne.';
+  focusInput();
+}
+
 /* ---------- start / konec ---------- */
 const startEl = $('#start'), endEl = $('#end');
 function showStart() {
@@ -1779,6 +1983,13 @@ $('#bNew').onclick = () => { $('#cont').hidden = true; $('#iTeam').focus(); };
 async function begin() {
   sfx.click(); startEl.classList.add('off'); $('#hud').classList.add('on'); paintHud(); restoreSolved();
   await wait(500);
+  // týmy z doby před brífinkem ho přeskočí
+  if (!st.tutDone && (st.startedAt || st.scene > 0 || st.intro[0])) { st.tutDone = true; save(); }
+  if (!st.tutDone) await runBriefing();
+  if (!st.startedAt) {
+    if (REMOTE) { showBrief(); await lobbyGate(); }          // čekárna před společným startem
+    else { st.startedAt = Date.now(); save(); localLog(t => { t.startedAt = st.startedAt; }); }
+  }
   const n = st.scene + 1;
   if (st.ms['m' + n] != null) {
     // stránka se obnovila po zadání správného kódu, ale před přechodem do další kapitoly:
@@ -1788,7 +1999,6 @@ async function begin() {
     if (n === 5) { st.finished = true; save(); await wait(600); showEnd(); return; }
     await goScene(n);
   } else await goScene(st.scene);
-  await lobbyGate();
 }
 function showEnd() {
   $('#hud').classList.remove('on');
