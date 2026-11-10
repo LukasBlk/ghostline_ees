@@ -131,6 +131,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .dlg .nx{position:absolute;right:1.8cqw;bottom:1cqw;font-size:.85cqw;letter-spacing:.2em;color:var(--dim);animation:pulse 1.4s infinite}
 
 /* ---------- tooltip, toast ---------- */
+/* ztmavení scény během dialogů: celé (příběh) nebo s „reflektorem“ na zkoumaném předmětu */
+.spot{position:absolute;z-index:12;pointer-events:none;left:50%;top:50%;width:0;height:0;border-radius:1.4cqw;box-shadow:0 0 0 300vmax rgba(0,8,5,.58);opacity:0;transition:opacity .4s ease,left .4s ease,top .4s ease,width .4s ease,height .4s ease}
+.spot.on{opacity:1}
+.spot.lit{box-shadow:0 0 0 300vmax rgba(0,8,5,.58),inset 0 0 0 .14cqw rgba(120,250,174,.6),inset 0 0 1.2cqw rgba(120,250,174,.12)}
+#stage.talk .hs .hit{fill:none!important;stroke:none!important;animation:none!important}
 .coach{position:absolute;z-index:27;pointer-events:none;display:none;flex-direction:column;align-items:center;transform:translate(-50%,-100%);animation:coachBob 1s ease-in-out infinite}
 .coach.on{display:flex}
 .coach span{padding:.45cqw 1cqw;background:var(--am);color:#1a1000;font:700 1cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.2em;white-space:nowrap;box-shadow:0 0 1.5cqw rgba(255,176,32,.5)}
@@ -790,6 +795,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <rect width="1600" height="900" fill="#ff0022" class="alarm nohit"/>
 </svg></div>
 
+<div class="spot" id="spot"></div>
 <div class="vig"></div><div class="scan"></div>
 
 <!-- HUD -->
@@ -1342,10 +1348,32 @@ function toast(t, cls = '') { const el = $('#toast'); el.textContent = t; el.cla
 /* ---------- dialog ---------- */
 let busy = false, dlgTeach = false;
 const dlg = $('#dlg'), dWho = $('#dWho'), dTxt = $('#dTxt'), catcher = $('#catch');
-function say(lines, record = true) {
+/* focus: null = příběhový dialog (ztmavit celou scénu), jinak id místa nebo selektor prvku (reflektor) */
+const spot = $('#spot');
+let spotOffT = null;
+function spotOn(focus) {
+  clearTimeout(spotOffT);
+  stage.classList.add('talk');
+  const el = focus ? (focus.startsWith && /^[#.]/.test(focus) ? document.querySelector(focus) : document.querySelector('.scene.on [data-hs="' + focus + '"] .hit')) : null;
+  if (el) {
+    const r = el.getBoundingClientRect(), sr = stage.getBoundingClientRect(), pad = sr.width * .012;
+    spot.style.left = (r.left - sr.left - pad) + 'px'; spot.style.top = (r.top - sr.top - pad) + 'px';
+    spot.style.width = (r.width + pad * 2) + 'px'; spot.style.height = (r.height + pad * 2) + 'px';
+    spot.classList.add('lit');
+  } else {
+    if (!spot.classList.contains('on')) { spot.style.left = '50%'; spot.style.top = '50%'; }
+    spot.style.width = '0px'; spot.style.height = '0px'; spot.classList.remove('lit');
+  }
+  spot.classList.add('on');
+}
+function spotOff() {
+  clearTimeout(spotOffT);
+  spotOffT = setTimeout(() => { spot.classList.remove('on', 'lit'); stage.classList.remove('talk'); }, 120);   // navazující dialogy nebliknou
+}
+function say(lines, record = true, focus = null) {
   return new Promise(res => {
     busy = true; let i = 0, typer = null, full = '', pos = 0;
-    catcher.classList.add('on'); hideTip();
+    catcher.classList.add('on'); hideTip(); spotOn(focus);
     const show = () => {
       const [w, t] = lines[i];
       dlg.className = 'dlg on w-' + w + (dlgTeach ? ' teach' : ''); dWho.textContent = WHO[w]; full = t; pos = 0; dTxt.textContent = '';
@@ -1358,7 +1386,7 @@ function say(lines, record = true) {
       if (typer) { clearInterval(typer); typer = null; dTxt.textContent = full; return; }
       i++;
       if (i < lines.length) show();
-      else { off(); dlg.classList.remove('on'); catcher.classList.remove('on'); busy = false; res(); }
+      else { off(); dlg.classList.remove('on'); catcher.classList.remove('on'); busy = false; spotOff(); res(); }
     };
     const key = e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); adv(); } };
     const off = () => { catcher.removeEventListener('click', adv); dlg.removeEventListener('click', adv); document.removeEventListener('keydown', key); };
@@ -1393,11 +1421,11 @@ async function onHotspot(id) {
   sfx.click();
   if (h.term) {
     if (st.ms['m' + (st.scene + 1)] != null) { toast('TERMINÁL UŽ JE ODEMČENÝ'); return; }
-    if (sc.req.some(x => !seen(x))) { await say(sc.lock); return; }
+    if (sc.req.some(x => !seen(x))) { await say(sc.lock, true, id); return; }
     markSeen(id); openTerm(); return;
   }
   markSeen(id);
-  await say(h.l);
+  await say(h.l, true, id);
   if (h.item && !st.items.includes(h.item)) { st.items.push(h.item); save(); paintHud(); sfx.item(); toast('+ ' + ITEMS[h.item].n.toUpperCase()); }
   if (h.take) paintSeen();
 }
@@ -1920,21 +1948,21 @@ async function runBriefing() {
   await briefWait('screen');
   $('#brIdle').style.display = 'none'; $('#brMap').style.display = ''; sfx.whoosh();
   briefActive([]);
-  await say(BRIEF.screen.slice(0, 2));
+  await say(BRIEF.screen.slice(0, 2), true, 'screen');
   prog.classList.add('teach'); coachAt('#prog', 'POSTUP · 5 MILNÍKŮ', true);
   await say(BRIEF.screen.slice(2, 3));
   prog.classList.remove('teach'); coachOff();
-  await say(BRIEF.screen.slice(3));
+  await say(BRIEF.screen.slice(3), true, 'tterm');
   // 2) zamčený terminál
   briefActive(['tterm']); coachAt('#sc-brief [data-hs=tterm] .hit', 'TRÉNINKOVÝ TERMINÁL');
   await briefWait('tterm');
   briefActive([]); sfx.err();
-  await say(BRIEF.locked);
+  await say(BRIEF.locked, true, 'tterm');
   // 3) tabule
   briefActive(['board']); coachAt('#sc-brief [data-hs=board] .hit', 'PROZKOUMEJTE TABULI');
   await briefWait('board');
   briefActive([]);
-  await say(BRIEF.board);
+  await say(BRIEF.board, true, 'board');
   $('#brLock').style.display = 'none'; $('#brTermTxt').textContent = 'ODEMČENO'; $('#brTermTxt').setAttribute('fill', '#78FAAE');
   // 4) terminál nanečisto
   briefActive(['tterm']); coachAt('#sc-brief [data-hs=tterm] .hit', 'OTEVŘETE TERMINÁL');
