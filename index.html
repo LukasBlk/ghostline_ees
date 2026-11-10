@@ -843,7 +843,7 @@ const STORY = [
     ['m', 'Testovací vůz ENYAQ se před hodinou sám nastartoval. Nikdo u něj nebyl a klíček je zamčený v trezoru.'],
     ['m', 'V 06:00 spouštíme ORU kampaň pro 412 000 vozů. Jestli se tu děje něco víc, musíme to vědět dřív.'],
     ['m', 'Rozhlédněte se. Na co kliknete, to prozkoumáte. Jsem s vámi ve spojení.'],
-    ['s', 'Tip: tlačítko ◎ MÍSTA nahoře (nebo klávesa H) zvýrazní vše, co lze prozkoumat.']
+    ['s', 'Tip: místa, která lze prozkoumat, jsou zvýrazněná přerušovaným rámečkem. Zvýraznění vypnete tlačítkem ◎ MÍSTA nahoře (nebo klávesou H).']
   ],
   hs: {
     car:     { n: 'Testovací vůz ENYAQ', l: [
@@ -1799,7 +1799,13 @@ function showEnd() {
 }
 
 /* ---------- ovládací prvky ---------- */
-function toggleReveal() { stage.classList.toggle('reveal'); $('#bReveal').classList.toggle('act', stage.classList.contains('reveal')); }
+/* zvýraznění klikatelných míst: ve výchozím stavu zapnuté; volbu hráče si pamatujeme */
+function setReveal(on) {
+  stage.classList.toggle('reveal', on); $('#bReveal').classList.toggle('act', on);
+  $('#bReveal').title = (on ? 'Vypnout' : 'Zapnout') + ' zvýraznění míst, která lze prozkoumat (klávesa H)';
+}
+function toggleReveal() { const on = !stage.classList.contains('reveal'); setReveal(on); try { localStorage.setItem('ghostline:reveal', on ? '1' : '0'); } catch (e) {} }
+setReveal((() => { try { return localStorage.getItem('ghostline:reveal') !== '0'; } catch (e) { return true; } })());
 $('#bReveal').onclick = e => { e.stopPropagation(); toggleReveal(); };
 document.addEventListener('keydown', e => { if ((e.key === 'h' || e.key === 'H') && !termOn && document.activeElement.tagName !== 'INPUT') toggleReveal(); });
 $('#bSnd').onclick = e => { e.stopPropagation(); sfx.toggle(); paintHud(); };
