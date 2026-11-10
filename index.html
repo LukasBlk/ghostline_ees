@@ -827,7 +827,7 @@ function cyrb53(str, seed = 0) {
 const codeHash = s => cyrb53(norm(s) + '|' + (CFG.salt || 'auriga'));
 
 /* ---------- příběh ---------- */
-const WHO = { n: 'POZOROVÁNÍ', m: 'DAGMAR PÁROVÁ · CPSO', g: 'GHOSTLINE', s: 'SYSTÉM' };
+const WHO = { n: 'POZOROVÁNÍ', m: 'DÁŠA PÁROVÁ · CPSO', g: 'GHOSTLINE', s: 'SYSTÉM' };
 const ITEMS = {
   dongle:   { n: 'OBD dongle',        d: 'Neznámé zařízení se SIM kartou, odpojené z diagnostického portu vozu ENYAQ.', i: '<rect x="5" y="8" width="14" height="9" rx="2"/><path d="M9 8V5h6v3M8 12h2"/><circle cx="16" cy="12.5" r="1"/>' },
   protokol: { n: 'Servisní protokol', d: 'Protokol z prohlídky vozu ENYAQ. Externí technik „J. Dvořák“. Podpis chybí.', i: '<path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 13h6M9 17h3"/>' },
@@ -839,7 +839,7 @@ const STORY = [
 { id: 'garage', el: 'sc-garage', ch: '01', title: 'EES DÍLNA', sub: 'NEDĚLE 02:13 · TECHNOLOGICKÉ CENTRUM ŠKODA AUTO',
   intro: [
     ['n', 'Neděle, 02:13. Technologické centrum Škoda Auto. Hala je prázdná, jen zářivky tiše bzučí.'],
-    ['m', 'Tady Dagmar Párová, CPSO. Díky, že jste dorazili tak rychle.'],
+    ['m', 'Tady Dáša Párová, CPSO. Díky, že jste dorazili tak rychle.'],
     ['m', 'Testovací vůz ENYAQ se před hodinou sám nastartoval. Nikdo u něj nebyl a klíček je zamčený v trezoru.'],
     ['m', 'V 06:00 spouštíme ORU kampaň pro 412 000 vozů. Jestli se tu děje něco víc, musíme to vědět dřív.'],
     ['m', 'Rozhlédněte se. Na co kliknete, to prozkoumáte. Jsem s vámi ve spojení.'],
