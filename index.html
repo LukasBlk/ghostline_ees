@@ -180,6 +180,20 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .hn{margin-top:.9cqw}
 .hn-btn{padding:.5cqw 1.2cqw;border:1px dashed var(--am);color:var(--am);font:700 .95cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.18em;background:rgba(40,25,0,.25)}
 .hn-btn:hover{background:rgba(255,176,32,.12);border-style:solid}
+.hmod{position:absolute;inset:0;z-index:44;display:grid;place-items:center;background:rgba(0,4,3,.6);backdrop-filter:blur(2px);animation:hmIn .2s ease-out}
+.hmod[hidden]{display:none}
+@keyframes hmIn{from{opacity:0}}
+.hmod-box{width:36cqw;padding:2.2cqw 2.4cqw 2cqw;text-align:center;background:#1a1204;border:1px solid var(--am);box-shadow:0 0 3cqw rgba(255,176,32,.25);animation:popin .3s}
+.hmod-ic{font-size:2.6cqw;line-height:1;margin-bottom:.6cqw}
+.hmod-t{font:700 1.5cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.2em;color:var(--am);margin-bottom:.9cqw}
+.hmod-box p{font-size:1.2cqw;line-height:1.5;color:#ffe9bd;margin-bottom:1.6cqw}
+.hmod-box p b{color:#fff}
+.hmod-b{display:flex;gap:1cqw;justify-content:center}
+.hmod-b button{padding:.8cqw 1.8cqw;font:700 1.05cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.18em;border:1px solid var(--am)}
+.hmod-no{color:var(--am)}
+.hmod-no:hover{background:rgba(255,176,32,.12)}
+.hmod-go{background:var(--am);color:#1a1000}
+.hmod-go:hover{background:#ffc75a}
 .hn-ask{display:flex;align-items:center;gap:1cqw;flex-wrap:wrap;padding:.8cqw 1cqw;border:1px solid var(--am);background:rgba(40,25,0,.35);font-size:1.05cqw;color:#ffe3a8}
 .hn-ask b{color:var(--am)}
 .hn-ask span{flex:1;min-width:20cqw}
@@ -827,6 +841,12 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <div class="clock" id="clock">00:00</div>
 </div>
 
+<div class="hmod" id="hintModal" hidden><div class="hmod-box">
+  <div class="hmod-ic">💡</div>
+  <div class="hmod-t">ZOBRAZIT NÁPOVĚDU?</div>
+  <p id="hmodTxt"></p>
+  <div class="hmod-b"><button type="button" class="hmod-no" id="hmodNo">ZRUŠIT</button><button type="button" class="hmod-go" id="hmodGo"></button></div>
+</div></div>
 <section class="lobby" id="lobby">
   <div class="lb-tag" id="lbTag">ČEKACÍ MÍSTNOST</div>
   <div class="lb-team" id="lbTeam"></div>
@@ -1663,10 +1683,15 @@ function renderHint(h, n) {
   }
   box.innerHTML = '<button class="hn-btn" type="button">💡 NÁPOVĚDA · +' + mins + ' MIN</button>';
   box.querySelector('button').onclick = () => {
-    box.innerHTML = '<div class="hn-ask"><span>Zobrazit pravdivostní tabulky? K vašemu času se <b>přičte ' + mins + ' minut</b>. Nejde to vzít zpět.</span>' +
-      '<button type="button" class="no">ZRUŠIT</button><button type="button" class="go">ZOBRAZIT · +' + mins + ' MIN</button></div>';
-    box.querySelector('.no').onclick = () => renderHint(h, n);
-    box.querySelector('.go').onclick = () => {
+    const m = $('#hintModal');
+    $('#hmodTxt').innerHTML = 'Zobrazí se pravdivostní tabulky použitých operací.<br>K vašemu času se <b>přičte ' + mins + ' minut</b>. Nejde to vzít zpět.';
+    $('#hmodGo').textContent = 'ZOBRAZIT · +' + mins + ' MIN';
+    m.hidden = false; sfx.click();
+    const close = () => { m.hidden = true; focusInput(); };
+    $('#hmodNo').onclick = close;
+    m.onclick = e => { if (e.target === m) close(); };
+    $('#hmodGo').onclick = () => {
+      m.hidden = true;
       if (!st.hints) st.hints = {};
       if (!st.hints[key]) {
         st.hints[key] = true; st.penalty = (st.penalty || 0) + h.penaltySec; save();
@@ -1713,7 +1738,7 @@ function spread(from, v, letters) {
 const boxMode = () => boxes.length > 0;
 function focusInput() { if (boxMode()) { (boxes.find(b => !b.value || b.classList.contains('bad')) || boxes[0]).focus(); } else tIn.focus(); }
 function setInputsDisabled(d) { tIn.disabled = d; boxes.forEach(b => b.disabled = d); }
-function closeTerm() { if (qRun) { const lk = lockState(qRun.n); delete lk.quizRun; save(); } stopQuiz(); term.className = 'term'; termOn = false; tIn.blur(); boxes.forEach(b => b.blur()); }
+function closeTerm() { $('#hintModal').hidden = true; if (qRun) { const lk = lockState(qRun.n); delete lk.quizRun; save(); } stopQuiz(); term.className = 'term'; termOn = false; tIn.blur(); boxes.forEach(b => b.blur()); }
 function coolTick() {
   clearInterval(coolT);
   const upd = () => { const left = Math.ceil((coolUntil - Date.now()) / 1000);
@@ -1724,7 +1749,7 @@ function coolTick() {
   upd(); if (coolUntil > Date.now()) coolT = setInterval(upd, 250);
 }
 $('#tBack').onclick = () => { if (!qRun && !term.classList.contains('good')) closeTerm(); };
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && termOn && !qRun && !term.classList.contains('good')) closeTerm(); });
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; const hm = $('#hintModal'); if (!hm.hidden) { hm.hidden = true; return; } if (termOn && !qRun && !term.classList.contains('good')) closeTerm(); });
 $('#tForm').addEventListener('submit', async e => {
   e.preventDefault();
   if (!termOn || Date.now() < coolUntil || term.classList.contains('good')) return;
