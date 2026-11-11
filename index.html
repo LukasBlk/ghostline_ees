@@ -177,9 +177,22 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .pz-c i{display:block;font:500 1.05cqw var(--mono);font-style:normal;color:#5f8a78;margin-top:.45cqw;white-space:nowrap}
 .pz-n{margin-top:.9cqw;font-size:.95cqw;color:#a9bccd;line-height:1.5}
 .pz-n q{color:#d9e8f5}
-.hn{margin-top:.9cqw}
 .hn-btn{padding:.5cqw 1.2cqw;border:1px dashed var(--am);color:var(--am);font:700 .95cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.18em;background:rgba(40,25,0,.25)}
 .hn-btn:hover{background:rgba(255,176,32,.12);border-style:solid}
+.hp{position:absolute;top:4.5cqw;right:0;bottom:4.5cqw;width:21cqw;z-index:41;transform:translateX(100%);transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.hp[hidden]{display:none}
+.hp.open{transform:none}
+.hp-tab{position:absolute;right:100%;top:50%;transform:translateY(-50%);width:3cqw;padding:1.6cqw 0;display:flex;align-items:center;justify-content:center;background:#1a1204;border:1px solid var(--am);border-right:0;color:var(--am);box-shadow:-.6cqw 0 1.6cqw rgba(255,176,32,.2);animation:hpPulse 2.4s ease-in-out infinite}
+.hp-tab span{writing-mode:vertical-rl;transform:rotate(180deg);font:700 .95cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.22em;white-space:nowrap}
+.hp-tab:hover{background:#2a1d06}
+.hp.paid .hp-tab{animation:none}
+@keyframes hpPulse{50%{box-shadow:-.6cqw 0 2.4cqw rgba(255,176,32,.55)}}
+.hp-body{height:100%;overflow:auto;padding:1.1cqw 1.3cqw 1.2cqw;background:#120d03;border:1px solid var(--am);border-right:0;box-shadow:0 0 3cqw rgba(0,0,0,.6)}
+.hn-g.hp-g{grid-template-columns:1fr;gap:.8cqw}
+.hn-g.hp-g table{font-size:1.1cqw}
+.hn-g.hp-g th{white-space:nowrap}
+.term .tbox{transition:margin .5s cubic-bezier(.2,.8,.2,1)}
+.term .tbox.hp-open{margin-right:20cqw}
 .hmod{position:absolute;inset:0;z-index:44;display:grid;place-items:center;background:rgba(0,4,3,.6);backdrop-filter:blur(2px);animation:hmIn .2s ease-out}
 .hmod[hidden]{display:none}
 @keyframes hmIn{from{opacity:0}}
@@ -841,6 +854,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <div class="clock" id="clock">00:00</div>
 </div>
 
+<aside class="hp" id="hintPanel" hidden>
+  <button class="hp-tab" id="hpTab" type="button"><span id="hpTabTxt"></span></button>
+  <div class="hp-body"><div class="hn-t" id="hpHead"></div><div class="hn-g hp-g" id="hpTables"></div></div>
+</aside>
 <div class="hmod" id="hintModal" hidden><div class="hmod-box">
   <div class="hmod-ic">💡</div>
   <div class="hmod-t">ZOBRAZIT NÁPOVĚDU?</div>
@@ -1495,9 +1512,9 @@ function openTerm() {
   if (pz) {
     pzEl.innerHTML = (pz.title ? '<div class="pz-t">' + pz.title + '</div>' : '') + '<div class="pz-g">' +
       pz.cards.map(([h, e]) => '<div class="pz-c"><b>' + h + '</b><code>' + e + '</code><i>→ ???? → ?</i></div>').join('') +
-      '</div>' + (pz.note ? '<div class="pz-n">' + pz.note + '</div>' : '') + (pz.hint ? '<div class="hn" id="hintBox"></div>' : '');
-    if (pz.hint && !tut) renderHint(pz.hint, n);
+      '</div>' + (pz.note ? '<div class="pz-n">' + pz.note + '</div>' : '');
   } else pzEl.innerHTML = '';
+  hintPanel(pz && pz.hint && !tut ? pz.hint : null, n);
   const cp = sc.term.cipher;
   if (cp) {
     pzEl.innerHTML = '<div class="pz-t">' + cp.label + '</div><div class="cz-msg">' + cp.text.split('').map(ch => '<span>' + ch + '</span>').join('') + '</div>' +
@@ -1675,14 +1692,20 @@ function ttHtml(op) {
   const head = un ? '<th>A</th><th>NOT A</th>' : '<th>A</th><th>B</th><th>A ' + op + ' B</th>';
   return '<table><caption>' + op + '</caption><tr>' + head + '</tr>' + rows.map(r => '<tr>' + r.map((v, i) => '<td class="' + (i === r.length - 1 ? 'y ' : '') + (i === r.length - 1 && v ? 'one' : '') + '">' + v + '</td>').join('') + '</tr>').join('') + '</table>';
 }
-function renderHint(h, n) {
-  const box = $('#hintBox'), key = 'm' + n, mins = Math.round(h.penaltySec / 60);
-  if (st.hints && st.hints[key]) {
-    box.innerHTML = '<div class="hn-t">NÁPOVĚDA · PRAVDIVOSTNÍ TABULKY · +' + mins + ' MIN ZAPOČTENO</div><div class="hn-g">' + h.tables.map(ttHtml).join('') + '</div>';
-    return;
-  }
-  box.innerHTML = '<button class="hn-btn" type="button">💡 NÁPOVĚDA · +' + mins + ' MIN</button>';
-  box.querySelector('button').onclick = () => {
+/* postranní panel s nápovědou: jazýček u pravého okraje, po zaplacení vyjede panel s tabulkami */
+const hp = $('#hintPanel');
+let hpOpen = true;
+function hintPanel(h, n) {
+  if (!h) { hp.hidden = true; hp.classList.remove('open'); $('#term .tbox').classList.remove('hp-open'); return; }
+  const key = 'm' + n, mins = Math.round(h.penaltySec / 60), paid = !!(st.hints && st.hints[key]);
+  hp.hidden = false;
+  $('#hpTabTxt').textContent = paid ? '💡 PRAVDIVOSTNÍ TABULKY' : '💡 NÁPOVĚDA · +' + mins + ' MIN';
+  $('#hpHead').textContent = 'NÁPOVĚDA · +' + mins + ' MIN ZAPOČTENO';
+  $('#hpTables').innerHTML = paid ? h.tables.map(ttHtml).join('') : '';
+  const open = paid && hpOpen;
+  hp.classList.toggle('open', open); hp.classList.toggle('paid', paid); $('#term .tbox').classList.toggle('hp-open', open);
+  $('#hpTab').onclick = () => {
+    if (paid) { hpOpen = !hpOpen; hintPanel(h, n); sfx.click(); return; }
     const m = $('#hintModal');
     $('#hmodTxt').innerHTML = 'Zobrazí se pravdivostní tabulky použitých operací.<br>K vašemu času se <b>přičte ' + mins + ' minut</b>. Nejde to vzít zpět.';
     $('#hmodGo').textContent = 'ZOBRAZIT · +' + mins + ' MIN';
@@ -1696,9 +1719,9 @@ function renderHint(h, n) {
       if (!st.hints[key]) {
         st.hints[key] = true; st.penalty = (st.penalty || 0) + h.penaltySec; save();
         localLog(t => { t.penalty = st.penalty; }); fbPenalty(key);
-        toast('NÁPOVĚDA · +' + mins + ' MIN K ČASU'); sfx.click();
+        toast('NÁPOVĚDA · +' + mins + ' MIN K ČASU'); sfx.whoosh();
       }
-      renderHint(h, n); focusInput();
+      hpOpen = true; hintPanel(h, n); focusInput();
     };
   };
 }
@@ -1738,7 +1761,7 @@ function spread(from, v, letters) {
 const boxMode = () => boxes.length > 0;
 function focusInput() { if (boxMode()) { (boxes.find(b => !b.value || b.classList.contains('bad')) || boxes[0]).focus(); } else tIn.focus(); }
 function setInputsDisabled(d) { tIn.disabled = d; boxes.forEach(b => b.disabled = d); }
-function closeTerm() { $('#hintModal').hidden = true; if (qRun) { const lk = lockState(qRun.n); delete lk.quizRun; save(); } stopQuiz(); term.className = 'term'; termOn = false; tIn.blur(); boxes.forEach(b => b.blur()); }
+function closeTerm() { $('#hintModal').hidden = true; hp.hidden = true; hp.classList.remove('open'); $('#term .tbox').classList.remove('hp-open'); if (qRun) { const lk = lockState(qRun.n); delete lk.quizRun; save(); } stopQuiz(); term.className = 'term'; termOn = false; tIn.blur(); boxes.forEach(b => b.blur()); }
 function coolTick() {
   clearInterval(coolT);
   const upd = () => { const left = Math.ceil((coolUntil - Date.now()) / 1000);
