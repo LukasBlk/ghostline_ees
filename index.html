@@ -78,6 +78,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .waves{animation:waves 1.3s ease-out infinite;transform-box:fill-box;transform-origin:center}
 .waves.d1{animation-delay:.4s}
 .alarm{animation:alarm 1.6s ease-in-out infinite;opacity:0}
+#sc-ctrl.overtime .alarm{animation-duration:.7s}
+#sc-ctrl.overtime #cd,#sc-ctrl.overtime #cdBox{animation:blink .7s steps(2) infinite}
+#sc-ctrl.solved #cd,#sc-ctrl.solved #cdBox{animation:none}
 .jit{animation:jit .18s linear infinite;transform-box:view-box}
 .bars rect{animation:bars 1.8s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
 .bars rect:nth-child(2){animation-delay:.3s}.bars rect:nth-child(3){animation-delay:.6s}.bars rect:nth-child(4){animation-delay:.9s}.bars rect:nth-child(5){animation-delay:1.2s}
@@ -1879,23 +1882,35 @@ const mk = (tag, attrs, parent) => { const el = document.createElementNS(NS, tag
   for (let k = 0; k < 140; k++) { const c = mk('circle', { cx: (r5() * 1600).toFixed(0), cy: (r5() * 900).toFixed(0), r: (1 + r5() * 2.5).toFixed(1), fill: '#3dff9a', opacity: (.15 + r5() * .5).toFixed(2), class: 'pulse' }, ed); c.style.animationDelay = (r5() * 2).toFixed(2) + 's'; }
 })();
 
-let ctrlTimers = [];
+let ctrlTimers = [], ultiToast = false;
+const ULTIMATUM = [
+  ['g', 'ČAS VYPRŠEL. FLOTILA JE MOJE.'],
+  ['m', 'Ultimátum vypršelo! Vozy ale zatím čekají na potvrzení z backendu.'],
+  ['m', 'Pořád to můžeme zastavit. Nouzový vypínač, hned!']
+];
 const sceneHooks = {
   ctrl() {
-    ctrlTimers.forEach(clearInterval); ctrlTimers = [];
+    ctrlTimers.forEach(clearInterval); ctrlTimers = []; ultiToast = false;
     const solved = st.ms.m5 != null;
     $('#sc-ctrl').classList.toggle('solved', solved);
     if (solved) return;
     const t0 = (st.ctrlAt = st.ctrlAt || Date.now()); save();
     const cd = $('#cd');
     const tickCd = () => { const left = 15 * 60 - (Date.now() - t0) / 1000;
-      if (left > 0) cd.textContent = fmt(left);
-      else { cd.textContent = '00:00'; $('#cdLabel').textContent = 'ULTIMÁTUM VYPRŠELO · ČEKÁ SE NA BACKEND'; } };
+      if (left > 0) { cd.textContent = fmt(left); return; }
+      cd.textContent = '00:00'; $('#cdLabel').textContent = 'ULTIMÁTUM VYPRŠELO';
+      $('#sc-ctrl').classList.add('overtime');
+      // výhrůžka: jednou dialog útočníka a Dáši; hra pokračuje bez následků
+      if (!st.ultiDone && st.ms.m5 == null) {
+        if (busy || termOn) { if (!ultiToast) { ultiToast = true; toast('⚠ ULTIMÁTUM VYPRŠELO'); sfx.err(); } return; }
+        st.ultiDone = true; save(); sfx.err();
+        say(ULTIMATUM);
+      } };
     tickCd(); ctrlTimers.push(setInterval(tickCd, 1000));
     const cars = [...document.querySelectorAll('#fleet5 .car5')], r = rng(77);
     ctrlTimers.push(setInterval(() => {
       const free = cars.filter(c => !c.classList.contains('lock-car'));
-      if (free.length < cars.length * .18) return;
+      if (free.length < cars.length * ($('#sc-ctrl').classList.contains('overtime') ? .02 : .18)) return;
       for (let k = 0; k < 3; k++) { const c = free[Math.floor(r() * free.length)]; c && c.classList.add('lock-car'); }
     }, 700));
   }
