@@ -131,6 +131,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .dlg.w-n{border-left-color:#5d7387}.dlg.w-n .who{color:#8aa0b5}.dlg.w-n .txt{color:#c9d6e2}
 .dlg.w-g{border-left-color:var(--rd);background:rgba(24,3,8,.92)}.dlg.w-g .who{color:var(--rd)}.dlg.w-g .txt{font-family:var(--mono);color:#ff8a96;letter-spacing:.06em;text-shadow:0 0 .6cqw rgba(255,59,78,.6)}
 .dlg.w-s{border-left-color:var(--am)}.dlg.w-s .who{color:var(--am)}
+.dlg.w-d{border-left-color:#e9f1f7}.dlg.w-d .who{color:#fff}.dlg.w-d .txt{font-weight:600}
 .dlg .nx{position:absolute;right:1.8cqw;bottom:1cqw;font-size:.85cqw;letter-spacing:.2em;color:var(--dim);animation:pulse 1.4s infinite}
 
 /* ---------- tooltip, toast ---------- */
@@ -359,7 +360,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .logp .lst{overflow:auto;padding:1cqw 1.6cqw;font-size:1.1cqw;line-height:1.5}
 .logp .lst p{margin-bottom:.9cqw;color:#c3d2df}
 .logp .lst p b{display:block;font-size:.75cqw;letter-spacing:.25em;color:var(--cy)}
-.logp .lst p.g b{color:var(--rd)}.logp .lst p.n b{color:#7f95aa}.logp .lst p.s b{color:var(--am)}
+.logp .lst p.g b{color:var(--rd)}.logp .lst p.n b{color:#7f95aa}.logp .lst p.s b{color:var(--am)}.logp .lst p.d b{color:#fff}
 .logp .lst h4{font-size:.85cqw;letter-spacing:.3em;color:var(--am);margin:1.4cqw 0 .8cqw;font-weight:600}
 
 /* ---------- lobby / odpočet / ukončení ---------- */
@@ -974,7 +975,7 @@ function cyrb53(str, seed = 0) {
 const codeHash = s => cyrb53(norm(s) + '|' + (CFG.salt || 'auriga'));
 
 /* ---------- příběh ---------- */
-const WHO = { n: 'POZOROVÁNÍ', m: 'DÁŠA PÁROVÁ · CPSO', g: 'GHOSTLINE', s: 'SYSTÉM' };
+const WHO = { n: 'POZOROVÁNÍ', m: 'DÁŠA PÁROVÁ · CPSO', g: 'GHOSTLINE', s: 'SYSTÉM', d: 'DUŠAN CHŇOUPEK' };
 const ITEMS = {
   dongle:   { n: 'OBD dongle',        d: 'Neznámé zařízení se SIM kartou, odpojené z diagnostického portu vozu ENYAQ.', i: '<rect x="5" y="8" width="14" height="9" rx="2"/><path d="M9 8V5h6v3M8 12h2"/><circle cx="16" cy="12.5" r="1"/>' },
   protokol: { n: 'Servisní protokol', d: 'Protokol z prohlídky vozu ENYAQ. Externí technik „J. Dvořák“. Podpis chybí.', i: '<path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 13h6M9 17h3"/>' },
@@ -1186,7 +1187,9 @@ const STORY = [
     ['n', 'Zmáčkli jsme vypínač. Flotila se odpojila od backendu a příkazy k převzetí vypršely bez potvrzení.'],
     ['n', 'Body na mapě se jeden po druhém barví zeleně.'],
     ['m', 'Zvládli jste to. Útočník je odříznutý, podvržený firmware neplatný a dongle máme jako důkaz.'],
-    ['m', 'Teď začne forenzní analýza a hledání pana „Dvořáka“. Ale to až ráno. Dokázali jste to. Děkuji, týme.'] ]
+    ['m', 'Teď začne forenzní analýza a hledání pana „Dvořáka“. Ale to až ráno. Dokázali jste to. Děkuji, týme.'],
+    ['n', 'Zazvoní telefon. Volá Dušan Chňoupek.'],
+    ['d', 'Výborná práce. Ale mohlo to být rychlejší.'] ]
 }];
 
 /* ---------- stav ---------- */
