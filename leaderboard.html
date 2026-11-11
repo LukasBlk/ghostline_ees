@@ -219,14 +219,14 @@ function render() {
     const up = upUntil[r.id] > now;
     const cells = MS.map((m, j) => { const v = r.ms['m' + (j + 1)], p = j ? r.ms['m' + j] : 0;
       return v != null ? '<td class="t">' + fmt(v) + (j && p != null ? '<small>+' + fmt(v - p) + '</small>' : '') + '</td>' : '<td class="t no">—</td>'; }).join('');
-    let tot;
-    if (r.finished) tot = '<td class="tot done">' + fmt(r.ms['m' + N]) + '<small>CÍL</small></td>';
+    let tot; const pen = r.penalty || 0, penTxt = pen ? ' · +' + fmt(pen) : '';
+    if (r.finished) tot = '<td class="tot done">' + fmt(r.ms['m' + N]) + '<small>CÍL' + penTxt + '</small></td>';
     else if (REMOTE) {
       const go = CTRL.startMs && serverNow() >= CTRL.startMs;
       if (!go) tot = '<td class="tot lob">--:--<small>LOBBY</small></td>';
-      else if (CTRL.status === 'ended') tot = '<td class="tot lob">' + fmt((CTRL.endMs - CTRL.startMs) / 1000) + '<small>UKONČENO</small></td>';
-      else tot = '<td class="tot run">' + fmt((serverNow() - CTRL.startMs) / 1000) + '<small>BĚŽÍ</small></td>';
-    } else tot = '<td class="tot run">' + fmt(r.start ? (now - r.start) / 1000 : null) + '<small>BĚŽÍ</small></td>';
+      else if (CTRL.status === 'ended') tot = '<td class="tot lob">' + fmt((CTRL.endMs - CTRL.startMs) / 1000 + pen) + '<small>UKONČENO' + penTxt + '</small></td>';
+      else tot = '<td class="tot run">' + fmt((serverNow() - CTRL.startMs) / 1000 + pen) + '<small>BĚŽÍ' + penTxt + '</small></td>';
+    } else tot = '<td class="tot run">' + fmt(r.start ? (now - r.start) / 1000 + pen : null) + '<small>BĚŽÍ' + penTxt + '</small></td>';
     return '<tr data-id="' + esc(r.id) + '" class="' + (r.finished ? 'fin ' : '') + (i === 0 && r.done ? 'p1 ' : '') + (up ? 'up ' : '') + (flash ? 'flash' : '') + '"><td class="rank">' + (i + 1) + (up ? '<small class="mv">▲' + upBy[r.id] + '</small>' : '') + '</td><td><div class="nm">' + (canDelete() ? '<button class="del" data-id="' + esc(r.id) + '" title="Smazat tým">✕</button>' : '') + '<div class="name" title="' + esc(r.name) + '">' + esc(r.name) + '</div></div><div class="bar">' + MS.map((_, j) => '<i class="' + (j < r.done ? 'on' : '') + '"></i>').join('') + '</div></td>' + cells + tot + '<td class="wr' + (r.wrong >= 5 ? ' hi' : '') + '">' + (r.wrong || 0) + '</td></tr>';
   }).join('');
   tb.innerHTML = html;
@@ -254,7 +254,7 @@ if (!hasFB) {
     all: async () => localStorage.setItem('ghostline:local:' + GID, '{}')
   };
   const pull = () => { try { const all = JSON.parse(localStorage.getItem('ghostline:local:' + GID) || '{}');
-    teams = Object.entries(all).map(([id, t]) => ({ id, name: t.name, start: t.startedAt, ms: t.ms || {}, wrong: t.wrong || 0 })); } catch (e) {} render(); };
+    teams = Object.entries(all).map(([id, t]) => ({ id, name: t.name, start: t.startedAt, ms: t.ms || {}, wrong: t.wrong || 0, penalty: t.penalty || 0 })); } catch (e) {} render(); };
   pull(); window.addEventListener('storage', pull); setInterval(pull, 2000);
   if (REMOTE) setupLocalControl();
   window.__pull = pull;
@@ -274,7 +274,7 @@ if (!hasFB) {
       fsM.onSnapshot(fsM.collection(db, 'games', GID, 'teams'), snap => {
         teams = snap.docs.map(d => { const x = d.data({ serverTimestamps: 'estimate' }); const ms = {}; const wr = x.wrong || {};
           for (let i = 1; i <= N; i++) { const m = x.milestones && x.milestones['m' + i]; if (m && m.sec != null) ms['m' + i] = m.sec; }
-          return { id: d.id, name: x.name || d.id, start: x.clientStart || (x.startedAt && x.startedAt.toMillis()), ms, wrong: Object.values(wr).reduce((a, b) => a + (b || 0), 0) }; });
+          return { id: d.id, name: x.name || d.id, start: x.clientStart || (x.startedAt && x.startedAt.toMillis()), ms, wrong: Object.values(wr).reduce((a, b) => a + (b || 0), 0), penalty: x.penalty || 0 }; });
         setSync('online', 'ŽIVĚ · FIRESTORE'); render();
       }, err => { console.error(err); setSync('error', 'CHYBA: ' + (err.code || 'čtení')); });
     } catch (e) { console.error(e); setSync('error', 'CHYBA PŘIPOJENÍ'); const n = $('#note'); n.hidden = false; n.textContent = 'Nepodařilo se připojit k Firebase: ' + (e.code || e.message) + '. Zkontrolujte config.js, zapnuté anonymní přihlášení a pravidla Firestore.'; }
@@ -407,8 +407,8 @@ $('#cGo').onclick = () => { const h = codeHash($('#cIn').value); const hit = Obj
   $('#cOut').style.color = hit.length ? 'var(--gn)' : 'var(--rd)'; $('#cOut').textContent = hit.length ? '✓ Platný kód pro ' + hit.join(', ') : '✕ Neodpovídá žádnému milníku'; };
 $('#cIn').addEventListener('keydown', e => e.key === 'Enter' && $('#cGo').click());
 $('#csv').onclick = () => {
-  const head = ['Tým', ...MS.map((m, i) => (i + 1) + ' ' + m + ' [s]'), ...MS.map((m, i) => (i + 1) + ' ' + m + ' [mm:ss]'), 'Chybné pokusy'];
-  const lines = [head, ...teams.map(t => [t.name, ...MS.map((_, i) => t.ms['m' + (i + 1)] ?? ''), ...MS.map((_, i) => t.ms['m' + (i + 1)] != null ? fmt(t.ms['m' + (i + 1)]) : ''), t.wrong || 0])];
+  const head = ['Tým', ...MS.map((m, i) => (i + 1) + ' ' + m + ' [s]'), ...MS.map((m, i) => (i + 1) + ' ' + m + ' [mm:ss]'), 'Chybné pokusy', 'Penalizace za nápovědy [s]'];
+  const lines = [head, ...teams.map(t => [t.name, ...MS.map((_, i) => t.ms['m' + (i + 1)] ?? ''), ...MS.map((_, i) => t.ms['m' + (i + 1)] != null ? fmt(t.ms['m' + (i + 1)]) : ''), t.wrong || 0, t.penalty || 0])];
   const csv = '﻿' + lines.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(';')).join('\r\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'ghostline-' + GID + '.csv'; a.click();
 };

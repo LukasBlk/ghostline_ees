@@ -20,7 +20,7 @@ Webová adventura s motivem kybernetické bezpečnosti ve Škoda Auto. Týmy v r
 | m2 | Kokpit — servisní menu infotainmentu | `ODPOJIT` — Caesarova šifra `SHTSNMX` v terminálu, posun o 4 doleva = rychlost 4 km/h a levý blinkr na přístrojové desce |
 | m3 | Dohledové centrum — blokace C2 | bez kódu: **rychlokvíz** 10 náhodných otázek za 2 min, všechny správně (otázky v `index.html` → `STORY` → `soc` → `quiz`) |
 | m4 | ORU laboratoř — revokace certifikátu | bez kódu: **minihra** 3 kola vyřazování certifikátů 9 → 5 → 3 → 1 (vydavatel, platnost a účel, otisk); každá chyba = zámek 20 s |
-| m5 | Velín — nouzový vypínač | `6547` — logické operace XOR/NOT/AND/OR, zadání je přímo v terminálu |
+| m5 | Velín — nouzový vypínač | `6547` — logické operace XOR/NOT/AND/OR, zadání je přímo v terminálu; nápověda (pravdivostní tabulky) za +5 min k času |
 
 Zatím je všude testovací kód `1111`. Zadání je tolerantní: nezáleží na velikosti písmen, diakritice, mezerách ani interpunkci.
 
@@ -53,7 +53,7 @@ service cloud.firestore {
       allow update: if request.auth != null
         && resource.data.uid == request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['milestones', 'current', 'lastAt', 'finishedAt', 'wrong', 'ping']);
+             .hasOnly(['milestones', 'current', 'lastAt', 'finishedAt', 'wrong', 'ping', 'penalty', 'hints']);
       allow delete: if false;
     }
     // řízení hry (vzdálený start) — zapisovat smí jen organizátor

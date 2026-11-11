@@ -177,6 +177,22 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .pz-c i{display:block;font:500 1.05cqw var(--mono);font-style:normal;color:#5f8a78;margin-top:.45cqw;white-space:nowrap}
 .pz-n{margin-top:.9cqw;font-size:.95cqw;color:#a9bccd;line-height:1.5}
 .pz-n q{color:#d9e8f5}
+.hn{margin-top:.9cqw}
+.hn-btn{padding:.5cqw 1.2cqw;border:1px dashed var(--am);color:var(--am);font:700 .95cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.18em;background:rgba(40,25,0,.25)}
+.hn-btn:hover{background:rgba(255,176,32,.12);border-style:solid}
+.hn-ask{display:flex;align-items:center;gap:1cqw;flex-wrap:wrap;padding:.8cqw 1cqw;border:1px solid var(--am);background:rgba(40,25,0,.35);font-size:1.05cqw;color:#ffe3a8}
+.hn-ask b{color:var(--am)}
+.hn-ask span{flex:1;min-width:20cqw}
+.hn-ask button{padding:.45cqw 1.1cqw;font:700 .9cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.15em;border:1px solid var(--am);color:var(--am)}
+.hn-ask button.go{background:var(--am);color:#1a1000}
+.hn-t{font:700 .85cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.25em;color:var(--am);margin-bottom:.5cqw}
+.hn-g{display:grid;grid-template-columns:repeat(4,1fr);gap:.8cqw}
+.hn-g table{align-self:start;width:100%;border-collapse:collapse;font:600 .95cqw var(--mono);text-align:center;background:#04170f;border:1px solid #2c5a3c}
+.hn-g caption{font:700 .9cqw 'Chakra Petch',system-ui,sans-serif;letter-spacing:.2em;color:var(--cy);padding-bottom:.3cqw}
+.hn-g th{font-weight:600;color:#7fa898;border-bottom:1px solid #2c5a3c;padding:.2cqw}
+.hn-g td{color:#cfe6f7;padding:.12cqw}
+.hn-g td.y{border-left:1px solid #2c5a3c}
+.hn-g td.one{color:var(--gn)}
 .cz-msg{display:flex;justify-content:center;gap:.9cqw;margin:.4cqw 0 1.2cqw}
 .cz-msg span{width:3.4cqw;height:4cqw;display:grid;place-items:center;font:700 2.4cqw var(--mono);color:#ff8a96;background:#1a0a0e;border:1px solid rgba(255,59,78,.45);text-shadow:0 0 .8cqw rgba(255,59,78,.6)}
 .cz-abc{display:flex;flex-wrap:wrap;justify-content:center;gap:.3cqw;padding:.6cqw .8cqw;border:1px dashed #1f5a45;background:#04170f}
@@ -1125,7 +1141,9 @@ const STORY = [
         ['C', '1101 AND 0110'],
         ['D', '0010 OR 0101']
       ],
-      note: 'Výsledek každé operace převeďte z dvojkové soustavy do desítkové. Čísla v pořadí A–B–C–D tvoří PIN.'
+      note: 'Výsledek každé operace převeďte z dvojkové soustavy do desítkové. Čísla v pořadí A–B–C–D tvoří PIN.',
+      /* nápověda za penalizaci: pravdivostní tabulky; po zobrazení zůstanou v zadání */
+      hint: { penaltySec: 300, tables: ['XOR', 'NOT', 'AND', 'OR'] }
     } },
   done: [
     ['n', 'Zmáčkli jsme vypínač. Flotila se odpojila od backendu a příkazy k převzetí vypršely bez potvrzení.'],
@@ -1318,6 +1336,9 @@ function watchLocal() {
   };
   poll(); setInterval(poll, 300);
 }
+/* čas týmu = od startu + penalizace za nápovědy */
+const elapsed = () => (Date.now() - st.startedAt) / 1000 + (st.penalty || 0);
+function fbPenalty(key) { fbTask(async A => { if (st.created) await A.updateDoc(teamRef(A), { penalty: st.penalty || 0, ['hints.' + key]: true }); }); }
 function fbWrong(n) { fbTask(async A => { if (st.created) await A.updateDoc(teamRef(A), { ['wrong.m' + n]: A.increment(1) }); }); }
 
 /* ---------- HUD ---------- */
@@ -1338,8 +1359,8 @@ setInterval(() => {
   let t;
   if (st.finished) t = fmt(st.ms.m5);
   else if (!st.startedAt) t = '--:--';
-  else if (CTRL.status === 'ended' && CTRL.endMs) t = fmt((CTRL.endMs - FB.offset - st.startedAt) / 1000);
-  else t = fmt((Date.now() - st.startedAt) / 1000);
+  else if (CTRL.status === 'ended' && CTRL.endMs) t = fmt((CTRL.endMs - FB.offset - st.startedAt) / 1000 + (st.penalty || 0));
+  else t = fmt(elapsed());
   $('#clock').textContent = t;
 }, 500);
 let toastT;
@@ -1454,7 +1475,8 @@ function openTerm() {
   if (pz) {
     pzEl.innerHTML = (pz.title ? '<div class="pz-t">' + pz.title + '</div>' : '') + '<div class="pz-g">' +
       pz.cards.map(([h, e]) => '<div class="pz-c"><b>' + h + '</b><code>' + e + '</code><i>→ ???? → ?</i></div>').join('') +
-      '</div>' + (pz.note ? '<div class="pz-n">' + pz.note + '</div>' : '');
+      '</div>' + (pz.note ? '<div class="pz-n">' + pz.note + '</div>' : '') + (pz.hint ? '<div class="hn" id="hintBox"></div>' : '');
+    if (pz.hint && !tut) renderHint(pz.hint, n);
   } else pzEl.innerHTML = '';
   const cp = sc.term.cipher;
   if (cp) {
@@ -1621,6 +1643,41 @@ function quizFail(why) {
   tMsg.className = 'tmsg bad'; tMsg.textContent = why;
   setTimeout(coolTick, 900);
 }
+/* ---- nápověda za penalizaci (pravdivostní tabulky) ---- */
+const TT = {
+  AND: [[0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 1]],
+  OR:  [[0, 0, 0], [0, 1, 1], [1, 0, 1], [1, 1, 1]],
+  XOR: [[0, 0, 0], [0, 1, 1], [1, 0, 1], [1, 1, 0]],
+  NOT: [[0, 1], [1, 0]]
+};
+function ttHtml(op) {
+  const rows = TT[op], un = op === 'NOT';
+  const head = un ? '<th>A</th><th>NOT A</th>' : '<th>A</th><th>B</th><th>A ' + op + ' B</th>';
+  return '<table><caption>' + op + '</caption><tr>' + head + '</tr>' + rows.map(r => '<tr>' + r.map((v, i) => '<td class="' + (i === r.length - 1 ? 'y ' : '') + (i === r.length - 1 && v ? 'one' : '') + '">' + v + '</td>').join('') + '</tr>').join('') + '</table>';
+}
+function renderHint(h, n) {
+  const box = $('#hintBox'), key = 'm' + n, mins = Math.round(h.penaltySec / 60);
+  if (st.hints && st.hints[key]) {
+    box.innerHTML = '<div class="hn-t">NÁPOVĚDA · PRAVDIVOSTNÍ TABULKY · +' + mins + ' MIN ZAPOČTENO</div><div class="hn-g">' + h.tables.map(ttHtml).join('') + '</div>';
+    return;
+  }
+  box.innerHTML = '<button class="hn-btn" type="button">💡 NÁPOVĚDA · +' + mins + ' MIN</button>';
+  box.querySelector('button').onclick = () => {
+    box.innerHTML = '<div class="hn-ask"><span>Zobrazit pravdivostní tabulky? K vašemu času se <b>přičte ' + mins + ' minut</b>. Nejde to vzít zpět.</span>' +
+      '<button type="button" class="no">ZRUŠIT</button><button type="button" class="go">ZOBRAZIT · +' + mins + ' MIN</button></div>';
+    box.querySelector('.no').onclick = () => renderHint(h, n);
+    box.querySelector('.go').onclick = () => {
+      if (!st.hints) st.hints = {};
+      if (!st.hints[key]) {
+        st.hints[key] = true; st.penalty = (st.penalty || 0) + h.penaltySec; save();
+        localLog(t => { t.penalty = st.penalty; }); fbPenalty(key);
+        toast('NÁPOVĚDA · +' + mins + ' MIN K ČASU'); sfx.click();
+      }
+      renderHint(h, n); focusInput();
+    };
+  };
+}
+
 /* ---- políčka na jednotlivé znaky ---- */
 const tBoxes = $('#tBoxes');
 let boxes = [];
@@ -1712,7 +1769,7 @@ $('#tForm').addEventListener('submit', async e => {
 async function milestone(n) {
   const k = 'm' + n;
   if (st.ms[k] == null) {
-    st.ms[k] = Math.round((Date.now() - st.startedAt) / 1000);
+    st.ms[k] = Math.round(elapsed());
     if (n === 5) st.finished = true;
     save(); localLog(t => { t.ms[k] = st.ms[k]; t.name = st.name; }); flush();
   }

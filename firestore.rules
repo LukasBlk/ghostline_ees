@@ -37,7 +37,7 @@ service cloud.firestore {
       allow update: if request.auth != null
         && resource.data.uid == request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['milestones', 'current', 'lastAt', 'finishedAt', 'wrong', 'ping']);
+             .hasOnly(['milestones', 'current', 'lastAt', 'finishedAt', 'wrong', 'ping', 'penalty', 'hints']);
 
       // organizátor může tým smazat (např. testovací záznam); hráči ne
       allow delete: if isAdmin();
